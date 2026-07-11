@@ -1,0 +1,113 @@
+---
+title: Calendar
+nav: calendar
+permalink: /calendar/
+description: Course materials for the 2024, 2025, and 2026 CS3 RET cohorts.
+scripts:
+  - /assets/js/calendar.js
+---
+
+<header class="page-header">
+  <div class="container">
+    <p class="eyebrow">Course materials <span aria-hidden="true">/</span> <span data-course-year>2026</span></p>
+    <h1>Calendar</h1>
+    <p class="page-header__lead page-header__lead--sans">Select a cohort, filter by resource type, and open a week to view its materials.</p>
+  </div>
+</header>
+
+<section class="calendar-shell" data-calendar aria-label="Course calendar">
+  <div class="container">
+    <div class="control-group" role="group" aria-label="Select cohort year">
+      <span class="control-group__label">Cohort</span>
+      <button class="segmented-button" type="button" data-year-button="2024" aria-pressed="false">2024</button>
+      <button class="segmented-button" type="button" data-year-button="2025" aria-pressed="false">2025</button>
+      <button class="segmented-button" type="button" data-year-button="2026" aria-pressed="true">2026</button>
+    </div>
+
+    <div class="filter-bar" role="group" aria-label="Filter resources by type">
+      <span class="filter-bar__label">Filter</span>
+      <button class="filter-chip" type="button" data-filter="All" aria-pressed="true" style="--filter-color:#1d4f91">
+        <span class="filter-chip__dot" aria-hidden="true"></span><span>All</span><span class="filter-chip__count" data-filter-count="All"></span>
+      </button>
+      <button class="filter-chip" type="button" data-filter="Lecture" aria-pressed="false" style="--filter-color:#1d4f91">
+        <span class="filter-chip__dot" aria-hidden="true"></span><span>Lecture</span><span class="filter-chip__count" data-filter-count="Lecture"></span>
+      </button>
+      <button class="filter-chip" type="button" data-filter="Reading" aria-pressed="false" style="--filter-color:#5f7000">
+        <span class="filter-chip__dot" aria-hidden="true"></span><span>Reading</span><span class="filter-chip__count" data-filter-count="Reading"></span>
+      </button>
+      <button class="filter-chip" type="button" data-filter="Demo" aria-pressed="false" style="--filter-color:#ae2573">
+        <span class="filter-chip__dot" aria-hidden="true"></span><span>Demo</span><span class="filter-chip__count" data-filter-count="Demo"></span>
+      </button>
+      <button class="filter-chip" type="button" data-filter="Data" aria-pressed="false" style="--filter-color:#006daf">
+        <span class="filter-chip__dot" aria-hidden="true"></span><span>Data</span><span class="filter-chip__count" data-filter-count="Data"></span>
+      </button>
+      <button class="filter-chip" type="button" data-filter="Handout" aria-pressed="false" style="--filter-color:#b94700">
+        <span class="filter-chip__dot" aria-hidden="true"></span><span>Handout</span><span class="filter-chip__count" data-filter-count="Handout"></span>
+      </button>
+      <button class="filter-chip" type="button" data-filter="Workshop" aria-pressed="false" style="--filter-color:#53565a">
+        <span class="filter-chip__dot" aria-hidden="true"></span><span>Workshop</span><span class="filter-chip__count" data-filter-count="Workshop"></span>
+      </button>
+      <button class="filter-chip" type="button" data-filter="Capstone" aria-pressed="false" style="--filter-color:#003087">
+        <span class="filter-chip__dot" aria-hidden="true"></span><span>Capstone</span><span class="filter-chip__count" data-filter-count="Capstone"></span>
+      </button>
+    </div>
+
+    <p class="sr-only" aria-live="polite" data-results-status></p>
+
+    <div id="calendar-years">
+      {% assign years = "2024,2025,2026" | split: "," %}
+      {% for year in years %}
+        {% assign weeks = site.data.calendar[year] %}
+        <section class="calendar-year" data-calendar-year="{{ year }}" aria-label="{{ year }} course calendar"{% unless year == '2026' %} hidden{% endunless %}>
+          <h2 class="no-js-only">{{ year }} cohort</h2>
+          {% for week in weeks %}
+            <details class="calendar-week" id="{{ week.id }}" data-calendar-week{% if forloop.first %} open{% endif %}>
+              <summary>
+                <span class="calendar-week__kicker">{{ week.kicker }}</span>
+                <h2 class="calendar-week__title">{{ week.title }}</h2>
+                <span class="calendar-week__dates">{{ week.dateRange }}</span>
+                <span class="calendar-week__toggle" aria-hidden="true"></span>
+              </summary>
+              <div class="calendar-week__content">
+                {% for day in week.days %}
+                  <div class="calendar-day" data-calendar-day>
+                    <h3>{{ day.date }}</h3>
+                    <ul class="resource-list">
+                      {% for item in day.items %}
+                        {% case item.type %}
+                          {% when 'Reading' %}{% assign item_color = '#5f7000' %}
+                          {% when 'Demo' %}{% assign item_color = '#ae2573' %}
+                          {% when 'Data' %}{% assign item_color = '#006daf' %}
+                          {% when 'Handout' %}{% assign item_color = '#b94700' %}
+                          {% when 'Workshop' %}{% assign item_color = '#53565a' %}
+                          {% when 'Capstone' %}{% assign item_color = '#003087' %}
+                          {% else %}{% assign item_color = '#1d4f91' %}
+                        {% endcase %}
+                        <li class="resource-item" data-resource-type="{{ item.type }}" style="--item-color:{{ item_color }}">
+                          {% if item.url %}
+                            <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ item.title | escape }} (opens in a new tab)">
+                              <span class="resource-item__type">{{ item.type }}</span>
+                              <span class="resource-item__title">{{ item.title }}</span>
+                              <span class="resource-item__external" aria-hidden="true">Open</span>
+                            </a>
+                          {% else %}
+                            <span>
+                              <span class="resource-item__type">{{ item.type }}</span>
+                              <span class="resource-item__title">{{ item.title }}</span>
+                            </span>
+                          {% endif %}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                {% endfor %}
+              </div>
+            </details>
+          {% endfor %}
+        </section>
+      {% endfor %}
+    </div>
+
+    <p class="calendar-empty" data-calendar-empty hidden>No resources match this filter for the selected cohort.</p>
+  </div>
+</section>

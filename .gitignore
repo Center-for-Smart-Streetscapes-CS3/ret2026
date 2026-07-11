@@ -1,0 +1,11 @@
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+.bundle/
+vendor/
+Gemfile.lock
+
+# Keep the generated design export locally for reference.
+# Exclude it from the Jekyll build and deployment artifact.
+unstructured/

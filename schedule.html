@@ -1,0 +1,89 @@
+---
+title: Schedule
+nav: schedule
+permalink: /schedule/
+description: Program hours, daily activities, weekly topics, and cohort dates for CS3 RET.
+scripts:
+  - /assets/js/schedule.js
+---
+
+<header class="page-header">
+  <div class="container">
+    <p class="eyebrow">Program schedule <span aria-hidden="true">/</span> <span data-schedule-course-year>2026</span></p>
+    <h1>Schedule</h1>
+    <p class="page-header__lead page-header__lead--sans">Program hours are 9:00 AM to 4:00 PM on scheduled days. The program meets at Morningside Heights Campus, Mudd Building, Room 706.</p>
+  </div>
+</header>
+
+<section class="schedule-shell" data-schedule aria-label="Program schedule">
+  <div class="container">
+    <div class="control-group schedule-controls" role="group" aria-label="Select cohort year">
+      <span class="control-group__label">Cohort</span>
+      <button class="segmented-button" type="button" data-schedule-year-button="2024" aria-pressed="false">2024</button>
+      <button class="segmented-button" type="button" data-schedule-year-button="2025" aria-pressed="false">2025</button>
+      <button class="segmented-button" type="button" data-schedule-year-button="2026" aria-pressed="true">2026</button>
+    </div>
+
+    <div class="schedule-grid">
+      <section class="daily-schedule" aria-labelledby="typical-day-title">
+        <h2 id="typical-day-title" aria-live="polite" aria-atomic="true">Daily schedule for <span data-schedule-daily-year>2026</span></h2>
+        <div class="day-board">
+          <ol class="timeline">
+            <li class="timeline__item timeline__item--long timeline__item--humanities">
+              <div class="timeline__time"><time datetime="09:00">9:00 AM</time><span>to</span><time datetime="12:00">12:00 PM</time></div>
+              <div class="timeline__content"><strong>Humanities Lecture</strong><span>3 hours</span></div>
+            </li>
+            <li class="timeline__item timeline__item--short timeline__item--lunch">
+              <div class="timeline__time"><time datetime="12:00">12:00 PM</time><span>to</span><time datetime="13:00">1:00 PM</time></div>
+              <div class="timeline__content"><strong>Lunch</strong><span>1 hour</span></div>
+            </li>
+            <li class="timeline__item timeline__item--long timeline__item--engineering">
+              <div class="timeline__time"><time datetime="13:00">1:00 PM</time><span>to</span><time datetime="16:00">4:00 PM</time></div>
+              <div class="timeline__content"><strong>Engineering Lecture</strong><span>3 hours</span></div>
+            </li>
+            <li class="timeline__item timeline__item--milestone timeline__item--dismissal">
+              <div class="timeline__time"><time datetime="16:00">4:00 PM</time></div>
+              <div class="timeline__content"><strong>Dismissal</strong></div>
+            </li>
+          </ol>
+          <div class="day-board__location">
+            <span class="day-board__label">Location</span>
+            <strong>Morningside Heights Campus</strong>
+            <span>Mudd Building, Room 706</span>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="weekly-arc-title">
+        <h2 id="weekly-arc-title">Weekly topics</h2>
+
+        <div class="cohort-schedule" data-schedule-year="2024" hidden>
+          <h3 class="sr-only">2024 cohort</h3>
+          <article class="week-arc"><div class="week-arc__kicker">Week 1 <span aria-hidden="true">/</span> July 15 to 18</div><h3>Introduction to Machine Learning</h3><p>Neural networks, circuits, machine learning, and computer vision.</p></article>
+          <article class="week-arc"><div class="week-arc__kicker">Week 2 <span aria-hidden="true">/</span> July 22 to 25</div><h3>Experiments for Students</h3><p>Object tracking, language models, and object detection with NYC data.</p></article>
+          <article class="week-arc"><div class="week-arc__kicker">Week 3 <span aria-hidden="true">/</span> July 29 to August 1</div><h3>Various Topics on Vision and AI</h3><p>Depth estimation, model evaluation, and edge deployment.</p></article>
+          <article class="week-arc"><div class="week-arc__kicker">Week 4 <span aria-hidden="true">/</span> August 5 to 8</div><h3>Advanced Topics and Presentation Prep</h3><p>AI demonstrations, responsible AI, lesson plan work, and final presentations.</p></article>
+          <aside class="logistics" aria-label="2024 logistics"><h3>Logistics</h3><dl><dt>Dates</dt><dd>July 15 to August 8, 2024</dd><dt>Days</dt><dd>Monday to Thursday</dd><dt>Hours</dt><dd>9:00 AM to 4:00 PM</dd><dt>Location</dt><dd>Morningside Heights Campus, Mudd Building, Room 706</dd></dl></aside>
+        </div>
+
+        <div class="cohort-schedule" data-schedule-year="2025" hidden>
+          <h3 class="sr-only">2025 cohort</h3>
+          <article class="week-arc"><div class="week-arc__kicker">Week 1 <span aria-hidden="true">/</span> July 14 to 17</div><h3>Introduction to Machine Learning</h3><p>Neural networks, circuits, machine learning, and computer vision.</p></article>
+          <article class="week-arc"><div class="week-arc__kicker">Week 2 <span aria-hidden="true">/</span> July 21 to 23</div><h3>Experiments for Students</h3><p>Object tracking, language models, and object detection with NYC data.</p></article>
+          <article class="week-arc"><div class="week-arc__kicker">Week 3 <span aria-hidden="true">/</span> July 28 to 31</div><h3>Various Topics on Vision and AI</h3><p>Depth estimation, model evaluation, and edge deployment.</p></article>
+          <article class="week-arc"><div class="week-arc__kicker">Week 4 <span aria-hidden="true">/</span> August 4 to 7</div><h3>Advanced Topics and Presentation Prep</h3><p>AI demonstrations, responsible AI, lesson plan work, and final presentations.</p></article>
+          <aside class="logistics" aria-label="2025 logistics"><h3>Logistics</h3><dl><dt>Dates</dt><dd>July 14 to August 7, 2025</dd><dt>Days</dt><dd>Monday to Thursday</dd><dt>Hours</dt><dd>9:00 AM to 4:00 PM</dd><dt>Location</dt><dd>Morningside Heights Campus, Mudd Building, Room 706</dd></dl></aside>
+        </div>
+
+        <div class="cohort-schedule" data-schedule-year="2026">
+          <h3 class="sr-only">2026 cohort</h3>
+          <article class="week-arc"><div class="week-arc__kicker">Week 1 <span aria-hidden="true">/</span> July 13 to 16</div><h3>Introduction: From Machine Learning to Agentic AI</h3><p>Neural networks, circuits, machine learning, computer vision, agentic workflows, and responsible AI.</p></article>
+          <article class="week-arc"><div class="week-arc__kicker">Week 2 <span aria-hidden="true">/</span> July 20 to 22</div><h3>Experiments for Students</h3><p>Object tracking, language models, and object detection with NYC data.</p></article>
+          <article class="week-arc"><div class="week-arc__kicker">Week 3 <span aria-hidden="true">/</span> July 27 to 30</div><h3>Various Topics on Vision and AI</h3><p>Depth estimation, model evaluation, and edge deployment.</p></article>
+          <article class="week-arc"><div class="week-arc__kicker">Week 4 <span aria-hidden="true">/</span> August 3 to 6</div><h3>Advanced Topics and Presentation Prep</h3><p>AI demonstrations, lesson plan work, and final presentations.</p></article>
+          <aside class="logistics" aria-label="2026 logistics"><h3>Logistics</h3><dl><dt>Dates</dt><dd>July 13 to August 6, 2026</dd><dt>Days</dt><dd>Monday to Thursday</dd><dt>Hours</dt><dd>9:00 AM to 4:00 PM</dd><dt>Location</dt><dd>Morningside Heights Campus, Mudd Building, Room 706</dd></dl></aside>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

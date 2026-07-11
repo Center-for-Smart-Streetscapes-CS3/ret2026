@@ -1,0 +1,33 @@
+title: CS3 Research Experience for Teachers
+short_title: CS3 RET
+description: Course materials and program information for the 2024, 2025, and 2026 CS3 Research Experience for Teachers cohorts.
+author: Mehmet Kerem Turkcan
+url: https://center-for-smart-streetscapes-cs3.github.io
+baseurl: /ret2026
+lang: en-US
+timezone: America/New_York
+permalink: pretty
+theme: null
+
+collections:
+  staffers:
+    output: false
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+  - README.md
+  - THIRD_PARTY_NOTICES.md
+  - unstructured
+  - vendor
+
+liquid:
+  error_mode: strict
+  strict_filters: true

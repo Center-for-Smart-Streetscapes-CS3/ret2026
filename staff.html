@@ -1,0 +1,36 @@
+---
+title: Staff
+nav: staff
+permalink: /staff/
+description: Meet the staff for the CS3 Research Experience for Teachers.
+---
+
+<header class="page-header">
+  <div class="container">
+    <p class="eyebrow">2026 program</p>
+    <h1>Staff</h1>
+    <p class="page-header__lead page-header__lead--sans">Staff responsible for program instruction, research, and curriculum.</p>
+  </div>
+</header>
+
+<section class="staff-shell" aria-labelledby="program-staff-title">
+  <div class="container">
+    <h2 id="program-staff-title">Program staff</h2>
+    <div class="staff-grid">
+      {% assign staffers = site.staffers | sort: "order" %}
+      {% for staffer in staffers %}
+        <article class="staff-card">
+          <div class="staff-card__image">
+            <img src="{{ staffer.photo | relative_url }}" alt="Portrait of {{ staffer.name | escape }}" width="300" height="300" loading="lazy">
+          </div>
+          <div class="staff-card__body">
+            <h3><a href="{{ staffer.website }}">{{ staffer.name }}</a></h3>
+            <p class="staff-card__role">{{ staffer.role }}</p>
+            <p class="staff-card__bio">{{ staffer.content | strip_html | strip }}</p>
+            <a class="staff-card__email" href="mailto:{{ staffer.email }}">{{ staffer.email }}</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
