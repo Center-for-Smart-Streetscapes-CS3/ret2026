@@ -148,6 +148,14 @@ html:not(.js) [data-schedule] .schedule-controls {
   color: var(--blue-100);
 }
 
+.eyebrow--light a {
+  color: inherit;
+}
+
+.eyebrow--light a:hover {
+  color: var(--white);
+}
+
 .section-title {
   margin: 0;
   font-family: var(--serif);
@@ -626,16 +634,6 @@ html:not(.js) [data-schedule] .schedule-controls {
   margin-bottom: 0;
 }
 
-.program-note {
-  margin-top: 2.2rem;
-  padding: 0.3rem 0 0.3rem 1.4rem;
-  border-left: 4px solid var(--blue-700);
-  color: var(--slate);
-  font-family: var(--serif);
-  font-size: 1rem;
-  line-height: 1.65;
-}
-
 .fact-panel {
   padding: 2rem;
   background: var(--surface);
@@ -705,25 +703,6 @@ html:not(.js) [data-schedule] .schedule-controls {
   color: var(--slate);
   font-size: 0.9rem;
   line-height: 1.6;
-}
-
-.partners {
-  padding: clamp(3.5rem, 7vw, 5rem) 0;
-}
-
-.partner-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.3rem 3rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.partner-list a {
-  font-family: var(--serif);
-  font-size: 1.35rem;
-  text-decoration-thickness: 1px;
 }
 
 /* Calendar */
