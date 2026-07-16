@@ -259,7 +259,7 @@ html[data-nums="off"] #count { visibility: hidden; }
     </div>
   </figure>
   </div>
-  <p class="frag small">The square has a second gift, visible at the bottom of the plot: its steepness shrinks as the mistake shrinks, so a learner slows down as it closes in; the V stays equally steep to the last instant and invites overshooting. The walk downhill, shown on a later slide, uses this shrinking slope.</p>
+  <p class="frag small">The square has a second gift, visible at the bottom of the plot: its steepness shrinks as the mistake shrinks, so a learner slows down as it closes in; the V stays equally steep to the last instant and invites overshooting. The walk downhill uses this shrinking slope.</p>
 </section>
 
 <!-- ================ 6 · symmetry ================ -->
@@ -653,7 +653,7 @@ html[data-nums="off"] #count { visibility: hidden; }
   </table>
   <p class="note" style="margin-top:8px;">Computed with the logarithm formula the field uses; its details arrive in Part 5.</p>
   </div>
-  <p class="frag small">Notice the tilt: this loss has no symmetric partner, because there is no such thing as overshooting a probability of 1. Being confidently wrong at 0.01 costs about forty times more than being nearly sure at 0.9. The through line of this lecture holds at the top of the field: the chosen shape encodes chosen values, and the LLM's loss says that confident wrongness is the cardinal sin.</p>
+  <p class="frag small">Notice the tilt: this loss has no symmetric partner, because there is no such thing as overshooting a probability of 1. Being confidently wrong at 0.01 costs about forty times more than being nearly sure at 0.9. The principle holds at the top of the field: the chosen shape encodes chosen values, and the LLM's loss says that confident wrongness is the cardinal sin.</p>
 </section>
 
 <!-- ================ 18 · quiz ================ -->
@@ -1005,6 +1005,7 @@ html[data-nums="off"] #count { visibility: hidden; }
         e.collisions.push('tex-error: ' + (t.textContent || '').trim().slice(0, 60));
       });
       Array.prototype.forEach.call(s.querySelectorAll('svg'), function (svg) {
+        if (svg.closest && svg.closest('.katex')) return;
         var vb = svg.viewBox && svg.viewBox.baseVal;
         if (vb && vb.width) {
           var cb = svg.getBBox();

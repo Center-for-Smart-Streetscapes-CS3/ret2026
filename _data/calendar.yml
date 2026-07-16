@@ -598,37 +598,53 @@
           - type: "Lecture"
             title: "Intro to AI, Part 6: Training at Scale"
             path: "/assets/lectures/intro_to_ai_part6_training_at_scale.html"
+          - type: "Lecture"
+            title: "Intro to AI, Part 7: Agents and Tool Use"
+            path: "/assets/lectures/intro_to_ai_part7_agents_and_tool_use.html"
+          - type: "Lecture"
+            title: "Intro to AI, Part 8: Vision"
+            path: "/assets/lectures/intro_to_ai_part8_vision.html"
           - type: "Demo"
             title: "AI Training Toolkit"
             path: "/toolkit/"
           - type: "Lecture"
             title: "Machine Learning"
+            optional: true
           - type: "Handout"
             title: "Concepts in Deep Learning"
             url: "https://drive.google.com/file/d/18Qt7eIgb_VKepUzsQlzW9hBCYPAb-85k/view"
+            optional: true
           - type: "Reading"
             title: "Overview of Machine Learning Algorithms"
             url: "https://keremturkcan.com/projects/ai_flowchart.html"
+            optional: true
           - type: "Reading"
             title: "Overview of Machine Learning Tasks"
             url: "https://keremturkcan.com/projects/ai_flowchart_2.html"
+            optional: true
           - type: "Reading"
             title: "Model Evaluation: Training, Validation and Testing"
             url: "https://drive.google.com/file/d/17m3T5Un_kiaWvDtrL_Zcg7k2L7OwaPbE/view"
+            optional: true
           - type: "Lecture"
             title: "Computer Vision"
+            optional: true
           - type: "Handout"
             title: "Introduction to Convolutional Neural Networks"
             url: "https://drive.google.com/file/d/1LZN7U4ivJ0I3Kx3Klajt3oNNy-CFmsXY/view"
+            optional: true
           - type: "Demo"
             title: "MNIST Fully Connected Network"
             url: "https://adamharley.com/nn_vis/mlp/2d.html"
+            optional: true
           - type: "Demo"
             title: "MNIST Convolutional Neural Network"
             url: "https://adamharley.com/nn_vis/cnn/2d.html"
+            optional: true
           - type: "Reading"
             title: "Convolutional Neural Networks Explained"
             url: "https://poloclub.github.io/cnn-explainer/"
+            optional: true
   - id: "y26w2"
     kicker: "Week 2"
     num: 2

@@ -927,6 +927,79 @@ html:not(.js) [data-schedule] .schedule-controls {
   list-style: none;
 }
 
+.calendar-day__resources {
+  min-width: 0;
+}
+
+.optional-content {
+  margin-top: 0.75rem;
+  border: 1px solid #d4e4ee;
+  background: var(--blue-050);
+}
+
+.optional-content[hidden] {
+  display: none;
+}
+
+.optional-content > summary {
+  display: flex;
+  min-height: 3.25rem;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--blue-800);
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+
+.optional-content > summary::-webkit-details-marker {
+  display: none;
+}
+
+.optional-content > summary:hover {
+  background: #e0edf5;
+}
+
+.optional-content__count {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.optional-content__toggle {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.optional-content__toggle::before,
+.optional-content__toggle::after {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 2px;
+  transform: translateY(-50%);
+  background: var(--blue-700);
+  content: "";
+}
+
+.optional-content__toggle::after {
+  transform: translateY(-50%) rotate(90deg);
+  transition: transform 160ms ease;
+}
+
+.optional-content[open] .optional-content__toggle::after {
+  transform: translateY(-50%);
+}
+
+.optional-content__list {
+  padding: 0 0.75rem 0.75rem;
+}
+
 .resource-item {
   --item-color: var(--blue-700);
   border-left: 3px solid var(--item-color);
@@ -1758,5 +1831,13 @@ html:not(.js) [data-schedule] .schedule-controls {
 
   .calendar-week > div {
     display: block !important;
+  }
+
+  .optional-content > summary {
+    display: none;
+  }
+
+  .optional-content > .resource-list {
+    display: flex !important;
   }
 }

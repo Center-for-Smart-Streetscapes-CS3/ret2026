@@ -50,6 +50,13 @@
           resource.hidden = !visible;
           if (visible) dayCount += 1;
         });
+        day.querySelectorAll('[data-optional-content]').forEach((optionalContent) => {
+          const visibleOptionalItems = [...optionalContent.querySelectorAll('[data-resource-type]')]
+            .filter((resource) => !resource.hidden).length;
+          optionalContent.hidden = visibleOptionalItems === 0;
+          const count = optionalContent.querySelector('[data-optional-count]');
+          if (count) count.textContent = `${visibleOptionalItems} ${visibleOptionalItems === 1 ? 'item' : 'items'}`;
+        });
         day.hidden = dayCount === 0;
         weekCount += dayCount;
       });

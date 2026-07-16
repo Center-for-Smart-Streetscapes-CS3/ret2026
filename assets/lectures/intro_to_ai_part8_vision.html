@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Intro to AI, Part 6: Training at Scale</title>
+<title>Intro to AI, Part 8: Vision</title>
 <!--
   3b1b-style HTML slideshow template (see rules/html-slideshow.md).
   One self-contained file: no network requests, works from file://.
@@ -214,8 +214,8 @@ html[data-size="l"] .slide { padding: 48px 68px 70px; }
 <!-- ================ 1 · title ================ -->
 <section class="slide" data-title="Title">
   <div class="grow" style="text-align:center;">
-    <div class="kicker">Part 6</div>
-    <h1>Training at Scale</h1>
+    <div class="kicker">Part 8</div>
+    <h1>Vision: Convolutions and Tokens</h1>
     <div style="margin-top:52px; line-height:1.6; font-size:.84em;">
       <div style="font-size:1.14em;">Mehmet Kerem Turkcan</div>
       <div class="note">Associate Research Scientist</div>
@@ -228,461 +228,772 @@ html[data-size="l"] .slide { padding: 48px 68px 70px; }
 </section>
 
 <!-- ================ 2 · prior work ================ -->
-<section class="slide" data-title="Part 5 Overview">
-  <h2>Part 5 Overview</h2>
+<section class="slide" data-title="Part 7 Overview">
+  <h2>Part 7 Overview</h2>
   <div class="grow">
     <ol>
-      <li class="frag"><b>The loop:</b> Training repeats four stages: forward computation, loss, backward computation, and weight update. Part 5 ran the loop on toy networks with a dozen weights.</li>
-      <li class="frag"><b>The losses:</b> Cross entropy counts halvings for token answers, and squared loss measures distance for number answers.</li>
-      <li class="frag"><b>The gap:</b> The assistant in your browser holds hundreds of billions of weights, and the same loop trained every one of them.</li>
-      <li class="frag"><b>Today:</b> the three training stages that shape an assistant, the machines that run them, and the bill in dollars, megawatt hours, and tonnes of CO2.</li>
+      <li class="frag"><b>The agent:</b> Part 7 put the model in a loop with tools; everything that entered the loop was text.</li>
+      <li class="frag"><b>The question:</b> The assistant students use also answers questions about photographs. Pixels are numbers, so something must arrange them for a network.</li>
+      <li class="frag"><b>Two methods:</b> convolution slides small filters across the image; tokens cut the image into patches that enter the same window as words.</li>
     </ol>
   </div>
-  <p class="note">Part 9 opens attention, the gray box from Parts 2 and 3.</p>
+  <p class="note">Part 9 opens attention, which also reads image tokens.</p>
 </section>
 
-<!-- ================ 3 · pipeline ================ -->
-<section class="slide dense23" data-title="The three stages of training">
-  <h2>The three stages of training</h2>
-  <div class="grow stack compact">
-    <p>Every modern assistant is shaped in three stages, each running Part 5's loop on a different kind of data.</p>
-    <figure>
-      <svg viewBox="0 0 1090 300" role="img" aria-label="Three training stages in a row: pretraining reads raw text, supervised fine tuning reads written answers, and preference tuning reads choices between two answers.">
-        <defs><marker id="p6s3arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>
-        <g class="m frag" data-order="1" font-size="16">
-          <rect id="s3d1" x="40" y="16" width="250" height="66" rx="10" style="fill:var(--panel);stroke:var(--blue);stroke-width:2.5"/>
-          <text x="165" y="44" text-anchor="middle" style="fill:var(--blue)">raw text</text>
-          <text x="165" y="68" text-anchor="middle" font-size="14" style="fill:var(--ink)">trillions of tokens</text>
-          <rect id="s3t1" x="40" y="168" width="250" height="64" rx="10" style="fill:var(--panel);stroke:var(--amber);stroke-width:2.5"/>
-          <text x="165" y="206" text-anchor="middle" style="fill:var(--amber)">Stage 1: pretraining</text>
-          <line data-connect="s3d1 s3t1" style="stroke:var(--muted);stroke-width:2.5" marker-end="url(#p6s3arr)"/>
-        </g>
-        <g class="m frag" data-order="2" font-size="16">
-          <rect id="s3d2" x="420" y="16" width="250" height="66" rx="10" style="fill:var(--panel);stroke:var(--blue);stroke-width:2.5"/>
-          <text x="545" y="44" text-anchor="middle" style="fill:var(--blue)">written answers</text>
-          <text x="545" y="68" text-anchor="middle" font-size="14" style="fill:var(--ink)">thousands to a million</text>
-          <rect id="s3t2" x="420" y="168" width="250" height="64" rx="10" style="fill:var(--panel);stroke:var(--amber);stroke-width:2.5"/>
-          <text x="545" y="199" text-anchor="middle" style="fill:var(--amber)">Stage 2: supervised</text>
-          <text x="545" y="221" text-anchor="middle" style="fill:var(--amber)">fine tuning</text>
-          <line data-connect="s3d2 s3t2" style="stroke:var(--muted);stroke-width:2.5" marker-end="url(#p6s3arr)"/>
-          <line id="s3e1" data-connect="s3t1 s3t2" style="stroke:var(--muted);stroke-width:2.5" marker-end="url(#p6s3arr)"/>
-          <text data-for="s3e1" data-t=".5" data-off="-15" class="knock" font-size="15" style="fill:var(--green)">base model</text>
-        </g>
-        <g class="m frag" data-order="3" font-size="16">
-          <rect id="s3d3" x="800" y="16" width="250" height="66" rx="10" style="fill:var(--panel);stroke:var(--blue);stroke-width:2.5"/>
-          <text x="925" y="44" text-anchor="middle" style="fill:var(--blue)">choices between answers</text>
-          <text x="925" y="68" text-anchor="middle" font-size="14" style="fill:var(--ink)">tens of thousands and up</text>
-          <rect id="s3t3" x="800" y="168" width="250" height="64" rx="10" style="fill:var(--panel);stroke:var(--amber);stroke-width:2.5"/>
-          <text x="925" y="199" text-anchor="middle" style="fill:var(--amber)">Stage 3: preference</text>
-          <text x="925" y="221" text-anchor="middle" style="fill:var(--amber)">tuning</text>
-          <line data-connect="s3d3 s3t3" style="stroke:var(--muted);stroke-width:2.5" marker-end="url(#p6s3arr)"/>
-          <line id="s3e2" data-connect="s3t2 s3t3" style="stroke:var(--muted);stroke-width:2.5" marker-end="url(#p6s3arr)"/>
-          <text data-for="s3e2" data-t=".5" data-off="-15" class="knock" font-size="15" style="fill:var(--green)">assistant</text>
-          <text x="925" y="272" text-anchor="middle" font-size="15" style="fill:var(--green)">the model you talk to</text>
-        </g>
-      </svg>
-      <figcaption>Rough scales; the documented figures follow.</figcaption>
-    </figure>
-    <p class="answer frag" data-order="4" style="text-align:center;">All three stages run the same training loop; the stages differ in their data and their loss.</p>
-  </div>
-</section>
-
-<!-- ================ 4 · pretraining ================ -->
-<section class="slide dense22" data-title="Stage 1: pretraining">
-  <h2>Stage 1: pretraining</h2>
-  <div class="grow stack compact">
-    <p>Pretraining plays Part 1's game at planetary scale: read text, predict the next token, and update the weights after every position. Because the text itself supplies each correct next token, no person labels anything.</p>
-    <div class="eq frag"><span class="tex disp">\mathcal{L}(\theta)=-\sum_{t}\log_2\, p_\theta\!\left(x_t\mid x_{&lt;t}\right)</span></div>
-    <p class="small frag">Each position <span class="tex">t</span> charges the halving loss of the true next token <span class="tex">x_t</span> given everything before it, and the sum runs over every position of every document. One halving is one bit; published implementations sum base <span class="tex">e</span> logarithms, where one halving equals 0.69 nats (Part 5's reconciliation).</p>
-    <p class="frag">One position, worked with illustrative numbers: after <span class="tok">the</span><span class="tok">cat</span><span class="tok">sat</span><span class="tok">on</span><span class="tok">the</span> the model gives <span class="tok amber">mat</span> probability <span class="tex">0.25</span>, so this position costs <span class="tex">-\log_2 0.25 = 2</span> halvings; a sharper model that gives <span class="tex">0.5</span> pays 1 halving.</p>
-  </div>
-  <p class="history"><b>History:</b> Next token pretraining at modern scale entered through GPT (Radford et al. 2018) and GPT-2 (2019); GPT-3 (Brown et al. 2020) trained 175 billion weights on 300 billion tokens.</p>
-</section>
-
-<!-- ================ 5 · dataset printed ================ -->
-<section class="slide dense22" data-title="How large is the pretraining dataset?">
-  <h2>How large is the pretraining dataset?</h2>
+<!-- ================ 3 · image is numbers ================ -->
+<section class="slide dense22" data-title="The image as a table of numbers">
+  <h2>The image as a table of numbers</h2>
   <div class="cols grow" style="gap:34px; align-items:start;">
-    <div class="stack compact" style="flex:1.0;">
-      <table class="tight" style="font-size:.72em;">
-        <thead><tr><th>model</th><th>year</th><th>pretraining tokens</th></tr></thead>
-        <tbody>
-          <tr><td>GPT-3 (OpenAI)</td><td class="num">2020</td><td class="num">300 billion</td></tr>
-          <tr><td>Chinchilla (DeepMind)</td><td class="num">2022</td><td class="num">1.4 trillion</td></tr>
-          <tr><td>DeepSeek-V3</td><td class="num">2024</td><td class="num">14.8 trillion</td></tr>
-          <tr><td>Llama 3.1 405B (Meta)</td><td class="num">2024</td><td class="num">15.6 trillion</td></tr>
-        </tbody>
-      </table>
-      <p class="small frag" data-order="2"><b class="cBlue">Passes over the data (epochs):</b> about one. Chinchilla paired 70 billion weights with 1.4 trillion tokens and doubled tokens whenever weights double, roughly 20 tokens per weight (a derived ratio). Muennighoff et al. (2023) measured that repeating the same data up to about 4 passes loses almost no quality, and that past about 16 passes further repetition adds almost no improvement.</p>
+    <div class="stack compact" style="flex:.94;">
+      <p>A grayscale image is a table of brightness values, 0 for black through 255 for white. This illustrative scene, a drawing, is 128 by 128 pixels: 16,384 numbers.</p>
+      <figure style="max-width:262px;">
+        <div style="position:relative; width:100%;">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAAEyElEQVR42u2a228bRRTGz5mL4zix0yohbU3FC49IPLQIXriECgHiHYEQ/yOXqihc0rSFAmrpFWiaB2hCIUlJvXacUF92dz4eYhrHXq93nPVaCes3b7w7v/3Od86cmQnfodF+FEYMIChV4P+uQAqQemDoAAwCEXOvcdQQxwYTGWIpyfg+MRM4YQUAyk7mMor8Zn2n5gtCwgBmfKagGUSUI++fzR1O2AOYKmYBEBGBxNTEo8dI1AOYLkrTJocsZtYMJ6eAOfas2Pdw0Iy7kVwIkC2KzmfjRK3CiSkwO266rskTO15CpRjZQsCrmVzeJKSAyWeCniymHCQCwJwLLL7IKnf/H4YUAiOzgW+GTMYgCQUgehQYKZEMQO/HgpIIARm/5/VEFCC3PmEC5h526wkB4Ml00NzHtWYyAIzKSRnEVfY7CrQYVjO0XQ14NNfLFFshCuqv2t22VgiQYL3eWZ/EgIMzyXB0UXnYRSg31+OZjo3yvt+am3LDNVjPFrEvE2R5xXQV6EEAoKsLN/zNd083Qwn8B83TyrQiBRbYWGl0TxDyY3sA/dfnP2v5+PfCLExYJpjKk2xGMRERC6qvrrqi+3X5S+vwy6X5kgaxNzb3ivJCTWQyx6YnxgShWXOcGgdWhnnL8aV37VJDgYjY4My5QrgRYKTOavJrrs8cx9IMurp4k3dvgqCfnHeKXugNEo06ETEHrkrsPAAG6bXzv+g9J8nSg8IswGE1gZmZOZbFqRHi169L7a0WtPNJ6WXlM5JYHUO51680NDqufVOa62OEmACgq5dvcefvIeiG83bRHRhAfhRxeNJrF+6pIK1laSU/C/BQFYAQ9xZKOrjR1M5nzkvK5yECQPo/ftfQ6GmOhdIb+cGMoKLZb/vKbe7NCkE3y2+dcmkABPlhhA5Xr3+xpMJTTZZW8s+QGUYIIMTSRUejX46UzztnBzCC6tf1GOVdu9rQiFAlFp3X8i6zXT70UQBQO9/e4ShWhaBb5XOnPGNXFuUHfQA35u+rqI+Uzmp+xtIIoe8GIZYXHW1RLMsXymeklRFU+Nx//YeGtlAUyr3kvDrpcSwKQG9fvct2DQME3S6/edKz8MD7PedxtfHVsrQvLdL5Y3IGOLACbH67XM4MMs9nKvOVFyMLp3p3c5nX5WB9Bhv21ME9wM/tNtS2XTMREXnm4FkAF4Os3QAi4ujcYbEaSIF9QozixAQY8ZGNNUAsg7bHbASHVjzWGrlp4g9BhNkdYy+0tkXvlyQoboAoCmTHW4tF2Pg/mgeiNc3/HQzZjz/6LDiCZ8eHrhAdwkqI8Cy1XCYPoEB7m7Z7/oK21x5+CMxOW9ud0yBuLrdyqSoQeyHqbtW3P9162qrxe8+7TKbU+i44/jTsmgsYW87Tm3h3T0C2uSPuEARtyag9AO76UQIAQOggR60UY9SV8OgDHD0P0KHzAB+8Ke08HrADqPfZc7GVoFm3BFgKn/omjmurXS88fGTHrBp9jihtFXAbPmL0AA/dAyOvAynA6EtxxIVn+9e9LSi2Lny2AKJ5t/P/ILzZ43s+/7PcCVARiFUB/++uPMu15Vl1qwuZYw6BCp1uuodD7B6Ie7pO0zAFSAFSgBQgBUgBUoAUIAVIAVKAFCAF6Pj8C8zuQ2b6i7vUAAAAAElFTkSuQmCC" alt="An illustrative grayscale scene: a house with a roof, door, and window under a sun." style="width:100%; border-radius:8px; display:block;"/>
+          <div style="position:absolute; left:26.6%; top:29.7%; width:9.4%; height:9.4%; border:3px solid var(--amber); border-radius:2px;"></div>
+        </div>
+        <figcaption>The amber square marks the 12 by 12 crop shown at right.</figcaption>
+      </figure>
+      <p class="small frag">The crop sits on the roof's left edge, so its numbers fall from sky (about 180) to roof (about 60) along a diagonal. Every question about the picture is a question about this table.</p>
     </div>
-    <div class="stack compact" style="flex:1.0;">
-      <div class="mini-label frag" data-order="1">Llama 3.1's dataset printed on paper</div>
-      <div class="eq frag" data-order="1" style="font-size:.82em;"><span class="tex disp">\begin{aligned}15.6\text{T tokens}&amp;\approx 11.7\text{T words}&amp;&amp;\scriptstyle(0.75\text{ words per token})\\&amp;\approx 23.4\text{B pages}&amp;&amp;\scriptstyle(500\text{ words per page})\\&amp;\approx 2{,}340\text{ km of paper}&amp;&amp;\scriptstyle(500\text{ sheets}\approx 5\text{ cm})\end{aligned}</span></div>
-      <p class="small frag" data-order="1">Printed one page per sheet, the stack stands about 2,340 km tall, nearly six times the altitude of the International Space Station's orbit (about 400 km). The token to word ratio is OpenAI's published rule of thumb.</p>
+    <figure style="flex:1.06; max-width:398px;">
+      <svg viewBox="0 0 380 364" role="img" aria-label="A 12 by 12 grid of pixel values from the roof edge, each cell shaded by its own brightness.">
+        <g class="m" data-qa="skip">
+            <rect x="22" y="16" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="36" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="50" y="16" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="64" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="78" y="16" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="92" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="106" y="16" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="120" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="134" y="16" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="148" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="162" y="16" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="176" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="190" y="16" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="204" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="218" y="16" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="232" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="246" y="16" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="260" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="274" y="16" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="288" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="302" y="16" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="316" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="330" y="16" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="344" y="34.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="22" y="44" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="36" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="50" y="44" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="64" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="78" y="44" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="92" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="106" y="44" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="120" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="134" y="44" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="148" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="162" y="44" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="176" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="190" y="44" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="204" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="218" y="44" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="232" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="246" y="44" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="260" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="274" y="44" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="288" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="302" y="44" width="28" height="28" style="fill:#b7b7b7"/>
+            <text x="316" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">183</text>
+            <rect x="330" y="44" width="28" height="28" style="fill:#b9b9b9"/>
+            <text x="344" y="62.5" text-anchor="middle" font-size="10.5" style="fill:#111">185</text>
+            <rect x="22" y="72" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="36" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="50" y="72" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="64" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="78" y="72" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="92" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="106" y="72" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="120" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="134" y="72" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="148" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="162" y="72" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="176" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="190" y="72" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="204" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="218" y="72" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="232" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="246" y="72" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="260" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="274" y="72" width="28" height="28" style="fill:#b8b8b8"/>
+            <text x="288" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">184</text>
+            <rect x="302" y="72" width="28" height="28" style="fill:#b3b3b3"/>
+            <text x="316" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">179</text>
+            <rect x="330" y="72" width="28" height="28" style="fill:#7e7e7e"/>
+            <text x="344" y="90.5" text-anchor="middle" font-size="10.5" style="fill:#111">126</text>
+            <rect x="22" y="100" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="36" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="50" y="100" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="64" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="78" y="100" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="92" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="106" y="100" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="120" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="134" y="100" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="148" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="162" y="100" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="176" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="190" y="100" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="204" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="218" y="100" width="28" height="28" style="fill:#b3b3b3"/>
+            <text x="232" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">179</text>
+            <rect x="246" y="100" width="28" height="28" style="fill:#b8b8b8"/>
+            <text x="260" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">184</text>
+            <rect x="274" y="100" width="28" height="28" style="fill:#aaaaaa"/>
+            <text x="288" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#111">170</text>
+            <rect x="302" y="100" width="28" height="28" style="fill:#6b6b6b"/>
+            <text x="316" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#eee">107</text>
+            <rect x="330" y="100" width="28" height="28" style="fill:#3a3a3a"/>
+            <text x="344" y="118.5" text-anchor="middle" font-size="10.5" style="fill:#eee">58</text>
+            <rect x="22" y="128" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="36" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="50" y="128" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="64" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="78" y="128" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="92" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="106" y="128" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="120" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="134" y="128" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="148" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="162" y="128" width="28" height="28" style="fill:#b3b3b3"/>
+            <text x="176" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#111">179</text>
+            <rect x="190" y="128" width="28" height="28" style="fill:#b3b3b3"/>
+            <text x="204" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#111">179</text>
+            <rect x="218" y="128" width="28" height="28" style="fill:#b8b8b8"/>
+            <text x="232" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#111">184</text>
+            <rect x="246" y="128" width="28" height="28" style="fill:#9e9e9e"/>
+            <text x="260" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#111">158</text>
+            <rect x="274" y="128" width="28" height="28" style="fill:#595959"/>
+            <text x="288" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#eee">89</text>
+            <rect x="302" y="128" width="28" height="28" style="fill:#383838"/>
+            <text x="316" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#eee">56</text>
+            <rect x="330" y="128" width="28" height="28" style="fill:#3d3d3d"/>
+            <text x="344" y="146.5" text-anchor="middle" font-size="10.5" style="fill:#eee">61</text>
+            <rect x="22" y="156" width="28" height="28" style="fill:#b3b3b3"/>
+            <text x="36" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#111">179</text>
+            <rect x="50" y="156" width="28" height="28" style="fill:#b3b3b3"/>
+            <text x="64" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#111">179</text>
+            <rect x="78" y="156" width="28" height="28" style="fill:#b3b3b3"/>
+            <text x="92" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#111">179</text>
+            <rect x="106" y="156" width="28" height="28" style="fill:#b3b3b3"/>
+            <text x="120" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#111">179</text>
+            <rect x="134" y="156" width="28" height="28" style="fill:#b2b2b2"/>
+            <text x="148" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#111">178</text>
+            <rect x="162" y="156" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="176" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="190" y="156" width="28" height="28" style="fill:#b6b6b6"/>
+            <text x="204" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#111">182</text>
+            <rect x="218" y="156" width="28" height="28" style="fill:#8e8e8e"/>
+            <text x="232" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#111">142</text>
+            <rect x="246" y="156" width="28" height="28" style="fill:#4b4b4b"/>
+            <text x="260" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#eee">75</text>
+            <rect x="274" y="156" width="28" height="28" style="fill:#383838"/>
+            <text x="288" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#eee">56</text>
+            <rect x="302" y="156" width="28" height="28" style="fill:#3d3d3d"/>
+            <text x="316" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#eee">61</text>
+            <rect x="330" y="156" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="344" y="174.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="22" y="184" width="28" height="28" style="fill:#b2b2b2"/>
+            <text x="36" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#111">178</text>
+            <rect x="50" y="184" width="28" height="28" style="fill:#b2b2b2"/>
+            <text x="64" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#111">178</text>
+            <rect x="78" y="184" width="28" height="28" style="fill:#b2b2b2"/>
+            <text x="92" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#111">178</text>
+            <rect x="106" y="184" width="28" height="28" style="fill:#b1b1b1"/>
+            <text x="120" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#111">177</text>
+            <rect x="134" y="184" width="28" height="28" style="fill:#b4b4b4"/>
+            <text x="148" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#111">180</text>
+            <rect x="162" y="184" width="28" height="28" style="fill:#b1b1b1"/>
+            <text x="176" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#111">177</text>
+            <rect x="190" y="184" width="28" height="28" style="fill:#7c7c7c"/>
+            <text x="204" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#111">124</text>
+            <rect x="218" y="184" width="28" height="28" style="fill:#404040"/>
+            <text x="232" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#eee">64</text>
+            <rect x="246" y="184" width="28" height="28" style="fill:#393939"/>
+            <text x="260" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#eee">57</text>
+            <rect x="274" y="184" width="28" height="28" style="fill:#3d3d3d"/>
+            <text x="288" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#eee">61</text>
+            <rect x="302" y="184" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="316" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="330" y="184" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="344" y="202.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="22" y="212" width="28" height="28" style="fill:#b2b2b2"/>
+            <text x="36" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#111">178</text>
+            <rect x="50" y="212" width="28" height="28" style="fill:#b2b2b2"/>
+            <text x="64" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#111">178</text>
+            <rect x="78" y="212" width="28" height="28" style="fill:#b1b1b1"/>
+            <text x="92" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#111">177</text>
+            <rect x="106" y="212" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="120" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="134" y="212" width="28" height="28" style="fill:#a8a8a8"/>
+            <text x="148" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#111">168</text>
+            <rect x="162" y="212" width="28" height="28" style="fill:#6a6a6a"/>
+            <text x="176" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#eee">106</text>
+            <rect x="190" y="212" width="28" height="28" style="fill:#3a3a3a"/>
+            <text x="204" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#eee">58</text>
+            <rect x="218" y="212" width="28" height="28" style="fill:#3b3b3b"/>
+            <text x="232" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#eee">59</text>
+            <rect x="246" y="212" width="28" height="28" style="fill:#3d3d3d"/>
+            <text x="260" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#eee">61</text>
+            <rect x="274" y="212" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="288" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="302" y="212" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="316" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="330" y="212" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="344" y="230.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="22" y="240" width="28" height="28" style="fill:#b0b0b0"/>
+            <text x="36" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#111">176</text>
+            <rect x="50" y="240" width="28" height="28" style="fill:#b0b0b0"/>
+            <text x="64" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#111">176</text>
+            <rect x="78" y="240" width="28" height="28" style="fill:#b5b5b5"/>
+            <text x="92" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#111">181</text>
+            <rect x="106" y="240" width="28" height="28" style="fill:#9c9c9c"/>
+            <text x="120" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#111">156</text>
+            <rect x="134" y="240" width="28" height="28" style="fill:#585858"/>
+            <text x="148" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#eee">88</text>
+            <rect x="162" y="240" width="28" height="28" style="fill:#383838"/>
+            <text x="176" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#eee">56</text>
+            <rect x="190" y="240" width="28" height="28" style="fill:#3d3d3d"/>
+            <text x="204" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#eee">61</text>
+            <rect x="218" y="240" width="28" height="28" style="fill:#3d3d3d"/>
+            <text x="232" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#eee">61</text>
+            <rect x="246" y="240" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="260" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="274" y="240" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="288" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="302" y="240" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="316" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="330" y="240" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="344" y="258.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="22" y="268" width="28" height="28" style="fill:#b1b1b1"/>
+            <text x="36" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#111">177</text>
+            <rect x="50" y="268" width="28" height="28" style="fill:#b3b3b3"/>
+            <text x="64" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#111">179</text>
+            <rect x="78" y="268" width="28" height="28" style="fill:#8c8c8c"/>
+            <text x="92" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#111">140</text>
+            <rect x="106" y="268" width="28" height="28" style="fill:#4a4a4a"/>
+            <text x="120" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#eee">74</text>
+            <rect x="134" y="268" width="28" height="28" style="fill:#383838"/>
+            <text x="148" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#eee">56</text>
+            <rect x="162" y="268" width="28" height="28" style="fill:#3d3d3d"/>
+            <text x="176" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#eee">61</text>
+            <rect x="190" y="268" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="204" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="218" y="268" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="232" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="246" y="268" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="260" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="274" y="268" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="288" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="302" y="268" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="316" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="330" y="268" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="344" y="286.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="22" y="296" width="28" height="28" style="fill:#aeaeae"/>
+            <text x="36" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#111">174</text>
+            <rect x="50" y="296" width="28" height="28" style="fill:#7b7b7b"/>
+            <text x="64" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#111">123</text>
+            <rect x="78" y="296" width="28" height="28" style="fill:#404040"/>
+            <text x="92" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">64</text>
+            <rect x="106" y="296" width="28" height="28" style="fill:#393939"/>
+            <text x="120" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">57</text>
+            <rect x="134" y="296" width="28" height="28" style="fill:#3d3d3d"/>
+            <text x="148" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">61</text>
+            <rect x="162" y="296" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="176" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="190" y="296" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="204" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="218" y="296" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="232" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="246" y="296" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="260" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="274" y="296" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="288" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="302" y="296" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="316" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="330" y="296" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="344" y="314.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="22" y="324" width="28" height="28" style="fill:#696969"/>
+            <text x="36" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">105</text>
+            <rect x="50" y="324" width="28" height="28" style="fill:#3a3a3a"/>
+            <text x="64" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">58</text>
+            <rect x="78" y="324" width="28" height="28" style="fill:#3b3b3b"/>
+            <text x="92" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">59</text>
+            <rect x="106" y="324" width="28" height="28" style="fill:#3d3d3d"/>
+            <text x="120" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">61</text>
+            <rect x="134" y="324" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="148" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="162" y="324" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="176" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="190" y="324" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="204" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="218" y="324" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="232" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="246" y="324" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="260" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="274" y="324" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="288" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="302" y="324" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="316" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+            <rect x="330" y="324" width="28" height="28" style="fill:#3c3c3c"/>
+            <text x="344" y="342.5" text-anchor="middle" font-size="10.5" style="fill:#eee">60</text>
+        </g>
+      </svg>
+      <figcaption>The actual values of the crop, cell by cell; the diagonal edge is visible in the numbers.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================ 4 · the filter ================ -->
+<section class="slide dense22" data-title="The filter: a weighted sum slid everywhere">
+  <h2>The filter: a weighted sum slid everywhere</h2>
+  <div class="cols grow" style="gap:30px; align-items:start;">
+    <div class="stack compact" style="flex:.92;">
+      <p>A <span class="cBlue">filter</span> is a small table of weights. At each position, it multiplies its weights with the 9 pixels beneath it and adds the products, Part 5's weighted sum; it writes one number and slides one pixel onward.</p>
+      <div class="eq frag" data-order="1" style="font-size:.9em;"><span class="tex disp">\begin{pmatrix}-1&amp;0&amp;1\\-2&amp;0&amp;2\\-1&amp;0&amp;1\end{pmatrix}</span></div>
+      <p class="small frag" data-order="1">This filter asks one question at every position: is the right side brighter than the left? On the toy grid (illustrative values 10 and 90), it writes <span class="tex">4\times(90-10)=320</span> where the bright edge passes and 0 on the flat regions.</p>
+      <p class="small frag" data-order="2">Because one filter of 9 weights is reused at every position, convolution stays cheap, and a pattern learned in one corner is recognized anywhere.</p>
     </div>
+    <figure style="flex:1.08;">
+      <svg viewBox="0 0 560 320" role="img" aria-label="A 3 by 3 filter window slides across an 8 by 8 grid of pixel values; each stop writes one value of the 6 by 6 output grid.">
+        <g class="m" font-size="12" data-qa="skip">
+            <rect x="14" y="40" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="29" y="60" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="44" y="40" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="59" y="60" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="74" y="40" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="89" y="60" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="104" y="40" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="119" y="60" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="134" y="40" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="149" y="60" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="164" y="40" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="179" y="60" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="194" y="40" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="209" y="60" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="224" y="40" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="239" y="60" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="14" y="70" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="29" y="90" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="44" y="70" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="59" y="90" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="74" y="70" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="89" y="90" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="104" y="70" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="119" y="90" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="134" y="70" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="149" y="90" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="164" y="70" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="179" y="90" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="194" y="70" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="209" y="90" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="224" y="70" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="239" y="90" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="14" y="100" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="29" y="120" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="44" y="100" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="59" y="120" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="74" y="100" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="89" y="120" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="104" y="100" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="119" y="120" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="134" y="100" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="149" y="120" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="164" y="100" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="179" y="120" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="194" y="100" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="209" y="120" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="224" y="100" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="239" y="120" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="14" y="130" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="29" y="150" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="44" y="130" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="59" y="150" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="74" y="130" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="89" y="150" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="104" y="130" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="119" y="150" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="134" y="130" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="149" y="150" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="164" y="130" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="179" y="150" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="194" y="130" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="209" y="150" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="224" y="130" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="239" y="150" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="14" y="160" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="29" y="180" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="44" y="160" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="59" y="180" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="74" y="160" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="89" y="180" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="104" y="160" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="119" y="180" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="134" y="160" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="149" y="180" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="164" y="160" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="179" y="180" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="194" y="160" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="209" y="180" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="224" y="160" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="239" y="180" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="14" y="190" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="29" y="210" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="44" y="190" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="59" y="210" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="74" y="190" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="89" y="210" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="104" y="190" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="119" y="210" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="134" y="190" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="149" y="210" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="164" y="190" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="179" y="210" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="194" y="190" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="209" y="210" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="224" y="190" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="239" y="210" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="14" y="220" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="29" y="240" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="44" y="220" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="59" y="240" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="74" y="220" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="89" y="240" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="104" y="220" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="119" y="240" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="134" y="220" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="149" y="240" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="164" y="220" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="179" y="240" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="194" y="220" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="209" y="240" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="224" y="220" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="239" y="240" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="14" y="250" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="29" y="270" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="44" y="250" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="59" y="270" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="74" y="250" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="89" y="270" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="104" y="250" width="30" height="30" rx="2" style="fill:rgb(20,20,20);stroke:#777;stroke-width:.6"/>
+            <text x="119" y="270" text-anchor="middle" font-size="12" style="fill:#eeeeee">10</text>
+            <rect x="134" y="250" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="149" y="270" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="164" y="250" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="179" y="270" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="194" y="250" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="209" y="270" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+            <rect x="224" y="250" width="30" height="30" rx="2" style="fill:rgb(110,110,110);stroke:#777;stroke-width:.6"/>
+            <text x="239" y="270" text-anchor="middle" font-size="12" style="fill:#eeeeee">90</text>
+        </g>
+        <text x="134" y="26" text-anchor="middle" class="m" font-size="14" style="fill:var(--muted)">input, 8 by 8</text>
+        <text x="438" y="26" text-anchor="middle" class="m" font-size="14" style="fill:var(--muted)">output, 6 by 6</text>
+        <g data-qa="skip" class="m">
+            <g class="s4o" data-i="0"><rect x="330" y="70" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="348" y="93" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="1"><rect x="366" y="70" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="384" y="93" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="2"><rect x="402" y="70" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="420" y="93" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="3"><rect x="438" y="70" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="456" y="93" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="4"><rect x="474" y="70" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="492" y="93" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="5"><rect x="510" y="70" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="528" y="93" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="6"><rect x="330" y="106" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="348" y="129" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="7"><rect x="366" y="106" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="384" y="129" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="8"><rect x="402" y="106" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="420" y="129" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="9"><rect x="438" y="106" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="456" y="129" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="10"><rect x="474" y="106" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="492" y="129" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="11"><rect x="510" y="106" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="528" y="129" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="12"><rect x="330" y="142" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="348" y="165" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="13"><rect x="366" y="142" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="384" y="165" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="14"><rect x="402" y="142" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="420" y="165" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="15"><rect x="438" y="142" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="456" y="165" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="16"><rect x="474" y="142" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="492" y="165" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="17"><rect x="510" y="142" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="528" y="165" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="18"><rect x="330" y="178" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="348" y="201" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="19"><rect x="366" y="178" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="384" y="201" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="20"><rect x="402" y="178" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="420" y="201" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="21"><rect x="438" y="178" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="456" y="201" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="22"><rect x="474" y="178" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="492" y="201" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="23"><rect x="510" y="178" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="528" y="201" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="24"><rect x="330" y="214" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="348" y="237" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="25"><rect x="366" y="214" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="384" y="237" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="26"><rect x="402" y="214" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="420" y="237" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="27"><rect x="438" y="214" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="456" y="237" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="28"><rect x="474" y="214" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="492" y="237" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="29"><rect x="510" y="214" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="528" y="237" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="30"><rect x="330" y="250" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="348" y="273" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="31"><rect x="366" y="250" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="384" y="273" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="32"><rect x="402" y="250" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="420" y="273" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="33"><rect x="438" y="250" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="456" y="273" text-anchor="middle" font-size="12" style="fill:var(--green)">320</text></g>
+            <g class="s4o" data-i="34"><rect x="474" y="250" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="492" y="273" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+            <g class="s4o" data-i="35"><rect x="510" y="250" width="36" height="36" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.5"/><text x="528" y="273" text-anchor="middle" font-size="12" style="fill:var(--muted)">0</text></g>
+        </g>
+        <rect id="s4win" x="164" y="190" width="90" height="90" rx="4" fill="none" style="stroke:var(--amber);stroke-width:3.5" data-qa="skip"/>
+        <g class="frag" data-order="1" id="s4trig"></g>
+      </svg>
+      <figcaption>Step the fragment to watch the window slide; the two output columns of 320 trace the edge.</figcaption>
+    </figure>
   </div>
-  <p class="history"><b>Sources:</b> Brown et al. 2020 (Table 2.1); Hoffmann et al. 2022; DeepSeek-AI 2024; Grattafiori et al. 2024 (the Llama 3 herd paper states 15.6T in its introduction).</p>
 </section>
 
-<!-- ================ 6 · SFT ================ -->
-<section class="slide dense22" data-title="Stage 2: supervised fine tuning">
-  <h2>Stage 2: supervised fine tuning</h2>
+<!-- ================ 5 · what filters find ================ -->
+<section class="slide dense22" data-title="What filters find">
+  <h2>What filters find</h2>
   <div class="grow stack compact">
-    <p>A pretrained base model continues text; asked a question, it may continue with more questions. Supervised fine tuning (SFT) teaches the assistant role from <span class="cBlue">demonstrations</span>: a prompt paired with an answer that a person wrote or approved.</p>
-    <div class="eq frag"><span class="tex disp">\mathcal{L}_{\text{SFT}}(\theta)=-\sum_{t\,\in\,\text{answer}}\log_2\, p_\theta\!\left(x_t\mid x_{&lt;t}\right)</span></div>
-    <p class="small frag">The formula is Stage 1's loss restricted by a mask to the answer tokens, and the mask is Part 5's elementwise product: a zero switches a position's loss off. The model reads the prompt and is charged loss only on the answer tokens.</p>
-    <table class="tight frag" style="font-size:.66em; text-align:center;">
-      <thead><tr><th style="text-align:left;">position</th><th>Name</th><th>one</th><th>planet</th><th>.</th><th>Mars</th><th>is</th><th>a</th><th>planet</th><th>.</th></tr></thead>
-      <tbody>
-        <tr><td style="text-align:left;">role</td><td class="cBlue">prompt</td><td class="cBlue">prompt</td><td class="cBlue">prompt</td><td class="cBlue">prompt</td><td class="cGreen">answer</td><td class="cGreen">answer</td><td class="cGreen">answer</td><td class="cGreen">answer</td><td class="cGreen">answer</td></tr>
-        <tr><td style="text-align:left;">mask</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num cGreen">1</td><td class="num cGreen">1</td><td class="num cGreen">1</td><td class="num cGreen">1</td><td class="num cGreen">1</td></tr>
-      </tbody>
-    </table>
-    <p class="small frag"><b class="cBlue">Documented scale:</b> InstructGPT (Ouyang et al. 2022) tuned GPT-3 on about 13,000 demonstration prompts for 16 epochs; the paper reports validation loss overfitting after one epoch while human ratings kept improving. Tülu 3 (Ai2, 2024) mixed 939,344 demonstrations. While pretraining runs for weeks to months, this stage finishes in hours to days.</p>
+    <p>The same arithmetic on the house image, with three classic filters:</p>
+    <div style="display:flex; gap:22px; justify-content:center; align-items:flex-start;">
+      <figure style="max-width:214px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAAEyElEQVR42u2a228bRRTGz5mL4zix0yohbU3FC49IPLQIXriECgHiHYEQ/yOXqihc0rSFAmrpFWiaB2hCIUlJvXacUF92dz4eYhrHXq93nPVaCes3b7w7v/3Od86cmQnfodF+FEYMIChV4P+uQAqQemDoAAwCEXOvcdQQxwYTGWIpyfg+MRM4YQUAyk7mMor8Zn2n5gtCwgBmfKagGUSUI++fzR1O2AOYKmYBEBGBxNTEo8dI1AOYLkrTJocsZtYMJ6eAOfas2Pdw0Iy7kVwIkC2KzmfjRK3CiSkwO266rskTO15CpRjZQsCrmVzeJKSAyWeCniymHCQCwJwLLL7IKnf/H4YUAiOzgW+GTMYgCQUgehQYKZEMQO/HgpIIARm/5/VEFCC3PmEC5h526wkB4Ml00NzHtWYyAIzKSRnEVfY7CrQYVjO0XQ14NNfLFFshCuqv2t22VgiQYL3eWZ/EgIMzyXB0UXnYRSg31+OZjo3yvt+am3LDNVjPFrEvE2R5xXQV6EEAoKsLN/zNd083Qwn8B83TyrQiBRbYWGl0TxDyY3sA/dfnP2v5+PfCLExYJpjKk2xGMRERC6qvrrqi+3X5S+vwy6X5kgaxNzb3ivJCTWQyx6YnxgShWXOcGgdWhnnL8aV37VJDgYjY4My5QrgRYKTOavJrrs8cx9IMurp4k3dvgqCfnHeKXugNEo06ETEHrkrsPAAG6bXzv+g9J8nSg8IswGE1gZmZOZbFqRHi169L7a0WtPNJ6WXlM5JYHUO51680NDqufVOa62OEmACgq5dvcefvIeiG83bRHRhAfhRxeNJrF+6pIK1laSU/C/BQFYAQ9xZKOrjR1M5nzkvK5yECQPo/ftfQ6GmOhdIb+cGMoKLZb/vKbe7NCkE3y2+dcmkABPlhhA5Xr3+xpMJTTZZW8s+QGUYIIMTSRUejX46UzztnBzCC6tf1GOVdu9rQiFAlFp3X8i6zXT70UQBQO9/e4ShWhaBb5XOnPGNXFuUHfQA35u+rqI+Uzmp+xtIIoe8GIZYXHW1RLMsXymeklRFU+Nx//YeGtlAUyr3kvDrpcSwKQG9fvct2DQME3S6/edKz8MD7PedxtfHVsrQvLdL5Y3IGOLACbH67XM4MMs9nKvOVFyMLp3p3c5nX5WB9Bhv21ME9wM/tNtS2XTMREXnm4FkAF4Os3QAi4ujcYbEaSIF9QozixAQY8ZGNNUAsg7bHbASHVjzWGrlp4g9BhNkdYy+0tkXvlyQoboAoCmTHW4tF2Pg/mgeiNc3/HQzZjz/6LDiCZ8eHrhAdwkqI8Cy1XCYPoEB7m7Z7/oK21x5+CMxOW9ud0yBuLrdyqSoQeyHqbtW3P9162qrxe8+7TKbU+i44/jTsmgsYW87Tm3h3T0C2uSPuEARtyag9AO76UQIAQOggR60UY9SV8OgDHD0P0KHzAB+8Ke08HrADqPfZc7GVoFm3BFgKn/omjmurXS88fGTHrBp9jihtFXAbPmL0AA/dAyOvAynA6EtxxIVn+9e9LSi2Lny2AKJ5t/P/ILzZ43s+/7PcCVARiFUB/++uPMu15Vl1qwuZYw6BCp1uuodD7B6Ie7pO0zAFSAFSgBQgBUgBUoAUIAVIAVKAFCAF6Pj8C8zuQ2b6i7vUAAAAAElFTkSuQmCC" alt="The original house scene." style="width:100%; border-radius:8px;"/><figcaption>original</figcaption></figure>
+      <figure class="frag" style="max-width:214px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAH4AAAB+CAAAAADHSPpUAAAF80lEQVR42u2aeW8bVRDAZ96u7XXsmCqHkzZpjiYlbQ6aJiWoBUERVYRoq14I9QPwKfhECApVC2oEqCrikKDQQ5F6qFEbO6ePpHZ8e483/JHTjmPnxbsOoJ0/18/vt29m3sy8eQtgiy222GKF4L5hkQEi4A5vYN17IQEwp0ykkpMhV/XVR4UiW4YnZHUeh5FTEZjD5aBMUt9GB8k6zTtaDrny6azKuWGA7Gty5vUa4pWOw0ZkOatxAjK0nOb11+XztcKjs6czEVg21vRNlM0427wrWq3wXf2JZ/GtxlZT7g722qgJHpuGaXK58Jmeajicjhc+Y9bgWW/jq0jxw/SU3OfBGuDZgc7U7PaQEg4daq0FHloPhBJ8WyTg83I71QDP/SxSyquWc80KotV4dDZoK1TirVLpN7yMLMfLHj1X6gc173ah9cpHxmgHpyzMfZbgSc87XKV+kBVdI8uVT2pC8eH2jcc8vnSaarDxIlILpxKxsD6a4ZbjEeYzHe7tq+ddOMOtdz2iaLClc9vq0d+5NAsmKL9iiWY8y/Q3FP/JNeh6WhQOpL2wsb3V2RYvOyjJuh3RguoGpf7B4COt+oQr9V1vka5mw7zcoJW6NpZQt7yzcqQ/+SBG1eJRGbv+5mTkgyEeUsvtvaTs92gqrRkKD/R2JSdDVG21w+o/+tR35+58rGfUHU6V8YJsDBrqEIkTMEddY3vz66dRXnWt13rxQurG3YQ6s9Ay5l+OlTGAFs+i4pDQgDqvz0eR6US1hTZKx669+/LL+yoBDweU0e7UklEm7SaTOZ2DToqkpZeW1BJpQBJLpKc+O/rH189Xlxx/pQ0OUEijnf+gZ7N5zSAjl06rJYdJIsc139lrvonvFjasOx3rGXWHUlguDpBBwHd8QxH8oQufJG/eS27Opc8u+k81x5f3Hh93j2d9V06//OqvAiXycNA90p2JGFbj0Xnq2tE/v3lR7OnxaXVwwAiXcwAT8Fh/9kr9D3cWSmzvQPzISSWcshR/8Px46tbPiZLePbvoH22Ov7YOL/VePv3qxoPSewd4ZEYZ6UpFuTV4dI1c7b1/c2rn6eMBbaCfR1Qr8Fj//mXvTxOL5cbkAvHuYSWSMhuPAK0fj6du/5IsP06fCzWPNMVjor0iqUJNw3ouvTP97UO10sbikVnlRGd6SRfrVkkVcvvwlZ6/b03txqtWAnr/cYpoZBqe1b930Xt3IrS7qXLBla4TSiRtmu394+fS3/+a3O1c+ny4+WRjLE5m4JH1Xnw7cOuRuvvZeHRWOdGZWebV49E5fOnIw9tTYsFkJagf76OoWi0evWfOe+79GBbdyLlgomvIFU1Xh0c6do7u/J4UT2TGfLi5JzXPq1s9a9R+e6zuJY3yyEJ+JWxUd1xCN2aAgIGY7RE5ALilbLV4AAIACcQKGYac1v+7G9mpoU57bPcjEgiYrMIJlwmegEXHy+ZewiDWHL/ungw51R4vt8OcDgDQ6pnPmqt8hiWuf4pLsTGIGgQA/Z0TeWSMm4dHpIp4uQNkJABs7XEzFNS+XOE2Cndx6l01ETIZkSHtm+fTvni+hRtPuO/GcD/xbH/xWPugu3FTuIoX8n1RPEqw2auUmE5kRMAgAKBYSCVRfIVjhhcL++/oGmsPb1wIvDUQUzmoiyFjtc6dyyvODDdx9dtM6/0cn8fX+HjpzBdPuPaCVhu1wVmVwNSoh0VNK2TOM+jCNf3i4IcNDPn6tbQmvu8E8YDg2PJIdhbjTC43WKm7gi3XkmRt2EHBEGtuxvuvxXzrbf9vrnRhn/M9w/1dval40Y+aJEkMX9ZVmNx2UBaar+mwgqbh0TU05BTxZewdrReyvly+hj5IQtrExnYFRRJ+xX0vaEvJVNcT7a6Ijrfo84H/LZ42VUxUpe7L256MBTCo4LMn/Rno61QKTiYLCw5amsuReZUu5WYW9MJSJ/34ycatmfb8YdGXWXwxkCPTMhQ6oai1iB7YLL0VR7bo80unlOeWOsvWnMIQbLHFFltsscUWW2yxxRZbbLFlTf4BHCxdxEkBLjEAAAAASUVORK5CYII=" alt="Vertical edge filter output: the house's vertical outlines glow." style="width:100%; border-radius:8px;"/><figcaption>vertical edges</figcaption></figure>
+      <figure class="frag" style="max-width:214px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAH4AAAB+CAAAAADHSPpUAAAGjklEQVR42u1a6W9UVRQ/577XWdqZblIodMG2JGJbatFYLFtABFxQIjEYoyiaamTRSIj/hUYJEFyIIuGTCTF1JSbGGPQLahC6AC0tbenMNG3pzHTazrx5793jhy7M3rnte62G+SX90Pfe7bn3d9Z7TpHBYmJxpd/j4uV7WvfIMro3DQSAiEQEuNDkIwEy4CSjxmUgDkjxpzfz5KhnFxXl2lAJjAz5ECjBFk2TT8idlWW5EFZBtrCgu2uQxWvAPPHAS1cXjA8MBxSyOAqXFoQ6uzVcON3LFav0nv4xiQAAKWt5pfN2x0TsRxKaZHe4smKstVejKXD/sFwk+/UFIl9fVql0+aIkWSuKXD0xp5VMIj+7jG55ox9pIZszNBEtX+bmmL2Te/yxD8f6Vzj8nMzXPWblKsNa3FOVWRTV/KBLJGmhcFyUIS2AEpcivd8c8jkLBxP8YVRCgEBkctBF1MNaIla4ShQV+c1xPA6MJ6IVJeLMfPKRESVJBIwiU48plk/MZkl4epYd89wcy0c5K6wm4t6GYUTTiy0OdnsCWsmWg/oCRD0iuzQR7/iSM3uCR1nFnE+f0mYwzAvy4x87lmCIDKh0iXM95QfKaE5FXuyerOVLgkGab75HhPtf3BIcpBRLSbWXZPn0aLurqvD3haIXSRKKAlj9kaO7Vo64NJb0G8ZDziqHX5nWEQKz1tSO3/Bj9BrxfK9bt7z/yM9/1G4M9wZTnD8czFu9NDTGGBAAY7CsoS7QEseYBCQE4PkvHL3vsw9/cNXvsPf4IdlyoOAIq6wulnWNMMtZ+uj65T1/evTYz0VLTSrf99LAyQtBkhoOrfvlkxaOyW8Ztqq15fK4f5zb8xwweLU9MN86n1jtW9sunbzECQArm3Z3nLoYYimCn6OsakW+BdXAQHePlyPO45KFANy26cADzae7J50Hl+zdr5xu9jEAShZ9kGXn2jEUGFcBE/Ek4ni8YM97hZ+fdk0Jw/F290Pbs3t9KVyUkTLm846GgCU+ZvqOR7TyjSbfR+dHI2rXjo6yJ0vcQ5TcA5GxyZ/ESNvxSKp757m/P/hVjSSaXFds22vuuNW5xu40HQ+4dfOR+uZjrbEZytcysXG90hdEmhPS1D3Pf/5w/hdn3HE2huPtnron7H3+uZUt6emeyva/7j3+TUIZWmdnyc4V7mFgKI50yOes9uCzlz/+TU1iFe4W27bqEZeKZpCPZN307tpvj7clL0x8LcENjeG+IJpAPhXsPlRw5isPpdjhxLWBNY/b+wPMUPKBAHjJK695TzTPYlrazc6SHcvdQ4QEBpJPWPP2rn+OXVRnDQueVsvj1SPuMCOjyAck24bD9d+fupZOPepvCzauU/pDTEQDqaIeUv4zBwrOnvOkdSCcuD5Qu9XeP4oGRT1e+vI+/6nv0o4oWldXybZi9xAHA3RPWP3mU1dO/K4KlAOeNtvWB70eDeereyDbxoN1P33aLmRJ4G8LPtagutM2gCS6Jyh8uinv3LlBQBFLAlLaPNWbsz0Bwnn187GwqHPPlhwufrnVLp8tGR3U5ineufPVepkjouDljhC6vz7fj/ObZlBOWSEAIBOM45wIcOz2HTbPYQqTJQQgAvErGHBVT/drOSmLNP3XhMifXJTuslnqfOIk2NRBIydZaZE/dVQicbYM6KvJVhkBAHRFJWMnWZT0AhNho6UN5RIAwNBfNxQQ9FQ26yBMwOVJaIFBup8in3RFFdb9bFfMdORHmJ6gdEMsP8FWFmuGK7jfWZqqomEHmKGWLx7xBcMOF+UyQkD8WyIx15PFW/V3wzrp/O6GxJPjHHSPFod1ZhyijQUJWHF1sUQA4L3Wq6KgOkXJlxuaGi1ThRxd//LHccKc8lUyAcDAwG0gElO+PNsInmKrmdheNnddsDMAAMUbFo968uxxPAqWXCtEkT9jDaRz8XwvWm4kNb1JRQn6vXjQTel4ouzLBodV0bDDFrXW+2//01Qm4ZqZcBcZmJu6X5JwDp/i8JYsMb/fm2pv3HXVI5TAC2oqsgzLeKiTsOVxoY4EOlK+1lVB8rNk/B/5fQaL6feiuiTCmVVxlZ24qaR+WfpwqcSjXLGldY00/VuPvTGm8zd89WbYuHIDc1etlimyz6uOdJVapkV6c9fkRc+Q+123DCQfcwpzoj2Tj/gKZyYGAWlZzPZDd0a5gbqP6/kS53cLGh43Ap4qPs00vVSv53TTyiCDDDLIIIMMMsgggwwyyMAY/AsiTktxc8pcUwAAAABJRU5ErkJggg==" alt="Horizontal edge filter output: rooflines and the horizon glow." style="width:100%; border-radius:8px;"/><figcaption>horizontal edges</figcaption></figure>
+      <figure class="frag" style="max-width:214px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAH4AAAB+CAAAAADHSPpUAAAFPklEQVR42u1a22LiNhCdkeQLEJK22W52u2n3//+mf5ANkBDIhXCzdbE0fcguCeCYCNuk7TqPhvjozJw5Gg3Cv+E9/wS9KzyDhv3Pyv4nh68dgQAA34k9AQICEL2ygnrhkXPOGThnM0eHhkceRIHgDJzLjNYZHTL3xIK4FQecI5CzRslUuwOyZ2H7qCUYAgDwIIwisZT2YPAYdI5bHIF+LIZzpC38moJP39Hp+QGPgZx0eAj2xONOLIBeliCLOibTdAh4DFutNfSnJbWVcYeAZ2Ec4NarRRRvZL8WeCQehixPEIHQ8DIooh6rFUJgnsuIjYzUE3xkPLePQcHR1d7tEDCGueWIDOtnT/S6KugAwSebu8EhOUdrya8n+GQzl/eBy6w9AHtnTBbmPLdGuzX2NdmO0TpmtBV7rQ5julmaxtE2eSkNHeKYQXKZ2o3aQ5cuElvFfq9TimIsjP4iEG3+Ms9Iar7YiP0epktI6e3Ynp4dMXp9BU5OGbT4Mzg4NX1Mso2OVzhvQ7WL0cXQfki/HBf9c5aCO2kFDAAIASiTs+nC0MYm7M/ezK4vBo9uLuWfv4ZF33PWHLVDwRAcZSZdzFNTvtXUk8HFcG5hlqn064ciAWRJlrajUDBw1qg00bZko01I6V3vcpw4BLe8VlKeHRWUjpU6CQPBwVltjM076fixt8vRt/69IgRAUGOdyj+ORZH1W8WQATm3Ou6VgLez629Xjyv1mgcj5XmhAABsNSdcQjKTwbeb+bOboJ0ZJf86bSFhzed7Qifver1x+rJRR5cMVfr1rMOo7vGCXY4v+w9qnSeCutVSfT7mNcPb2fDyappti9dMjJRffgnrm24QkplcXd4sLOaZ4DxT6Z8f4r0E8Cb2Tt73e7epy30/uuRGS/VxLwG8Bd4l495gM+1bAvi0jwB2w2M2H/au89K+JYCghtyrx6veKDftGwKQ56cxVsye1H2/f/dK2tcEMNJSfWyz6tgToFve9gcTtVvUCOrOSPWpKwiwEvaEkM1GvWFx2jcFcBKgw0qCT3p63RvvSPu6ALQ8P42QKoGXD4P+ffp2LuiSkVbqdw8HEAXVftu/mmgfL0NQd1qqT0eiNPtsMeoPZxl4llL2mCn1+STAkvBWJrYd7zNagCRti7LsiR3xPXfxSACVzT3vdggA9xrfc1469yx6iiTuNdggKlt4VAa+qi0H0Tv0lW646AGJ/uypJDgAfo8QAQF5BkDsbPNw1zeiKEQAAKOU9Q1/efYYnXQRACCZ6qqDT2/Y6cPub5wAQEjmrb5i+DfJHpExAACGAEB+9FllVUzVn3KwynnuHuxrRt8tvb32nMrgdzzBreVSvcrHHcukCl0vhzzRsxcgIgKZRDAAgIUmACKvg65f7glpOVuuet9WtysA5FTi06TVeSffN/g0G9ysGv/T85YA0uapfMg5oGqDv/UuWt5cmB/wsnuG9HJ2hUBQZfBz2n9rVvCWtkNUqfK3X4aIRR0QUYW5L64ILG87rHLTo3e8NlSx63nTP0juK9ty/tW5x7rpF/6UROg86ZOzzsv1JoWp6fDQ522UpfPMY7QD4qHw+gvFHb/hxnKivdg/FsGL8MQv+lkyU17sC39GdL7SJ3LOCx4rbXQR/erlnS/Kvvc9XU8boY0OY8PiqVJ40ouArflQJrG1sgKhp3rNZWguK53tyId0Hd7N2cmqWMJ0FKy3dnJpq4NHknq28cyy7rNw5C1uXdipkr21OfeuCj/226ZEqbkW/scLr4Fv4Bv4Br6Bb+Ab+Aa+gW/gG/gG/v8F/w/HoxmWWAQfOAAAAABJRU5ErkJggg==" alt="Blur filter output: a softened copy of the scene." style="width:100%; border-radius:8px;"/><figcaption>blur (average of 9)</figcaption></figure>
+    </div>
+    <p class="frag">A convolutional layer runs many filters at once, and training chooses their weights: Part 4's loss discovers the edge detector from the data, because edge features lower the loss on later tasks.</p>
   </div>
 </section>
 
-<!-- ================ 7 · preferences ================ -->
-<section class="slide dense22" data-title="Stage 3: learning from comparisons">
-  <h2>Stage 3: learning from comparisons</h2>
+<!-- ================ 6 · stacking ================ -->
+<section class="slide dense22" data-title="Layer upon layer">
+  <h2>Layer upon layer</h2>
   <div class="grow stack compact">
-    <p>Because people compare two answers more reliably than they compose an ideal one, the training data takes a new form: one prompt, two answers, and a choice. A <span class="cBlue">reward model</span>, a copy of the LLM whose output head produces one score, learns to predict the choice.</p>
-    <div class="eq frag"><span class="tex disp">P(A\ \text{preferred over}\ B)=\sigma\!\left(r_A-r_B\right)</span></div>
-    <p class="small frag">This is the Bradley and Terry comparison model (1952), and <span class="tex">\sigma</span> is Part 3's sigmoid applied to a score difference. With illustrative scores: <span class="tex">r_A=1.5</span> and <span class="tex">r_B=0.5</span> give <span class="tex">\sigma(1.0)\approx 0.73</span>, so answer A should win about 73 of 100 comparisons.</p>
-    <p class="small frag">The reward model trains on the loss <span class="tex">-\log\sigma\big(r_{\text{chosen}}-r_{\text{rejected}}\big)</span>, which falls as the chosen answer's score climbs above the rejected answer's. InstructGPT trained its reward model on 33,000 comparison prompts (Ouyang et al. 2022).</p>
-    <p class="note frag">The same comparison mathematics ranks chess players: Arpad Elo's rating system, adopted by FIDE in 1970, reads a rating gap as an expected score.</p>
+    <p>Stacking the operation lets each layer detect larger patterns. The first layer reads pixels and finds edges; the next layer reads the first layer's outputs, so its filters see combinations of edges: corners and textures; deeper layers see parts, then whole objects. Zeiler and Fergus (2014) made the ladder visible by tracing each layer's strongest responses back to the pixels.</p>
+    <p class="frag">Between layers, <span class="cBlue">pooling</span> shrinks the map by keeping each small region's largest response: a 2 by 2 pooling over <span class="tex">(320,\,0,\,320,\,0)</span> keeps 320. Pooling discards the exact position, so the network gains tolerance to small shifts while the map shrinks to a quarter of its values.</p>
+    <p class="frag">The activation function from Part 5 sits after every layer, because stacked linear filters would collapse into one filter, the same collapse Part 5 proved on matrices.</p>
+    <div class="teach frag"><b>For the classroom:</b> students verify the pooling: which number survives from (12, 7, 40, 3)? Why can the network afford to lose the other three?</div>
   </div>
 </section>
 
-<!-- ================ 8 · RLHF ================ -->
-<section class="slide dense22" data-title="Reinforcement learning from human feedback">
-  <h2 style="margin-bottom:18px;">Reinforcement learning from human feedback</h2>
+<!-- ================ 7 · history ================ -->
+<section class="slide dense22" data-title="From cat cortex to checks">
+  <h2>From cat cortex to checks</h2>
+  <div class="grow stack compact">
+    <p>David Hubel and Torsten Wiesel recorded from single neurons in a cat's visual cortex (1959) and found cells tuned to oriented edges at specific positions; their 1962 paper sorted them into simple and complex cells, a hierarchy from edges toward tolerance of position. They shared in the 1981 Nobel Prize in Physiology or Medicine (one half went to Roger Sperry, one quarter to each of them).</p>
+    <p class="frag">Kunihiko Fukushima built the hierarchy into a machine, the neocognitron (1980), alternating detecting layers and tolerance layers. Yann LeCun and colleagues added Part 4's backpropagation: their 1989 network read handwritten ZIP code digits, and LeNet-5 (LeCun, Bottou, Bengio, and Haffner, 1998) read, in the paper's words, "several million checks per day" in NCR's deployed systems.</p>
+    <p class="small frag">The training set from that work, MNIST, holds 60,000 handwritten digits at 28 by 28 pixels each and remains the field's first classroom exercise. The 28 by 28 size returns in 2026, in the token counting of a frontier assistant.</p>
+  </div>
+</section>
+
+<!-- ================ 8 · alexnet ================ -->
+<section class="slide dense22" data-title="AlexNet and the readout">
+  <h2>AlexNet and the readout</h2>
+  <div class="grow stack compact">
+    <p>AlexNet (Krizhevsky, Sutskever, and Hinton, 2012), which Part 6 showed training on two GTX 580s, stacked five convolutional layers and three fully connected layers: 60 million weights. The final layers are Part 3's classifier, a weighted sum and softmax over 1,000 object names, so every part of the machine is arithmetic from Parts 3 and 5.</p>
+    <ol style="font-size:.72em;">
+      <li class="frag">Convolutional layers find edges, textures, and parts, with pooling between them.</li>
+      <li class="frag">The feature map flattens into one long vector, Part 5's list.</li>
+      <li class="frag">Fully connected layers and a softmax map the vector to 1,000 probabilities, exactly Part 3's classifier built from Part 5's matrices.</li>
+    </ol>
+    <p class="frag">Training follows Part 6 step for step: cross entropy on labeled images, a backward sweep, a weight update, all on GPUs.</p>
+  </div>
+  <p class="history"><b>History:</b> AlexNet cut the previous ImageNet error by nearly half in one year, and convolutional networks led computer vision for the following decade.</p>
+</section>
+
+<!-- ================ 9 · patches ================ -->
+<section class="slide dense23" data-title="Tokens: an image cut into patches">
+  <h2 style="margin-bottom:14px;">Tokens: an image cut into patches</h2>
   <div class="stack compact">
-    <figure style="max-width:950px; margin:0 auto;">
-      <svg viewBox="0 0 1090 240" role="img" aria-label="A tuning cycle: prompts enter the policy, the policy writes an answer, the reward model scores it, and the update raises the probability of high scoring answers.">
-        <defs>
-          <marker id="p6s8arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker>
-          <marker id="p6s8green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--green)"/></marker>
-        </defs>
-        <g class="m frag" data-order="1" font-size="15">
-          <rect id="s8b1" x="14" y="34" width="218" height="78" rx="12" style="fill:var(--panel);stroke:var(--blue);stroke-width:2.5"/><text x="123" y="66" text-anchor="middle" style="fill:var(--blue);font-weight:700">prompts</text><text x="123" y="92" text-anchor="middle" font-size="13" style="fill:var(--ink)">31,000 in InstructGPT</text>
+    <figure style="max-width:1030px; margin:0 auto;">
+      <svg viewBox="0 0 1090 436" role="img" aria-label="The house image is cut into a 4 by 4 grid of patches; copies of the sixteen patches fly into a row and become sixteen tokens entering the model's window.">
+        <image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAAEyElEQVR42u2a228bRRTGz5mL4zix0yohbU3FC49IPLQIXriECgHiHYEQ/yOXqihc0rSFAmrpFWiaB2hCIUlJvXacUF92dz4eYhrHXq93nPVaCes3b7w7v/3Od86cmQnfodF+FEYMIChV4P+uQAqQemDoAAwCEXOvcdQQxwYTGWIpyfg+MRM4YQUAyk7mMor8Zn2n5gtCwgBmfKagGUSUI++fzR1O2AOYKmYBEBGBxNTEo8dI1AOYLkrTJocsZtYMJ6eAOfas2Pdw0Iy7kVwIkC2KzmfjRK3CiSkwO266rskTO15CpRjZQsCrmVzeJKSAyWeCniymHCQCwJwLLL7IKnf/H4YUAiOzgW+GTMYgCQUgehQYKZEMQO/HgpIIARm/5/VEFCC3PmEC5h526wkB4Ml00NzHtWYyAIzKSRnEVfY7CrQYVjO0XQ14NNfLFFshCuqv2t22VgiQYL3eWZ/EgIMzyXB0UXnYRSg31+OZjo3yvt+am3LDNVjPFrEvE2R5xXQV6EEAoKsLN/zNd083Qwn8B83TyrQiBRbYWGl0TxDyY3sA/dfnP2v5+PfCLExYJpjKk2xGMRERC6qvrrqi+3X5S+vwy6X5kgaxNzb3ivJCTWQyx6YnxgShWXOcGgdWhnnL8aV37VJDgYjY4My5QrgRYKTOavJrrs8cx9IMurp4k3dvgqCfnHeKXugNEo06ETEHrkrsPAAG6bXzv+g9J8nSg8IswGE1gZmZOZbFqRHi169L7a0WtPNJ6WXlM5JYHUO51680NDqufVOa62OEmACgq5dvcefvIeiG83bRHRhAfhRxeNJrF+6pIK1laSU/C/BQFYAQ9xZKOrjR1M5nzkvK5yECQPo/ftfQ6GmOhdIb+cGMoKLZb/vKbe7NCkE3y2+dcmkABPlhhA5Xr3+xpMJTTZZW8s+QGUYIIMTSRUejX46UzztnBzCC6tf1GOVdu9rQiFAlFp3X8i6zXT70UQBQO9/e4ShWhaBb5XOnPGNXFuUHfQA35u+rqI+Uzmp+xtIIoe8GIZYXHW1RLMsXymeklRFU+Nx//YeGtlAUyr3kvDrpcSwKQG9fvct2DQME3S6/edKz8MD7PedxtfHVsrQvLdL5Y3IGOLACbH67XM4MMs9nKvOVFyMLp3p3c5nX5WB9Bhv21ME9wM/tNtS2XTMREXnm4FkAF4Os3QAi4ujcYbEaSIF9QozixAQY8ZGNNUAsg7bHbASHVjzWGrlp4g9BhNkdYy+0tkXvlyQoboAoCmTHW4tF2Pg/mgeiNc3/HQzZjz/6LDiCZ8eHrhAdwkqI8Cy1XCYPoEB7m7Z7/oK21x5+CMxOW9ud0yBuLrdyqSoQeyHqbtW3P9162qrxe8+7TKbU+i44/jTsmgsYW87Tm3h3T0C2uSPuEARtyag9AO76UQIAQOggR60UY9SV8OgDHD0P0KHzAB+8Ke08HrADqPfZc7GVoFm3BFgKn/omjmurXS88fGTHrBp9jihtFXAbPmL0AA/dAyOvAynA6EtxxIVn+9e9LSi2Lny2AKJ5t/P/ILzZ43s+/7PcCVARiFUB/++uPMu15Vl1qwuZYw6BCp1uuodD7B6Ie7pO0zAFSAFSgBQgBUgBUoAUIAVIAVKAFCAF6Pj8C8zuQ2b6i7vUAAAAAElFTkSuQmCC" x="400" y="24" width="288" height="288"/>
+        <g style="stroke:var(--amber);stroke-width:2" data-qa="skip">
+          <line x1="472" y1="24" x2="472" y2="312"/><line x1="544" y1="24" x2="544" y2="312"/><line x1="616" y1="24" x2="616" y2="312"/>
+          <line x1="400" y1="96" x2="688" y2="96"/><line x1="400" y1="168" x2="688" y2="168"/><line x1="400" y1="240" x2="688" y2="240"/>
+          <rect x="400" y="24" width="288" height="288" fill="none"/>
         </g>
-        <g class="m frag" data-order="2" font-size="15">
-          <rect id="s8b2" x="286" y="34" width="218" height="78" rx="12" style="fill:var(--panel);stroke:var(--amber);stroke-width:2.5"/><text x="395" y="66" text-anchor="middle" style="fill:var(--amber);font-weight:700">the policy writes answers</text><text x="395" y="92" text-anchor="middle" font-size="13" style="fill:var(--ink)">the model being tuned</text>
-          <line data-connect="s8b1 s8b2" style="stroke:var(--muted);stroke-width:2.6" marker-end="url(#p6s8arr)"/>
-        </g>
-        <g class="m frag" data-order="3" font-size="15">
-          <rect id="s8b3" x="558" y="34" width="218" height="78" rx="12" style="fill:var(--panel);stroke:var(--purple);stroke-width:2.5"/><text x="667" y="66" text-anchor="middle" style="fill:var(--purple);font-weight:700">reward model scores</text><text x="667" y="92" text-anchor="middle" font-size="13" style="fill:var(--ink)">one number per answer</text>
-          <line data-connect="s8b2 s8b3" style="stroke:var(--muted);stroke-width:2.6" marker-end="url(#p6s8arr)"/>
-        </g>
-        <g class="m frag" data-order="4" font-size="15">
-          <rect id="s8b4" x="830" y="34" width="218" height="78" rx="12" style="fill:var(--panel);stroke:var(--green);stroke-width:2.5"/><text x="939" y="58" text-anchor="middle" style="fill:var(--green);font-weight:700">weight update</text><text x="939" y="82" text-anchor="middle" font-size="13" style="fill:var(--ink)">high scoring answers</text><text x="939" y="100" text-anchor="middle" font-size="13" style="fill:var(--ink)">gain probability</text>
-          <line data-connect="s8b3 s8b4" style="stroke:var(--muted);stroke-width:2.6" marker-end="url(#p6s8arr)"/>
-        </g>
-        <g class="frag" data-order="5">
-          <path id="s8e4" data-connect-curve="s8b4 s8b2" d="M 0 0" fill="none" style="stroke:var(--green);stroke-width:2.6" marker-end="url(#p6s8green)" data-qa="audit"/>
-          <text data-for="s8e4" class="m knock" font-size="16" style="fill:var(--green)">repeat with the tuned policy</text>
-        </g>
-      </svg>
-      <figcaption>The loop that shaped ChatGPT (OpenAI, November 2022), following Ouyang et al. 2022.</figcaption>
-    </figure>
-    <div class="eq frag" data-order="6"><span class="tex disp">\max_\theta\ \ \mathbb{E}\big[\,r(x,y)\,\big]\;-\;\beta\,\mathrm{KL}\!\left(\pi_\theta\,\|\,\pi_{\text{ref}}\right)</span></div>
-    <p class="small frag" data-order="6">The policy <span class="tex">\pi_\theta</span> is the model being tuned. KL divergence measures how far its probabilities have drifted from <span class="tex">\pi_{\text{ref}}</span>, a frozen copy made before tuning, and <span class="tex">\beta</span> sets the penalty for that drift, so however hard the update chases reward, it cannot push the model's probabilities far from the pretrained ones.</p>
-  </div>
-</section>
-
-<!-- ================ 9 · PPO ================ -->
-<section class="slide dense22" data-title="PPO: small clipped steps">
-  <h2>PPO: small clipped steps</h2>
-  <div class="grow stack compact">
-    <p>Proximal Policy Optimization (Schulman et al. 2017) performs the update, working with the probability ratio between the new and the previous policy, and it clips every step:</p>
-    <div class="eq frag"><span class="tex disp">\rho=\frac{\pi_\theta(y\mid x)}{\pi_{\text{old}}(y\mid x)},\qquad L=\min\!\big(\rho\,A,\ \ \mathrm{clip}(\rho,\,1-\varepsilon,\,1+\varepsilon)\,A\big)</span></div>
-    <p class="small frag"><span class="tex">A</span> is the <span class="cAmber">advantage</span>: how much better the answer scored than expected, where the expectation comes from a separate value network. With the paper's suggested <span class="tex">\varepsilon=0.2</span>, an advantage of <span class="tex">+1</span> and a ratio already at <span class="tex">1.3</span> earn <span class="tex">\min(1.3,\,1.2)=1.2</span>, so a step past the clip range adds nothing to the objective; PPO enforces Part 4's small steps inside the loss itself.</p>
-    <table class="tight frag" style="font-size:.7em;">
-      <thead><tr><th>network held in memory during PPO</th><th>role</th></tr></thead>
-      <tbody>
-        <tr><td><span class="cAmber">policy</span></td><td>the model being tuned</td></tr>
-        <tr><td><span class="cPurple">reference copy</span> (frozen)</td><td>anchors the KL drift penalty</td></tr>
-        <tr><td><span class="cPurple">reward model</span> (frozen)</td><td>scores each sampled answer</td></tr>
-        <tr><td><span class="cBlue">value network</span></td><td>estimates the expected score, giving <span class="tex">A</span></td></tr>
-      </tbody>
-    </table>
-    <p class="note frag">Four LLM sized networks resident at once make PPO the most memory hungry stage; the two methods on the next slides each drop parts of this list.</p>
-  </div>
-</section>
-
-<!-- ================ 10 · DPO ================ -->
-<section class="slide dense22" data-title="DPO: the algebra shortcut">
-  <h2>DPO: the algebra shortcut</h2>
-  <div class="grow stack compact">
-    <p>Direct Preference Optimization (Rafailov et al., NeurIPS 2023) starts from the RLHF objective, solves it in closed form, and substitutes the solution back. Because the reward model and the sampling loop cancel out of the algebra, one supervised loss on preference pairs remains:</p>
-    <div class="eq frag"><span class="tex disp">\mathcal{L}_{\text{DPO}}=-\log\sigma\!\left(\beta\log\frac{\pi_\theta(y_w\mid x)}{\pi_{\text{ref}}(y_w\mid x)}-\beta\log\frac{\pi_\theta(y_l\mid x)}{\pi_{\text{ref}}(y_l\mid x)}\right)</span></div>
-    <p class="small frag">Here <span class="tex">y_w</span> is the chosen answer and <span class="tex">y_l</span> the rejected one; each log ratio measures how much the tuned model has raised that answer's probability relative to the frozen reference; the loss falls when the chosen answer's ratio climbs above the rejected answer's; and <span class="tex">\beta</span> sets the drift penalty exactly as it did in the RL objective.</p>
-    <p class="small frag">With illustrative numbers: at the start both ratios equal 1, the bracket is 0, <span class="tex">\sigma(0)=0.5</span>, and the loss is one halving. When training lifts the bracket to 1.0, <span class="tex">\sigma(1.0)\approx 0.73</span> and the loss falls to about 0.45 halvings.</p>
-    <p class="small frag"><b class="cBlue">What remains in memory:</b> the policy and the frozen reference; no reward model, no value network, no sampling during training. Meta's Llama 3 post training ran rounds of SFT and DPO (Grattafiori et al. 2024).</p>
-  </div>
-</section>
-
-<!-- ================ 11 · GRPO ================ -->
-<section class="slide dense22" data-title="GRPO: the group baseline">
-  <h2>GRPO: the group baseline</h2>
-  <div class="cols grow" style="gap:30px; align-items:start;">
-    <div class="stack compact" style="flex:1.04;">
-      <p>PPO's value network answers one question: how well should answers to this prompt score? Group Relative Policy Optimization (Shao et al. 2024) answers it with a sample: draw <span class="tex">G</span> answers to the same prompt, score them all, and grade each against the group.</p>
-      <div class="eq frag" data-order="1"><span class="tex disp">A_i=\frac{r_i-\mathrm{mean}(r_1,\dots,r_G)}{\mathrm{std}(r_1,\dots,r_G)}</span></div>
-      <p class="small frag" data-order="2">A concrete group: four answers earn rewards <span class="tex">(1,0,0,1)</span> from an automatic checker; the mean is 0.5, the standard deviation 0.5, so the advantages are <span class="tex">(+1,-1,-1,+1)</span>, and the update takes PPO's clipped step.</p>
-      <p class="small frag" data-order="3">Because a checker can mark a final mathematics or code answer, the reward there needs no model at all; DeepSeek-R1 (2025) was trained for reasoning this way.</p>
-    </div>
-    <figure style="flex:.96;">
-      <svg viewBox="0 0 560 264" role="img" aria-label="One math problem fans out to four sampled answers; a checker marks two correct and two wrong, and each answer's advantage comes from the group statistics.">
-        <defs><marker id="p6s11arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>
         <g class="m" font-size="15">
-          <rect id="s11p" x="10" y="105" width="150" height="54" rx="10" style="fill:var(--panel);stroke:var(--blue);stroke-width:2.5"/>
-          <text x="85" y="128" text-anchor="middle" style="fill:var(--blue)">one problem</text>
-          <text x="85" y="149" text-anchor="middle" font-size="13" style="fill:var(--ink)">G = 4 samples</text>
+          <text x="544" y="342" text-anchor="middle" style="fill:var(--muted)">16 patches (illustrative; ViT cuts 16 by 16 pixels each)</text>
         </g>
-        <g class="m frag" data-order="2" font-size="14">
-          <rect id="s11a1" x="310" y="10" width="230" height="46" rx="9" style="fill:var(--panel);stroke:var(--green);stroke-width:2.5"/>
-          <text x="425" y="29" text-anchor="middle" style="fill:var(--green)">answer 1: reward 1</text>
-          <text x="425" y="48" text-anchor="middle" style="fill:var(--ink)">advantage +1</text>
-          <rect id="s11a2" x="310" y="76" width="230" height="46" rx="9" style="fill:var(--panel);stroke:var(--red);stroke-width:2.5"/>
-          <text x="425" y="95" text-anchor="middle" style="fill:var(--red)">answer 2: reward 0</text>
-          <text x="425" y="114" text-anchor="middle" style="fill:var(--ink)">advantage −1</text>
-          <rect id="s11a3" x="310" y="142" width="230" height="46" rx="9" style="fill:var(--panel);stroke:var(--red);stroke-width:2.5"/>
-          <text x="425" y="161" text-anchor="middle" style="fill:var(--red)">answer 3: reward 0</text>
-          <text x="425" y="180" text-anchor="middle" style="fill:var(--ink)">advantage −1</text>
-          <rect id="s11a4" x="310" y="208" width="230" height="46" rx="9" style="fill:var(--panel);stroke:var(--green);stroke-width:2.5"/>
-          <text x="425" y="227" text-anchor="middle" style="fill:var(--green)">answer 4: reward 1</text>
-          <text x="425" y="246" text-anchor="middle" style="fill:var(--ink)">advantage +1</text>
-          <line x1="160" y1="110" x2="322" y2="63" style="stroke:var(--muted);stroke-width:2.3" marker-end="url(#p6s11arr)"/>
-          <line data-connect="s11p s11a2" style="stroke:var(--muted);stroke-width:2.3" marker-end="url(#p6s11arr)"/>
-          <line data-connect="s11p s11a3" style="stroke:var(--muted);stroke-width:2.3" marker-end="url(#p6s11arr)"/>
-          <line x1="160" y1="154" x2="322" y2="201" style="stroke:var(--muted);stroke-width:2.3" marker-end="url(#p6s11arr)"/>
+        <g id="s9tiles" data-qa="skip">
+          <image class="s9t" data-sx="400" data-sy="24" data-ex="76" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAJklEQVR42mO8yIAfsPwnoICJYeBNoFwBHdwwQrw5QoJ6eIQkQRMAFWoWJgwn3I8AAAAASUVORK5CYII=" x="76" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="472" data-sy="24" data-ex="138" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAMElEQVR42mO8yIAfsPwnoICJYeBNoFwBHdwwQrw5QoJ6iIfkf0Y8JvxnZGRghmgFAE6AGSmKtKMUAAAAAElFTkSuQmCC" x="138" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="544" data-sy="24" data-ex="200" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAl0lEQVR42sWSzQoCQQyD084gs4qjsIuH8f0fyGcQPC8KIiw2HrxK5iBor/3oTxI7QVdmB3D8f8L3wA9uUCsIIOQEEkUCMUxVAdy1wiz6Y0shvoj90SneZGlOqcNhCKUDS6VUMrYrCZitjUrqSIXSLHrWbpI9N+PZycPy2IQpgPfR3iv4scB5kTfQblfXmYxLTTKTPp8NAF5FtVTafe4DZQAAAABJRU5ErkJggg==" x="200" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="616" data-sy="24" data-ex="262" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAv0lEQVR42sWSwQrCMAyG/7RlyEC8DAZ7/xfyKVQmzMPmyrY0HgSltcsOCubUw8fXJH/oCL2cbAAG/zd8D/ygBwgEIFoDHZO1CMwgglAGqMrCgSffj2yQ0dCdBABhGdo+IwANr3mWy1W0MYNtmkyr7v0UVPNZAwCpxxtpAGzdL+qqQ7kPehbmQBJX/AVk5+Z4lMQgRRFEaRKwVnQAz3TXDyYwVAPNfgMYJx2Qjo0oiyLfpUeTGE4+TTwy2Pb0cTEP3LRaeXNgDGwAAAAASUVORK5CYII=" x="262" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="400" data-sy="96" data-ex="324" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAbUlEQVR42mPczYAfsPynVAETw3CwYoR4E78V/wma8P8/IStY8Cr4z8R0kwWfPPOf08fxmPCf9fPRS4y4FTCyPD/wkAW3Lxj/3T34nu0/A043/P/HZseMNxwY5RgZGBhwm8Dw//d/QnHBOFgSDACwDzCSnf2aUAAAAABJRU5ErkJggg==" x="324" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="472" data-sy="96" data-ex="386" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAABI0lEQVR42sWRuU7DQBCG/92dcRkKJApEy3sgGmh4A3hHRIPAJEA4xY0QQULiaJIgkRhhoHB8DIUNGJ8FBVut9vtm/tldZSO/Igr2X2fGfAWAJM+F3eZp+Dw/NVKAWcwL3F25YjO4b0xIBLOULVems9y1BObjVk9SmI0QExxseSyAkL8+mG1kBGF380zFh6Jx4syp1VRzAffW7ix8Fyl/PN0h0vraHlqSbuikBCH/uO3xr0yhH0HY3T5XuaHpawPu2Q+M3LslFaJ1pznkgmdNbmTCw12viIPioLf2hSr6FoAEAu5vPBbEJ4JofdNyuBgDFFFwtOeVchC971yWxMfCU6s0HgBgwj5XYEC/VHNoqubQNRyk6oSFOmG6Thj9dQaN/xc+AYfQgVpLNCSpAAAAAElFTkSuQmCC" x="386" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="544" data-sy="96" data-ex="448" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAABGElEQVR42o3Tz07CQBAG8G/+JEoCwoE2thrUg4/jE/senhSKEUMT4WAoMU1314uUUjqNc9z9Zfeb7Cw9w6jAD2nwpMECcIvyVn0PILfczYZq7iOAvr4n6skmoHKtWqGvhF8EAXaQID+USt81cjPfpQPXA+75Yx1PbCEzyCYbxSGQCSDFKyfibQBx88IKIjMAYF7l8diBLADIJhtF8DaA7N/ouiNIDSBuUSQDBzrt5wjAvMqjsW/12wCAbJejaSvICYDs59wKcgogLiuSy+bjtQCYP/PoytsAkO37cBrqCZE7ahV0n3HEB6FPHZPoqaqHWR/PZhkAqjqFlm0QANDx2ZSsT3EA6DqhUf8Dh7Wu6xQAXfztlP78hF9EfWSBDRcNmwAAAABJRU5ErkJggg==" x="448" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="616" data-sy="96" data-ex="510" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAcElEQVR42u2PMQ7CQAwEZ40jkPj/3xAVDSJVUqHjQGEpQBRc6KhQpvSs5bXOvFmN+yo+SD9HVrg/VLkJpG1QuBxP92g82W/Xga9lGIrafchdt+mYym2SmPGk6wWQYlZDoldL5slv4neBYDmxdPi3Lx7xSDgrhys5IwAAAABJRU5ErkJggg==" x="510" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="400" data-sy="168" data-ex="572" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAUklEQVR42mNcwoAXMLL8J6CACb88w39CJjAQMoGBoAmUK6CDGyi2gmBcEAzq/xS74f/QcAMjoZD8QcAAlut4FfzjZvmJXwELATcwEsw4DINBAQAPch3TwX1vWAAAAABJRU5ErkJggg==" x="572" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="472" data-sy="168" data-ex="634" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAcElEQVR42uXSMQ6AIAwF0H7AxWt4G2/q5slMiG5EvpOAQGRwMjA15IU29GOBvB4l0gMw5RWTGjWgk6/zLIE/zijGIQfU+2r13QXzZJjtArSbCcChNoOJoDokSXa3zTZgCzj19YVfxP6RDhGSAkFIPS9Z8yDeNJw3lAAAAABJRU5ErkJggg==" x="634" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="544" data-sy="168" data-ex="696" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAj0lEQVR42r2RMRaCMBBE/4YU8Sze3BNpbWVBY4WojAUUaGDzkAdTJv/NzuzaCaVjEgDnutKr40sRsHQQgIIA5QBSD5D/98BY+iECBWUOkxm8EX9kcGrOjbD2Mvjcg3IHGV09PAabqVmNxk+20JKarF61dlj19uc2Mx9oGx/Q9RblOjwfby3KUNzDDkBUgfgAv4hBbtCFFp8AAAAASUVORK5CYII=" x="696" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="616" data-sy="168" data-ex="758" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAANElEQVR42mNcwoAfsPwnoICJYeBNoFwBHdwwQrw5KNzASEjBD0IKrhNS8JNSNxAMh8GgAADjFxLHcqvxigAAAABJRU5ErkJggg==" x="758" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="400" data-sy="240" data-ex="820" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAH0lEQVR42mOMZ8ALmJnwyzP8JaSAYVTBqIJRBUNUAQDvTwGfanCjpwAAAABJRU5ErkJggg==" x="820" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="472" data-sy="240" data-ex="882" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAQElEQVR42mMsYmZABX+e/maEcyS5WV6hyTMwciHkGT59ZGFBV8Dw/z+CzcTI8p8BL/jPxEAAjCoYVTCqYEAUAADK0gqY16kDhwAAAABJRU5ErkJggg==" x="882" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="544" data-sy="240" data-ex="944" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAMUlEQVR42mMsZUAFH34yovBZnqMpYEKVZ2BhQVPwH43Pgi6ADpgYRhWMKhhVMBgVAAB9WwWR0b74nAAAAABJRU5ErkJggg==" x="944" y="350" width="46" height="46"/>
+          <image class="s9t" data-sx="616" data-sy="240" data-ex="1006" data-ey="350" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAGElEQVR42mOMZ8APmBhGFYwqGFUwQhUAAA+/AJ/OZvXZAAAAAElFTkSuQmCC" x="1006" y="350" width="46" height="46"/>
         </g>
-      </svg>
-      <figcaption>Illustrative rewards. The paper states that GRPO "foregoes the critic model, instead estimating the baseline from group scores."</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- ================ 12 · pipeline in numbers ================ -->
-<section class="slide dense22" data-title="The pipeline in numbers">
-  <h2>The pipeline in numbers</h2>
-  <div class="grow stack compact">
-    <table class="tight" style="font-size:.68em;">
-      <thead><tr><th>stage</th><th>documented data</th><th>passes</th><th>documented compute</th></tr></thead>
-      <tbody>
-        <tr><td><span class="cAmber">pretraining</span></td><td>15.6T tokens (Llama 3.1 405B, 2024)</td><td class="num">about 1</td><td>30.84M H100 hours; about 78 days at the peak 16,384 GPUs (derived)</td></tr>
-        <tr class="frag"><td><span class="cAmber">SFT</span></td><td>13k demonstrations (InstructGPT, 2022); 939,344 (Tülu 3, 2024)</td><td class="num">16 (InstructGPT)</td><td>hours to days</td></tr>
-        <tr class="frag"><td><span class="cAmber">preference tuning</span></td><td>33k comparison + 31k tuning prompts (InstructGPT, 2022)</td><td class="num">a few</td><td>days</td></tr>
-      </tbody>
-    </table>
-    <p class="small frag">DeepSeek-V3's own ledger (2024 technical report, Table 1) splits 2.788M H800 GPU hours as: pretraining 2,664K; context extension 119K; post training 5K. In that ledger, post training amounts to about 0.2% of the total (a derived share).</p>
-    <p class="answer frag" style="text-align:center;">The loop is identical across the stages, while the compute spans three orders of magnitude.</p>
-    <div class="teach frag"><b>For the classroom:</b> have students place DeepSeek-V3's ledger on a log scale of GPU hours: 2,664,000; 119,000; 5,000. The drawing makes the 0.2% vivid.</div>
-  </div>
-</section>
-
-<!-- ================ 13 · triangles ================ -->
-<section class="slide dense22" data-title="Drawing triangles">
-  <h2>Drawing triangles</h2>
-  <div class="cols grow" style="gap:30px; align-items:start;">
-    <div class="stack compact" style="flex:1.02;">
-      <p>The machine that supplies this arithmetic was built to draw game frames. Every shape on a screen is a mesh of <span class="cBlue">triangles</span>; smooth surfaces, such as Martin Newell's 1975 Utah teapot, are tessellated into triangles before drawing.</p>
-      <p class="frag" data-order="1">To turn a shape, one small matrix multiplies every vertex, the matrix by vector multiplication of Part 5. A quarter turn:</p>
-      <div class="eq frag" data-order="1"><span class="tex disp">\begin{pmatrix}0&amp;-1\\1&amp;0\end{pmatrix}\begin{pmatrix}1\\0\end{pmatrix}=\begin{pmatrix}0\\1\end{pmatrix}</span></div>
-      <p class="small frag" data-order="2">Real pipelines use 4 by 4 matrices, so one product carries rotation, scale, and perspective together (Akenine-Möller et al., <i>Real-Time Rendering</i>, 2018). At 60 frames per second, the pipeline repeats the multiplication for millions of vertices in every frame, every one independent of the others.</p>
-    </div>
-    <figure style="flex:.98; max-width:430px; margin:0 auto;">
-      <svg viewBox="0 0 520 390" role="img" aria-label="Coordinate axes with a blue triangle and the same triangle turned a quarter turn in green; a dashed arc marks the rotation of one vertex.">
-        <defs>
-          <marker id="p6s13mut" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker>
-        </defs>
-        <line x1="40" y1="210" x2="500" y2="210" class="axis" marker-end="url(#p6s13mut)" data-qa="free"/>
-        <line x1="250" y1="380" x2="250" y2="20" class="axis" marker-end="url(#p6s13mut)" data-qa="free"/>
-        <g class="frag" data-order="1">
-          <path d="M400 210 L310 180 L355 120 Z" fill="none" style="stroke:var(--blue);stroke-width:3.5"/>
-          <text x="415" y="240" class="m knock" font-size="17" style="fill:var(--blue)">(1, 0)</text>
-        </g>
-        <g class="frag" data-order="2">
-          <path d="M250 60 L220 150 L160 105 Z" fill="none" style="stroke:var(--green);stroke-width:3.5"/>
-          <text x="196" y="42" class="m knock" font-size="17" style="fill:var(--green)">(0, 1)</text>
-          <path d="M395 172 A 150 150 0 0 0 265 62" fill="none" stroke-dasharray="7 7" style="stroke:var(--muted);stroke-width:2.5" marker-end="url(#p6s13mut)" data-qa="free"/>
-        </g>
-      </svg>
-      <figcaption>One vertex computed by hand; the pipeline repeats it for millions.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- ================ 14 · why GPUs ================ -->
-<section class="slide dense22" data-title="Why is a GPU good at matrix multiplication?">
-  <h2>Why is a GPU good at matrix multiplication?</h2>
-  <div class="grow stack compact">
-    <p>A CPU spends its silicon on a few cores that finish one task quickly; a GPU spends it on thousands of small cores that run one instruction on thousands of numbers at once. Rasterization, filling in the pixels of each triangle, repeats the same small calculation millions of times per frame.</p>
-    <p class="frag">Matrix multiplication has the same shape of work. Multiplying two <span class="tex">n\times n</span> tables takes <span class="tex">n^3</span> multiplications on <span class="tex">2n^2</span> input numbers. At <span class="tex">n=1{,}000</span>: two million numbers enter, one billion multiplications run, and every number is reused a thousand times, so the arithmetic outpaces the memory traffic and thousands of cores stay fed.</p>
-    <p class="frag">NVIDIA's Volta generation (2017) added <span class="cBlue">Tensor Cores</span>, circuits that multiply whole 4 by 4 matrices in a single clock cycle, reading FP16 inputs and accumulating in FP32. The H100 makes Part 5's scale note concrete:</p>
-    <table class="tight frag" style="font-size:.7em;">
-      <thead><tr><th>H100 SXM (NVIDIA, 2022)</th><th>figure</th></tr></thead>
-      <tbody>
-        <tr><td>dense BF16 tensor throughput</td><td class="num">989 trillion operations per second</td></tr>
-        <tr><td>transistors</td><td class="num">80 billion (custom TSMC 4N process)</td></tr>
-        <tr><td>power</td><td class="num">up to 700 W</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- ================ 15 · GPU history ================ -->
-<section class="slide dense22" data-title="A short history of the GPU">
-  <h2>A short history of the GPU</h2>
-  <div class="grow stack compact">
-    <figure>
-      <svg viewBox="0 52 1090 136" role="img" aria-label="A timeline from 1993 to 2025: NVIDIA founded, Voodoo, RIVA 128, GeForce 256, programmable shaders, Brook, CUDA, AlexNet, Tensor Cores, H100, and the four trillion dollar close.">
-        <line x1="40" y1="125" x2="1060" y2="125" style="stroke:var(--line);stroke-width:3"/>
         <g class="m" font-size="14">
-          <g class="frag" data-order="1">
-            <circle cx="70" cy="125" r="7" style="fill:var(--blue)"/><text x="70" y="95" text-anchor="middle" class="knock" style="fill:var(--blue)">1993</text><text x="70" y="77" text-anchor="middle" class="knock" style="fill:var(--ink)">NVIDIA founded</text>
-            <circle cx="159" cy="125" r="7" style="fill:var(--blue)"/><text x="159" y="157" text-anchor="middle" class="knock" style="fill:var(--blue)">1996</text><text x="159" y="175" text-anchor="middle" class="knock" style="fill:var(--ink)">3dfx Voodoo</text>
-            <circle cx="188" cy="125" r="7" style="fill:var(--blue)"/><text x="196" y="95" text-anchor="middle" class="knock" style="fill:var(--blue)">1997</text><text x="196" y="77" text-anchor="middle" class="knock" style="fill:var(--ink)">RIVA 128</text>
-            <circle cx="248" cy="125" r="7" style="fill:var(--blue)"/><text x="256" y="157" text-anchor="middle" class="knock" style="fill:var(--blue)">1999</text><text x="256" y="175" text-anchor="middle" class="knock" style="fill:var(--ink)">GeForce 256</text>
-            <circle cx="307" cy="125" r="7" style="fill:var(--blue)"/><text x="315" y="95" text-anchor="middle" class="knock" style="fill:var(--blue)">2001</text><text x="315" y="77" text-anchor="middle" class="knock" style="fill:var(--ink)">shaders</text>
-          </g>
-          <g class="frag" data-order="2">
-            <circle cx="396" cy="125" r="7" style="fill:var(--amber)"/><text x="396" y="157" text-anchor="middle" class="knock" style="fill:var(--amber)">2004</text><text x="396" y="175" text-anchor="middle" class="knock" style="fill:var(--ink)">Brook for GPUs</text>
-            <circle cx="456" cy="125" r="7" style="fill:var(--amber)"/><text x="456" y="95" text-anchor="middle" class="knock" style="fill:var(--amber)">2006</text><text x="456" y="77" text-anchor="middle" class="knock" style="fill:var(--ink)">CUDA</text>
-          </g>
-          <g class="frag" data-order="3">
-            <circle cx="634" cy="125" r="7" style="fill:var(--green)"/><text x="634" y="157" text-anchor="middle" class="knock" style="fill:var(--green)">2012</text><text x="634" y="175" text-anchor="middle" class="knock" style="fill:var(--ink)">AlexNet</text>
-            <circle cx="782" cy="125" r="7" style="fill:var(--green)"/><text x="782" y="95" text-anchor="middle" class="knock" style="fill:var(--green)">2017</text><text x="782" y="77" text-anchor="middle" class="knock" style="fill:var(--ink)">Tensor Cores</text>
-            <circle cx="931" cy="125" r="7" style="fill:var(--green)"/><text x="931" y="157" text-anchor="middle" class="knock" style="fill:var(--green)">2022</text><text x="931" y="175" text-anchor="middle" class="knock" style="fill:var(--ink)">H100</text>
-            <circle cx="1020" cy="125" r="7" style="fill:var(--green)"/><text x="1002" y="95" text-anchor="middle" class="knock" style="fill:var(--green)">2025</text><text x="1002" y="77" text-anchor="middle" class="knock" style="fill:var(--ink)">worth $4T</text>
-          </g>
+          <text x="76" y="414" style="fill:var(--muted)">patch 1</text>
+          <text x="1052" y="414" text-anchor="end" style="fill:var(--muted)">patch 16</text>
+          <text x="545" y="432" text-anchor="middle" class="knock" style="fill:var(--green)">each patch flattens to a vector, is multiplied by the embedding matrix, receives a position embedding, and enters the window as one token</text>
         </g>
+        <g class="frag" data-order="1" id="s9trig"></g>
       </svg>
-      <figcaption>Graphics era in blue, general computation in amber, the AI era in green.</figcaption>
+      <figcaption>Advance the fragment: copies of the patches leave the image and land as a token row.</figcaption>
     </figure>
-    <p class="small frag" data-order="1">Jensen Huang, Chris Malachowsky, and Curtis Priem planned NVIDIA over meetings at a Denny's in East San Jose in late 1992 and incorporated on April 5, 1993. The GeForce 256 (October 1999) shipped with the marketing line "the world's first GPU" because it moved transform and lighting, the vertex matrix work, onto the chip.</p>
-    <p class="small frag" data-order="2">Because only graphics programs could reach the cores, researchers first phrased general arithmetic as drawing operations; Ian Buck's Brook for GPUs (SIGGRAPH 2004) systematized the approach, and Buck then led CUDA at NVIDIA, which removed the graphics phrasing altogether.</p>
-    <p class="small frag" data-order="3">AlexNet (Krizhevsky, Sutskever, and Hinton, 2012) trained "between five and six days on two GTX 580 3GB GPUs" and won ImageNet. Because researchers across the field then moved to GPU training, NVIDIA became the first company to end a trading day valued above four trillion dollars (July 10, 2025) and the first to reach five trillion (October 29, 2025; CNBC).</p>
+    <p class="frag" data-order="2">The Vision Transformer (Dosovitskiy et al., ICLR 2021) is titled after exactly this move: "An Image is Worth 16x16 Words." A 224 by 224 image cut into 16 by 16 patches gives <span class="tex">14\times14=196</span> tokens, a short paragraph's worth of picture.</p>
   </div>
 </section>
 
-<!-- ================ 16 · cluster and invoice ================ -->
-<section class="slide dense22" data-title="The cluster and the invoice">
-  <h2>The cluster and the invoice</h2>
+<!-- ================ 10 · patch arithmetic ================ -->
+<section class="slide dense22" data-title="The patch arithmetic">
+  <h2>The patch arithmetic</h2>
   <div class="grow stack compact">
-    <table class="tight" style="font-size:.68em;">
-      <thead><tr><th>training run</th><th>GPUs</th><th>GPU hours</th><th>duration</th><th>stated cost basis</th></tr></thead>
+    <p>Everything in the pipeline is Part 5. A tiny worked case, a 2 by 2 patch with illustrative values:</p>
+    <div class="eq frag"><span class="tex disp">\begin{pmatrix}10&amp;90\\10&amp;90\end{pmatrix}\ \to\ (10,\,90,\,10,\,90)\ \to\ E\,(10,\,90,\,10,\,90)^{\mathsf T}</span></div>
+    <p class="small frag">The patch flattens into a list of 4 numbers, and the embedding matrix <span class="tex">E</span>, learned like every other weight, multiplies the list and produces a vector of the model's embedding width. With the illustrative <span class="tex">E=\begin{pmatrix}1&amp;0&amp;0&amp;1\\0&amp;0.1&amp;0.1&amp;0\end{pmatrix}</span> the patch becomes the vector <span class="tex">(100,\,10)</span>: table times list, exactly as Part 5 taught.</p>
+    <p class="small frag">A position embedding is added so the model knows which patch sat where, exactly as word tokens carry positions. From this point on, the transformer sees no difference between a patch token and a word token.</p>
+    <p class="answer frag">A picture enters the model as 196 vectors, and the machinery that reads them is the gray box Part 9 opens.</p>
+  </div>
+</section>
+
+<!-- ================ 11 · ViT trade ================ -->
+<section class="slide dense22" data-title="What the Vision Transformer traded">
+  <h2>What the Vision Transformer traded</h2>
+  <div class="grow stack compact">
+    <p>Convolution carries built in assumptions: nearby pixels matter together, and a pattern means the same thing anywhere. The Vision Transformer discards both and lets attention learn where to look, so it must relearn locality from data.</p>
+    <p class="frag">The paper measured the cost in training data and the gain in accuracy. Trained on ImageNet alone, the transformer trails comparable convolutional networks, because transformers "do not generalize well when trained on insufficient amounts of data"; pretrained on 14 million to 300 million images, it matches or beats them, and the authors conclude that "large scale training trumps inductive bias."</p>
+    <table class="tight frag" style="font-size:.7em;">
+      <thead><tr><th></th><th>convolution</th><th>patch tokens</th></tr></thead>
       <tbody>
-        <tr><td>Llama 3.1 405B (Meta, 2024)</td><td class="num">up to 16,384 H100</td><td class="num">30.84M</td><td class="num">about 78 days at the peak count (derived)</td><td>hardware: about $0.4B to $0.5B of GPUs at reported prices (derived)</td></tr>
-        <tr class="frag"><td>DeepSeek-V3 (2024)</td><td class="num">2,048 H800</td><td class="num">2.788M</td><td class="num">about 57 days (derived)</td><td>$5.576M at the report's assumed $2 per GPU hour rental</td></tr>
+        <tr><td>locality</td><td>wired in</td><td>learned</td></tr>
+        <tr><td>same pattern anywhere</td><td>wired in</td><td>learned</td></tr>
+        <tr><td>training data needed</td><td>less</td><td>more</td></tr>
+        <tr><td>reader</td><td>the filter stack</td><td>attention (Part 9)</td></tr>
       </tbody>
     </table>
-    <p class="small frag">Raymond James analysts estimated in 2023 that an H100 sells for $25,000 to $30,000, and shortage era retail listings reached $40,000 (CNBC reporting). At $25,000 to $30,000, the peak Llama cluster's 16,384 GPUs represent $410M to $492M of hardware before servers, networking, and buildings.</p>
-    <p class="small frag">DeepSeek-V3's report states its cost figure covers "only the official training", excluding "prior research and ablation experiments on architectures, algorithms, or data". Power, derived from the model card's 700 W per GPU: the peak Llama cluster draws about 11.5 MW for the GPUs alone.</p>
-    <p class="note frag">Duration derivations: 30.84M GPU hours across 16,384 GPUs give 1,882 hours, about 78 days, and longer in practice because early stages ran on 8,192 GPUs; 2.788M across 2,048 give about 57 days.</p>
   </div>
 </section>
 
-<!-- ================ 17 · energy and carbon ================ -->
-<section class="slide dense22" data-title="The energy and carbon bill">
-  <h2>The energy and carbon bill</h2>
+<!-- ================ 12 · vision in the assistant ================ -->
+<section class="slide dense22" data-title="Vision inside the assistant">
+  <h2>Vision inside the assistant</h2>
   <div class="grow stack compact">
-    <table class="tight" style="font-size:.68em;">
-      <thead><tr><th>training run</th><th>electricity</th><th>emissions (tCO2eq)</th></tr></thead>
-      <tbody>
-        <tr><td>GPT-3 (Patterson et al. 2021)</td><td class="num">1,287 MWh</td><td class="num">552</td></tr>
-        <tr class="frag"><td>BLOOM (Luccioni et al. 2022)</td><td class="num">433 MWh</td><td class="num">24.7; 50.5 with manufacturing and idle</td></tr>
-        <tr class="frag"><td>Llama 3.1 herd (Meta model card, 2024)</td><td class="num">GPUs alone: ≈21.6 GWh (derived)</td><td class="num">11,390 location based; 0 market based</td></tr>
-      </tbody>
-    </table>
-    <p class="small frag">The <span class="cBlue">location based</span> figure counts what the local grid actually emitted, while the <span class="cBlue">market based</span> figure subtracts renewable energy that the company bought to match its use, which is how Meta reports 0. The 405B model alone accounts for 8,930 of the 11,390 tonnes.</p>
-    <p class="small frag">An average US passenger car emits about 4.6 tonnes per year (EPA), and a transatlantic round trip seat costs about 1 tonne of CO2, roughly 2 with high altitude effects included (carbonfootprint.com calculator, 2025), so GPT-3's training equals about 120 car years, or the annual electricity of about 123 US households (EIA average, 10,500 kWh).</p>
-    <p class="note frag">The 21.6 GWh line is a derivation from 30.84M GPU hours at 700 W; it covers the GPUs alone and excludes cooling and facility overhead, so the true facility figure sits higher.</p>
+    <p>When students photograph their homework, the assistant reads the image as patch tokens. CLIP (Radford et al., announced January 5, 2021) trained a vision encoder by predicting which caption goes with which image across 400 million pairs; LLaVA (Liu et al., 2023) projected such patch features straight into a language model's embedding space, so image patches arrive as tokens among the words. The frontier assistants followed: GPT-4 announced image input on March 14, 2023, Gemini launched as natively multimodal on December 6, 2023, and Claude 3 shipped vision on March 4, 2024.</p>
+    <p class="frag">Part 7's context applies to pictures directly, because a picture is context. Anthropic's current documentation counts one <span class="cBlue">visual token</span> per 28 by 28 pixel patch, up to 1,568 tokens per image at the standard tier and 4,784 at the high resolution tier (2026); MNIST's whole digit, 28 by 28, is exactly one such patch.</p>
+    <p class="note frag">OpenAI's documentation counts 32 by 32 pixel patches for its smaller models and 512 by 512 tiles for the larger ones; the patch sizes differ, while the billing idea is the same: pictures are counted in patches.</p>
   </div>
 </section>
 
-<!-- ================ 18 · world energy budget ================ -->
-<section class="slide dense22" data-title="AI in the world's energy budget">
-  <h2>AI in the world's energy budget</h2>
-  <div class="grow stack compact">
-    <p>Data centres of every kind, AI included, drew about <span class="cAmber">415 TWh in 2024</span>, about 1.5% of the world's roughly 30,700 TWh of electricity; the IEA's base case reaches about 945 TWh by 2030, just under 3% (IEA, <i>Energy and AI</i>, 2025; Ember, 2025).</p>
-    <p class="frag">Sector comparisons need care, because the units differ: data centres above are measured as a share of <b>electricity</b>, while aviation contributes about 2.5% and cement about 7% of global <b>CO2</b> (Our World in Data from Lee et al. 2021; IEA). The shares therefore indicate rough magnitude only.</p>
-    <p class="frag">Per use, the cost is small: about <span class="cAmber">0.3 Wh per chatbot query</span> (Epoch AI, February 2025), which runs a 60 W bulb for 18 seconds; OpenAI's June 2025 blog states 0.34 Wh, a company figure. The older 3 Wh estimate (de Vries, 2023, <i>Joule</i>) predates measured efficiency gains.</p>
-    <p class="answer frag">One frontier training run draws about as much electricity as 2,000 US households use in a year (derived from the EIA average), while the whole data centre sector remains a small, quickly growing share of the world's grid.</p>
+<!-- ================ 13 · AR generation ================ -->
+<section class="slide dense22" data-title="Drawing with next token prediction">
+  <h2>Drawing with next token prediction</h2>
+  <div class="cols grow" style="gap:32px; align-items:start;">
+    <div class="stack compact" style="flex:1.1;">
+      <p>If a picture can enter the model as tokens, the model can also emit a picture, token by token. Image GPT (Chen et al., ICML 2020) trained a transformer "to auto-regressively predict pixels, without incorporating knowledge of the 2D input structure." DALL-E (Ramesh et al., announced January 5, 2021) compressed each 256 by 256 image into a 32 by 32 grid of discrete codes, 1,024 image tokens from a learned codebook, and trained one autoregressive model over the text tokens followed by the image tokens.</p>
+      <p class="frag" data-order="2">The cost is the sequence length: 1,024 tokens for one small image, each conditioned on all the previous ones. Part 10 reaches image generation differently: diffusion shapes the whole canvas at once out of noise.</p>
+    </div>
+    <figure style="flex:.9; max-width:352px;">
+      <svg viewBox="0 0 400 336" role="img" aria-label="A caption line feeds a 4 by 4 grid that fills with image patches one cell at a time in reading order, with an amber cursor on the cell being generated.">
+        <text x="200" y="22" text-anchor="middle" class="m" font-size="14" style="fill:var(--blue)">caption: a house under a sun (illustrative)</text>
+        <g data-qa="skip">
+          <rect x="68" y="40" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="134" y="40" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="200" y="40" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="266" y="40" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="68" y="106" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="134" y="106" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="200" y="106" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="266" y="106" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="68" y="172" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="134" y="172" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="200" y="172" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="266" y="172" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="68" y="238" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="134" y="238" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="200" y="238" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <rect x="266" y="238" width="64" height="64" rx="2" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2" stroke-dasharray="5 4"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAJklEQVR42mO8yIAfsPwnoICJYeBNoFwBHdwwQrw5QoJ6eIQkQRMAFWoWJgwn3I8AAAAASUVORK5CYII=" x="68" y="40" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAMElEQVR42mO8yIAfsPwnoICJYeBNoFwBHdwwQrw5QoJ6iIfkf0Y8JvxnZGRghmgFAE6AGSmKtKMUAAAAAElFTkSuQmCC" x="134" y="40" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAl0lEQVR42sWSzQoCQQyD084gs4qjsIuH8f0fyGcQPC8KIiw2HrxK5iBor/3oTxI7QVdmB3D8f8L3wA9uUCsIIOQEEkUCMUxVAdy1wiz6Y0shvoj90SneZGlOqcNhCKUDS6VUMrYrCZitjUrqSIXSLHrWbpI9N+PZycPy2IQpgPfR3iv4scB5kTfQblfXmYxLTTKTPp8NAF5FtVTafe4DZQAAAABJRU5ErkJggg==" x="200" y="40" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAv0lEQVR42sWSwQrCMAyG/7RlyEC8DAZ7/xfyKVQmzMPmyrY0HgSltcsOCubUw8fXJH/oCL2cbAAG/zd8D/ygBwgEIFoDHZO1CMwgglAGqMrCgSffj2yQ0dCdBABhGdo+IwANr3mWy1W0MYNtmkyr7v0UVPNZAwCpxxtpAGzdL+qqQ7kPehbmQBJX/AVk5+Z4lMQgRRFEaRKwVnQAz3TXDyYwVAPNfgMYJx2Qjo0oiyLfpUeTGE4+TTwy2Pb0cTEP3LRaeXNgDGwAAAAASUVORK5CYII=" x="266" y="40" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAbUlEQVR42mPczYAfsPynVAETw3CwYoR4E78V/wma8P8/IStY8Cr4z8R0kwWfPPOf08fxmPCf9fPRS4y4FTCyPD/wkAW3Lxj/3T34nu0/A043/P/HZseMNxwY5RgZGBhwm8Dw//d/QnHBOFgSDACwDzCSnf2aUAAAAABJRU5ErkJggg==" x="68" y="106" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAABI0lEQVR42sWRuU7DQBCG/92dcRkKJApEy3sgGmh4A3hHRIPAJEA4xY0QQULiaJIgkRhhoHB8DIUNGJ8FBVut9vtm/tldZSO/Igr2X2fGfAWAJM+F3eZp+Dw/NVKAWcwL3F25YjO4b0xIBLOULVems9y1BObjVk9SmI0QExxseSyAkL8+mG1kBGF380zFh6Jx4syp1VRzAffW7ix8Fyl/PN0h0vraHlqSbuikBCH/uO3xr0yhH0HY3T5XuaHpawPu2Q+M3LslFaJ1pznkgmdNbmTCw12viIPioLf2hSr6FoAEAu5vPBbEJ4JofdNyuBgDFFFwtOeVchC971yWxMfCU6s0HgBgwj5XYEC/VHNoqubQNRyk6oSFOmG6Thj9dQaN/xc+AYfQgVpLNCSpAAAAAElFTkSuQmCC" x="134" y="106" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAABGElEQVR42o3Tz07CQBAG8G/+JEoCwoE2thrUg4/jE/senhSKEUMT4WAoMU1314uUUjqNc9z9Zfeb7Cw9w6jAD2nwpMECcIvyVn0PILfczYZq7iOAvr4n6skmoHKtWqGvhF8EAXaQID+USt81cjPfpQPXA+75Yx1PbCEzyCYbxSGQCSDFKyfibQBx88IKIjMAYF7l8diBLADIJhtF8DaA7N/ouiNIDSBuUSQDBzrt5wjAvMqjsW/12wCAbJejaSvICYDs59wKcgogLiuSy+bjtQCYP/PoytsAkO37cBrqCZE7ahV0n3HEB6FPHZPoqaqHWR/PZhkAqjqFlm0QANDx2ZSsT3EA6DqhUf8Dh7Wu6xQAXfztlP78hF9EfWSBDRcNmwAAAABJRU5ErkJggg==" x="200" y="106" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAcElEQVR42u2PMQ7CQAwEZ40jkPj/3xAVDSJVUqHjQGEpQBRc6KhQpvSs5bXOvFmN+yo+SD9HVrg/VLkJpG1QuBxP92g82W/Xga9lGIrafchdt+mYym2SmPGk6wWQYlZDoldL5slv4neBYDmxdPi3Lx7xSDgrhys5IwAAAABJRU5ErkJggg==" x="266" y="106" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAUklEQVR42mNcwoAXMLL8J6CACb88w39CJjAQMoGBoAmUK6CDGyi2gmBcEAzq/xS74f/QcAMjoZD8QcAAlut4FfzjZvmJXwELATcwEsw4DINBAQAPch3TwX1vWAAAAABJRU5ErkJggg==" x="68" y="172" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAcElEQVR42uXSMQ6AIAwF0H7AxWt4G2/q5slMiG5EvpOAQGRwMjA15IU29GOBvB4l0gMw5RWTGjWgk6/zLIE/zijGIQfU+2r13QXzZJjtArSbCcChNoOJoDokSXa3zTZgCzj19YVfxP6RDhGSAkFIPS9Z8yDeNJw3lAAAAABJRU5ErkJggg==" x="134" y="172" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAj0lEQVR42r2RMRaCMBBE/4YU8Sze3BNpbWVBY4WojAUUaGDzkAdTJv/NzuzaCaVjEgDnutKr40sRsHQQgIIA5QBSD5D/98BY+iECBWUOkxm8EX9kcGrOjbD2Mvjcg3IHGV09PAabqVmNxk+20JKarF61dlj19uc2Mx9oGx/Q9RblOjwfby3KUNzDDkBUgfgAv4hBbtCFFp8AAAAASUVORK5CYII=" x="200" y="172" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAANElEQVR42mNcwoAfsPwnoICJYeBNoFwBHdwwQrw5KNzASEjBD0IKrhNS8JNSNxAMh8GgAADjFxLHcqvxigAAAABJRU5ErkJggg==" x="266" y="172" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAH0lEQVR42mOMZ8ALmJnwyzP8JaSAYVTBqIJRBUNUAQDvTwGfanCjpwAAAABJRU5ErkJggg==" x="68" y="238" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAQElEQVR42mMsYmZABX+e/maEcyS5WV6hyTMwciHkGT59ZGFBV8Dw/z+CzcTI8p8BL/jPxEAAjCoYVTCqYEAUAADK0gqY16kDhwAAAABJRU5ErkJggg==" x="134" y="238" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAMUlEQVR42mMsZUAFH34yovBZnqMpYEKVZ2BhQVPwH43Pgi6ADpgYRhWMKhhVMBgVAAB9WwWR0b74nAAAAABJRU5ErkJggg==" x="200" y="238" width="64" height="64"/>
+          <image class="s13t" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAAGElEQVR42mOMZ8APmBhGFYwqGFUwQhUAAA+/AJ/OZvXZAAAAAElFTkSuQmCC" x="266" y="238" width="64" height="64"/>
+          <rect id="s13cur" x="266" y="238" width="64" height="64" rx="2" fill="none" style="stroke:var(--amber);stroke-width:3" opacity="0"/>
+        </g>
+        <text x="200" y="330" text-anchor="middle" class="m" font-size="13" style="fill:var(--muted)">16 image tokens, emitted in reading order</text>
+        <g class="frag" data-order="1" id="s13trig"></g>
+      </svg>
+      <figcaption>One more fragment plays the generation: a 4 by 4 toy version of DALL-E's 32 by 32 grid.</figcaption>
+    </figure>
   </div>
-  <p class="history"><b>Reading note:</b> published energy and emission estimates for AI change quickly, so every figure above carries its year.</p>
+  <p class="history"><b>History:</b> DALL-E's codebook does the compressing that convolutional layers once did, so that an autoregressive transformer can fit a whole picture inside its sequence.</p>
 </section>
 
-<!-- ================ 19 · check ================ -->
+<!-- ================ 14 · check ================ -->
 <section class="slide" data-title="Check for understanding">
   <h2>Check for understanding</h2>
   <div class="grow stack compact">
-    <div class="q"><b>Exercise 1.</b> A GRPO group of four answers earns rewards <span class="tex">(1,0,1,0)</span>. Compute each answer's advantage.</div>
-    <p class="answer frag">The mean is 0.5 and the standard deviation is 0.5, so the advantages are <span class="tex">(+1,-1,+1,-1)</span>: both correct answers gain probability, both wrong answers lose it.</p>
-    <div class="q frag"><b>Exercise 2.</b> GPT-3 trained on about 300 billion tokens (Brown et al. 2020). Using 0.75 words per token, 500 words per page, and 500 sheets per 5 cm, how tall is the printed stack?</div>
-    <p class="answer frag">About 225 billion words, 450 million pages, and 900,000 reams: a stack of about 45 km, five times the height of Mount Everest.</p>
+    <div class="q"><b>Exercise 1.</b> The vertical edge filter from the animation meets a column where the values jump from 20 to 100. What does it write there? What does it write on the flat regions?</div>
+    <p class="answer frag">It writes <span class="tex">4\times(100-20)=320</span> on the edge and 0 on the flat regions, because the weighted sum cancels wherever left and right match.</p>
+    <div class="q frag"><b>Exercise 2.</b> A 224 by 224 image is cut into 16 by 16 patches. How many tokens enter the window? How does that compare with a paragraph of text?</div>
+    <p class="answer frag"><span class="tex">(224/16)^2=196</span> tokens, about the length of a long paragraph; a picture takes roughly as much of the context window as its own caption would.</p>
   </div>
 </section>
 
-<!-- ================ 20 · overview ================ -->
-<section class="slide" data-title="Part 6 Overview">
-  <h2>Part 6 Overview</h2>
+<!-- ================ 15 · overview ================ -->
+<section class="slide" data-title="Part 8 Overview">
+  <h2>Part 8 Overview</h2>
   <div class="grow">
     <ol style="font-size:.72em;">
-      <li class="frag"><b>Three stages:</b> Pretraining reads raw text, SFT reads written answers, and preference tuning reads choices; all three run Part 5's loop.</li>
-      <li class="frag"><b>The losses:</b> SFT masks pretraining's loss to the answer tokens. The reward model applies the sigmoid to a score difference. PPO clips each step and incurs a KL penalty for drift. DPO collapses the reward model and the loop into one supervised loss. GRPO grades each answer against its group.</li>
-      <li class="frag"><b>The machines:</b> Triangles made the GPU: millions of identical vertex and pixel jobs built hardware that now runs matrix multiplication at 989 trillion operations per second on an H100.</li>
-      <li class="frag"><b>The measurements:</b> 15.6 trillion tokens, one pass, 30.84 million GPU hours, and about 78 derived days for Llama 3.1 405B; post training adds about 0.2% of compute in DeepSeek-V3's ledger.</li>
-      <li class="frag"><b>The bill:</b> hundreds of millions of dollars of GPUs for a frontier cluster; hundreds of megawatt hours to tens of gigawatt hours per run; tonnes of CO2 that depend on the accounting; about 1.5% of world electricity for the whole sector.</li>
+      <li class="frag"><b>Images are numbers:</b> a grayscale picture is a table of brightness values, and every method reads that table.</li>
+      <li class="frag"><b>Convolution:</b> a small weighted sum slides everywhere, training discovers edge and texture filters, pooling buys shift tolerance, and stacked layers climb from edges to objects (Hubel and Wiesel to LeNet to AlexNet).</li>
+      <li class="frag"><b>Tokens:</b> the Vision Transformer flattens 16 by 16 patches through an embedding matrix into the same window as words; 196 tokens per image, read by attention.</li>
+      <li class="frag"><b>The trade:</b> convolution wires locality in and needs less data; patch tokens learn where to look and win at scale.</li>
+      <li class="frag"><b>In the assistant:</b> images are billed as patch tokens in the context, and next token prediction can also draw, one image token at a time.</li>
     </ol>
   </div>
-  <p class="q" style="font-size:.88em; padding:12px 18px;"><b>Next:</b> Part 7 hands the model tools: the agent loop, web search, MCP, and skills. Part 9 opens attention.</p>
+  <p class="q" style="font-size:.88em; padding:12px 18px;"><b>Next:</b> Part 9 opens the gray box, attention, which reads word tokens and patch tokens alike.</p>
 </section>
 
-<!-- ================ 21 · sources 1 ================ -->
-<section class="slide" data-title="Sources: the training pipeline">
-  <h2>Sources: the training pipeline</h2>
+<!-- ================ 16 · sources ================ -->
+<section class="slide" data-title="Sources: convolution">
+  <h2>Sources: convolution</h2>
   <div class="grow source-list">
     <ul>
-      <li>T. Brown et al., 2020, “Language Models are Few-Shot Learners,” NeurIPS; 175B parameters, 300B training tokens (Table 2.1).</li>
-      <li>J. Hoffmann et al., 2022, “Training Compute-Optimal Large Language Models,” (Chinchilla); equal scaling of parameters and tokens; 70B parameters, 1.4T tokens.</li>
-      <li>N. Muennighoff et al., 2023, “Scaling Data-Constrained Language Models,” NeurIPS; up to 4 epochs of repeated data cost little.</li>
-      <li>L. Ouyang et al., 2022, “Training language models to follow instructions with human feedback” (InstructGPT); 13k SFT, 33k reward, 31k PPO prompts; 16 SFT epochs.</li>
-      <li>J. Schulman, F. Wolski, P. Dhariwal, A. Radford, O. Klimov, 2017, “Proximal Policy Optimization Algorithms”; the clipped objective; “say, ε = 0.2.”</li>
-      <li>R. Rafailov, A. Sharma, E. Mitchell, C. D. Manning, S. Ermon, C. Finn, 2023, “Direct Preference Optimization: Your Language Model is Secretly a Reward Model,” NeurIPS.</li>
-      <li>Z. Shao et al., 2024, “DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models”; GRPO.</li>
-      <li>DeepSeek-AI, 2024, “DeepSeek-V3 Technical Report”; 14.8T tokens; 2,048 H800; 2.788M GPU hours; $5.576M at $2 per hour. DeepSeek-AI, 2025, “DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning.”</li>
-      <li>A. Grattafiori et al. (Meta), 2024, “The Llama 3 Herd of Models”; 15.6T tokens; up to 16,384 H100s; 3.8×10²⁵ FLOPs. Meta, 2024, Llama 3.1 Model Card; 30.84M GPU hours; 11,390 tCO2eq location based, 0 market based.</li>
-      <li>N. Lambert et al. (Ai2), 2024, “Tülu 3: Pushing Frontiers in Open Language Model Post-Training”; SFT mixture of 939,344 samples.</li>
-      <li>R. A. Bradley, M. E. Terry, 1952, “Rank Analysis of Incomplete Block Designs”; A. Elo's rating system, adopted by FIDE in 1970.</li>
-      <li>OpenAI help center: the rule of thumb of about 0.75 English words per token, used in the printed page arithmetic.</li>
+      <li>D. Hubel, T. Wiesel, 1959, “Receptive fields of single neurones in the cat's striate cortex,” <i>Journal of Physiology</i> 148; 1962, “Receptive fields, binocular interaction and functional architecture in the cat's visual cortex,” <i>Journal of Physiology</i> 160; Nobel Prize in Physiology or Medicine 1981, one half to R. Sperry, one quarter each to Hubel and Wiesel.</li>
+      <li>K. Fukushima, 1980, “Neocognitron: A Self-organizing Neural Network Model for a Mechanism of Pattern Recognition Unaffected by Shift in Position,” <i>Biological Cybernetics</i> 36.</li>
+      <li>Y. LeCun et al., 1989, “Backpropagation Applied to Handwritten Zip Code Recognition,” <i>Neural Computation</i> 1(4). Y. LeCun, L. Bottou, Y. Bengio, P. Haffner, 1998, “Gradient-Based Learning Applied to Document Recognition,” <i>Proceedings of the IEEE</i> 86(11); LeNet-5; “several million checks per day” in NCR systems.</li>
+      <li>MNIST: Y. LeCun, C. Cortes, C. Burges; 60,000 training digits, 28 by 28 pixels.</li>
+      <li>A. Krizhevsky, I. Sutskever, G. Hinton, 2012, “ImageNet Classification with Deep Convolutional Neural Networks,” NeurIPS; 60 million parameters, five convolutional and three fully connected layers.</li>
+      <li>M. Zeiler, R. Fergus, 2014, “Visualizing and Understanding Convolutional Networks,” ECCV; edges, then textures, then parts, then objects, layer by layer.</li>
     </ul>
   </div>
 </section>
 
-<!-- ================ 22 · sources 2 ================ -->
-<section class="slide" data-title="Sources: hardware, energy, and history">
-  <h2>Sources: hardware, energy, and history</h2>
+<!-- ================ 17 · sources 2 ================ -->
+<section class="slide" data-title="Sources: tokens and the assistant">
+  <h2>Sources: tokens and the assistant</h2>
   <div class="grow source-list">
     <ul>
-      <li>D. Patterson et al., 2021, “Carbon Emissions and Large Neural Network Training”; GPT-3 at 1,287 MWh and 552 tCO2e.</li>
-      <li>A. S. Luccioni, S. Viguier, A. Ligozat, 2022, “Estimating the Carbon Footprint of BLOOM”; 433 MWh; 24.7 to 50.5 tCO2eq.</li>
-      <li>IEA, 2025, <i>Energy and AI</i>; 415 TWh in 2024, about 945 TWh by 2030. Ember, 2025, <i>Global Electricity Review</i>; about 30,700 TWh generated in 2024.</li>
-      <li>Our World in Data, from D. S. Lee et al., 2021: aviation about 2.5% of global CO2. IEA cement sector tracking: about 7%.</li>
-      <li>US EPA, “Greenhouse Gas Emissions from a Typical Passenger Vehicle”: 4.6 t per year. US EIA: about 10,500 kWh per household per year. carbonfootprint.com calculator, 2025: about 1 t CO2 per transatlantic round trip seat, about 2 t with high altitude effects.</li>
-      <li>Epoch AI, February 2025, “How much energy does ChatGPT use?”: about 0.3 Wh per query. A. de Vries, 2023, <i>Joule</i>: the earlier 3 Wh estimate. S. Altman, June 2025 blog: 0.34 Wh (company figure).</li>
-      <li>A. Krizhevsky, I. Sutskever, G. Hinton, 2012, “ImageNet Classification with Deep Convolutional Neural Networks”; two GTX 580 3GB GPUs, five to six days.</li>
-      <li>NVIDIA: H100 datasheet (989 TFLOPS dense BF16; 700 W; 80B transistors); Volta whitepaper, 2017 (Tensor Cores); GeForce 256 materials, 1999 (“the world's first GPU”); corporate history (founded April 5, 1993). I. Buck et al., 2004, “Brook for GPUs,” SIGGRAPH.</li>
-      <li>CNBC, July 10, 2025 and October 29, 2025: first closes above $4T and $5T. CNBC, 2023/2024: Raymond James H100 price estimate of $25,000 to $30,000. T. Akenine-Möller, E. Haines, N. Hoffman, 2018, <i>Real-Time Rendering</i>, 4th ed. Computer History Museum: the Utah teapot (M. Newell, 1975).</li>
+      <li>A. Dosovitskiy et al., 2021, “An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale,” ICLR; “large scale training trumps inductive bias.”</li>
+      <li>M. Chen et al., 2020, “Generative Pretraining From Pixels,” ICML (Image GPT). A. Ramesh et al., 2021, “Zero-Shot Text-to-Image Generation” (DALL-E, announced January 5, 2021); a 32 by 32 grid of discrete image tokens.</li>
+      <li>A. Radford et al., 2021, “Learning Transferable Visual Models From Natural Language Supervision” (CLIP); 400 million image and caption pairs. H. Liu et al., 2023, “Visual Instruction Tuning” (LLaVA), NeurIPS.</li>
+      <li>OpenAI, March 14, 2023, GPT-4 with image input. Google, December 6, 2023, Gemini, “natively multimodal.” Anthropic, March 4, 2024, Claude 3 with vision.</li>
+      <li>Anthropic vision documentation (platform.claude.com, read July 2026): one visual token per 28 by 28 pixel patch; 1,568 and 4,784 token tiers. OpenAI vision documentation (read July 2026): 32 by 32 pixel patches for smaller models; 512 by 512 tiles with base and per tile counts for larger ones.</li>
+      <li>The house scene, its filter outputs, and every grid on these slides were generated for the deck (illustrative) with the kernels shown.</li>
       <li>Owner: Mehmet Kerem Turkcan; Associate Research Scientist; Center for Smart Streetscapes, Columbia University; New York, USA; keremturkcan.com; mkt2126@columbia.edu.</li>
     </ul>
   </div>
 </section>
 
 </div>
-<div class="footline"><span>Intro to AI, Part 6: Training at Scale</span><span>M. K. Turkcan, Columbia University</span></div>
+<div class="footline"><span>Intro to AI, Part 8: Vision</span><span>M. K. Turkcan, Columbia University</span></div>
 </div>
 
 <div id="chrome">
@@ -1138,6 +1449,102 @@ html[data-size="l"] .slide { padding: 48px 68px 70px; }
   if (document.fonts && document.fonts.addEventListener) {
     document.fonts.addEventListener('loadingdone', function () { autoFit(); });
   }
+})();
+</script>
+<script>
+(function partEightAnimators() {
+  var reduced = false;
+  try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  function fragOff() { return document.documentElement.getAttribute('data-frag') === 'off'; }
+  function shown(el) { return !el || fragOff() || el.classList.contains('shown'); }
+  function ease(t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; }
+
+  /* convolution window; markup ships in the FINAL state (outputs visible, window at last stop) */
+  var win = document.getElementById('s4win');
+  var outs = Array.prototype.slice.call(document.querySelectorAll('.s4o'));
+  var s4trig = document.getElementById('s4trig');
+  var s4anim = null, s4played = false;
+  function s4place(r, c) { win.setAttribute('x', 14 + c * 30); win.setAttribute('y', 40 + r * 30); }
+  function s4final() { outs.forEach(function (o) { o.style.opacity = 1; }); s4place(5, 5); }
+  function s4reset() { if (s4anim) { cancelAnimationFrame(s4anim); s4anim = null; } outs.forEach(function (o) { o.style.opacity = 0; }); s4place(0, 0); s4played = false; }
+  function s4play() {
+    if (s4played) return; s4played = true;
+    var stops = []; for (var r = 0; r < 6; r++) for (var c = 0; c < 6; c++) stops.push([r, c]);
+    var per = 175, t0 = null;
+    outs.forEach(function (o) { o.style.opacity = 0; });
+    function tick(ts) {
+      if (!t0) t0 = ts;
+      var i = Math.min(stops.length - 1, Math.floor((ts - t0) / per));
+      var frac = Math.min(1, ((ts - t0) % per) / (per * .6));
+      var cur = stops[i], prev = stops[Math.max(0, i - 1)];
+      var e = ease(frac);
+      win.setAttribute('x', 14 + (prev[1] + (cur[1] - prev[1]) * e) * 30);
+      win.setAttribute('y', 40 + (prev[0] + (cur[0] - prev[0]) * e) * 30);
+      for (var k = 0; k <= i; k++) outs[k].style.opacity = 1;
+      if (i < stops.length - 1) s4anim = requestAnimationFrame(tick);
+      else { s4final(); s4anim = null; }
+    }
+    s4anim = requestAnimationFrame(tick);
+  }
+
+  /* patch flight; tiles ship at their FINAL row positions */
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('.s9t'));
+  var s9trig = document.getElementById('s9trig');
+  var s9anim = null, s9played = false;
+  function s9final() { tiles.forEach(function (t) { t.setAttribute('x', t.dataset.ex); t.setAttribute('y', t.dataset.ey); t.setAttribute('width', 46); t.setAttribute('height', 46); }); }
+  function s9reset() { if (s9anim) { cancelAnimationFrame(s9anim); s9anim = null; } tiles.forEach(function (t) { t.setAttribute('x', t.dataset.sx); t.setAttribute('y', t.dataset.sy); t.setAttribute('width', 72); t.setAttribute('height', 72); }); s9played = false; }
+  function s9play() {
+    if (s9played) return; s9played = true;
+    var dur = 1400, stagger = 70, t0 = null;
+    function tick(ts) {
+      if (!t0) t0 = ts;
+      var done = true;
+      tiles.forEach(function (t, i) {
+        var p = Math.min(1, Math.max(0, (ts - t0 - i * stagger) / dur));
+        if (p < 1) done = false;
+        var e = ease(p);
+        t.setAttribute('x', (+t.dataset.sx) + ((+t.dataset.ex) - (+t.dataset.sx)) * e);
+        t.setAttribute('y', (+t.dataset.sy) + ((+t.dataset.ey) - (+t.dataset.sy)) * e);
+        var w = 72 + (46 - 72) * e; t.setAttribute('width', w); t.setAttribute('height', w);
+      });
+      if (!done) s9anim = requestAnimationFrame(tick); else { s9final(); s9anim = null; }
+    }
+    s9anim = requestAnimationFrame(tick);
+  }
+
+  /* generation grid; tiles ship visible (FINAL state), cursor hidden */
+  var gtiles = Array.prototype.slice.call(document.querySelectorAll('.s13t'));
+  var cur = document.getElementById('s13cur');
+  var s13trig = document.getElementById('s13trig');
+  var s13anim = null, s13played = false;
+  function s13final() { gtiles.forEach(function (t) { t.style.opacity = 1; }); if (cur) cur.setAttribute('opacity', 0); }
+  function s13reset() { if (s13anim) { cancelAnimationFrame(s13anim); s13anim = null; } gtiles.forEach(function (t) { t.style.opacity = 0; }); if (cur) cur.setAttribute('opacity', 0); s13played = false; }
+  function s13play() {
+    if (s13played) return; s13played = true;
+    var per = 200, t0 = null;
+    gtiles.forEach(function (t) { t.style.opacity = 0; });
+    function tick(ts) {
+      if (!t0) t0 = ts;
+      var i = Math.min(15, Math.floor((ts - t0) / per));
+      for (var k = 0; k <= i; k++) gtiles[k].style.opacity = 1;
+      if (cur) {
+        cur.setAttribute('opacity', 1);
+        cur.setAttribute('x', 68 + (i % 4) * 66);
+        cur.setAttribute('y', 40 + Math.floor(i / 4) * 66);
+      }
+      if ((ts - t0) < 16 * per) s13anim = requestAnimationFrame(tick);
+      else { s13final(); s13anim = null; }
+    }
+    s13anim = requestAnimationFrame(tick);
+  }
+
+  function sync() {
+    if (win && s4trig) { if (shown(s4trig)) { if (reduced || fragOff()) { s4final(); } else if (!s4played) { s4play(); } } else { s4reset(); } }
+    if (tiles.length && s9trig) { if (shown(s9trig)) { if (reduced || fragOff()) { s9final(); } else if (!s9played) { s9play(); } } else { s9reset(); } }
+    if (gtiles.length && s13trig) { if (shown(s13trig)) { if (reduced || fragOff()) { s13final(); } else if (!s13played) { s13play(); } } else { s13reset(); } }
+  }
+  document.addEventListener('fragstep', sync);
+  sync();
 })();
 </script>
 </body>
