@@ -1,0 +1,9 @@
+[
+  { "sel": "labs", "title": "Two laboratories", "body": "Switch between the Model Playground and the Text Lab here. You are in the Playground now." },
+  { "sel": "network", "title": "A live neural network", "body": "Neurons glow as they activate, and connections thicken with their weight." },
+  { "sel": "presets", "title": "Editing the network", "body": "Use the − and + controls over any layer to add or remove neurons and layers, or apply a Shallow, Wide, or Deep preset." },
+  { "sel": "play", "title": "Training controls", "body": "Press play to train continuously, or step once to watch a single batch nudge the weights." },
+  { "sel": "boundary", "title": "The decision boundary", "body": "The decision boundary shows what the model predicts across the whole plane as it learns." },
+  { "sel": "mission", "title": "The mission card", "body": "Each mission teaches one idea under a restriction. Hit the target and check your solution." },
+  { "sel": "quest", "title": "XP and the quest map", "body": "Completing missions earns XP and unlocks the next quest on your map. Good luck!" }
+]

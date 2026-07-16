@@ -74,6 +74,10 @@ scripts:
                     <h3>{{ day.date }}</h3>
                     <ul class="resource-list">
                       {% for item in day.items %}
+                        {% assign item_href = item.url %}
+                        {% if item.path %}
+                          {% assign item_href = item.path | relative_url %}
+                        {% endif %}
                         {% case item.type %}
                           {% when 'Reading' %}{% assign item_color = '#5f7000' %}
                           {% when 'Demo' %}{% assign item_color = '#ae2573' %}
@@ -84,8 +88,8 @@ scripts:
                           {% else %}{% assign item_color = '#1d4f91' %}
                         {% endcase %}
                         <li class="resource-item" data-resource-type="{{ item.type }}" style="--item-color:{{ item_color }}">
-                          {% if item.url %}
-                            <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ item.title | escape }} (opens in a new tab)">
+                          {% if item_href %}
+                            <a href="{{ item_href }}" target="_blank" rel="noopener noreferrer" aria-label="{{ item.title | escape }} (opens in a new tab)">
                               <span class="resource-item__type">{{ item.type }}</span>
                               <span class="resource-item__title">{{ item.title }}</span>
                               <span class="resource-item__external" aria-hidden="true">Open</span>

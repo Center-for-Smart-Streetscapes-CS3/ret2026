@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<meta name="viewport" content="width=1366, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&amp;family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;family=Cinzel:wght@600;700&amp;display=swap" rel="stylesheet">
+<style>
+.cs3app{
+  --page:#e9f0f6; --surface:#ffffff; --surface-soft:#f4f8fb; --surface-strong:#e6eff7;
+  --ink:#141a22; --muted:#54606e; --faint:#7c8794; --line:#e2e8ef; --line-strong:#cdd8e2;
+  --navy:#003087; --navy-deep:#001d54; --blue:#1d4f91; --blue-bright:#0077c8; --columbia:#b9d9eb; --columbia-soft:#eef6fb;
+  --gold:#f0b323; --gold-ink:#946200; --gold-soft:#fff5db; --good:#2f7d4f; --good-soft:#e7f3ec; --bad:#b1362c; --bad-soft:#fbebe9;
+  --accent:#f0b323; --accent-ink:#946200; --accent-soft:#fff5db;
+  --shadow-s:0 1px 2px rgba(15,32,64,.06); --shadow-m:0 2px 4px rgba(15,32,64,.05),0 12px 30px -14px rgba(15,32,64,.22);
+  --shadow-l:0 24px 60px -20px rgba(9,20,45,.42);
+  --sans:"Source Sans 3",system-ui,sans-serif; --serif:"EB Garamond",Georgia,serif; --display:"Cinzel",Georgia,serif; --mono:"Menlo","Monaco","Consolas",monospace;
+  position:fixed; inset:0; width:100vw; height:100vh; overflow:hidden;
+  display:flex; flex-direction:column;
+  background:var(--page); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+.cs3app[data-theme="dark"]{
+  --page:#06101f; --surface:#0e1f36; --surface-soft:#122944; --surface-strong:#183253;
+  --ink:#eef4fb; --muted:#aebccb; --faint:#7e8ea0; --line:#22405f; --line-strong:#3a597a;
+  --navy:#9cc6ee; --navy-deep:#c4defa; --blue:#78b7ea; --blue-bright:#57a7e6; --columbia:#b9d9eb; --columbia-soft:#15304e;
+  --gold:#f0b323; --gold-ink:#f4cd6a; --gold-soft:#332a12; --good:#7cc496; --good-soft:#1c3a2b; --bad:#f0857a; --bad-soft:#3d2422;
+  --accent:#f0b323; --accent-ink:#f4cd6a; --accent-soft:#332a12;
+  --shadow-s:0 1px 2px rgba(0,0,0,.4); --shadow-m:0 2px 6px rgba(0,0,0,.4),0 16px 36px -16px rgba(0,0,0,.6);
+  --shadow-l:0 30px 70px -20px rgba(0,0,0,.7);
+}
+.cs3app *{box-sizing:border-box}
+.cs3app button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;margin:0}
+.cs3app select,.cs3app input,.cs3app textarea{font:inherit;color:inherit}
+.cs3app h1,.cs3app h2,.cs3app h3,.cs3app h4,.cs3app p{margin:0}
+.cs3app ::-webkit-scrollbar{width:9px;height:9px}
+.cs3app ::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:9px;border:2px solid transparent;background-clip:padding-box}
+.cs3app ::-webkit-scrollbar-track{background:transparent}
+.cs3app :focus-visible{outline:2px solid var(--blue-bright);outline-offset:2px}
+.cs3app a{color:var(--blue);text-decoration:none}
+.cs3app a:hover{color:var(--navy);text-decoration:underline}
+@keyframes cs3fade{from{opacity:0}to{opacity:1}}
+@keyframes cs3rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes cs3pop{0%{opacity:0;transform:scale(.9)}60%{opacity:1;transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes cs3flow{to{stroke-dashoffset:-28}}
+@keyframes cs3pulse{0%,100%{opacity:.35}50%{opacity:.85}}
+@keyframes cs3spin{to{transform:rotate(360deg)}}
+@keyframes cs3sheen{0%{background-position:-160% 0}100%{background-position:260% 0}}
+@keyframes cs3bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes cs3ring{0%{transform:scale(.6);opacity:.5}100%{transform:scale(1.5);opacity:0}}
+@keyframes cs3attn{0%,100%{box-shadow:0 0 0 0 rgba(240,179,35,.75)}50%{box-shadow:0 0 0 7px rgba(240,179,35,0)}}
+.cs3app[data-reduce="1"] *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+</style>
+<script src="data/shakespeare-corpus.js"></script>
+<script src="data/shakespeare-all.js"></script>
+<script src="data/tinystories.js"></script>
+<script src="minigpt-engine.js"></script>
+</helmet>
+
+<div class="cs3app" data-theme="light" data-reduce="0" style="display:flex;flex-direction:column" ref="{{ rootRef }}" onClick="{{ onClick }}" onInput="{{ onInput }}" onChange="{{ onChange }}">
+  <header style="flex:0 0 auto;height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:var(--shadow-s);z-index:20;position:relative">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:0 0 auto">
+      <a href="https://cs3-erc.org/" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center" aria-label="Center for Smart Streetscapes">
+        <img src="assets/cs3-nsf-logo.png" alt="NSF Center for Smart Streetscapes" style="height:32px;width:auto;display:block">
+      </a>
+      <span style="width:1px;height:32px;background:var(--line-strong)"></span>
+      <div style="min-width:0;white-space:nowrap">
+        <p style="font:800 8.5px/1.2 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink)">Research Experience for Teachers</p>
+        <p style="font:700 15px/1.15 var(--display);letter-spacing:.02em;color:var(--ink)">AI Training Toolkit</p>
+      </div>
+    </div>
+
+    <nav style="display:flex;gap:4px;padding:4px;background:var(--surface-strong);border-radius:11px;margin-left:6px" aria-label="Laboratories">
+      <button data-action="lab" data-lab="playground" data-tour="labs" data-labtab="playground" style="display:flex;align-items:center;gap:9px;padding:7px 14px 7px 11px;border-radius:8px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);transition:all .18s">
+        <span style="display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--navy);color:#fff;font:800 11px/1 var(--mono)">01</span>
+        <span style="text-align:left"><span style="display:block;font:700 12.5px/1.1 var(--sans)">Model Playground</span><span style="display:block;font:500 9.5px/1.1 var(--sans);color:var(--faint)">Networks &amp; boundaries</span></span>
+      </button>
+      <button data-action="lab" data-lab="text" data-labtab="text" style="display:flex;align-items:center;gap:9px;padding:7px 14px 7px 11px;border-radius:8px;background:transparent;color:var(--muted);transition:all .18s">
+        <span style="display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--surface-strong);color:var(--muted);font:800 11px/1 var(--mono)">02</span>
+        <span style="text-align:left"><span style="display:block;font:700 12.5px/1.1 var(--sans)">Text Lab</span><span style="display:block;font:500 9.5px/1.1 var(--sans);color:var(--faint)">Tokens &amp; transformers</span></span>
+      </button>
+    </nav>
+
+    <div style="flex:1 1 auto"></div>
+
+    
+
+    <button data-action="quest" data-tour="quest" style="display:flex;align-items:center;gap:10px;padding:5px 12px 5px 7px;border-radius:22px;background:var(--surface);border:1px solid var(--line-strong);transition:all .18s" title="Open the quest map">
+      <span data-mp="levelbadge" style="position:relative;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:conic-gradient(var(--accent) 0deg,var(--surface-strong) 0deg);transition:background .5s">
+        <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font:700 13px/1 var(--display)"><span data-mp="level">1</span></span>
+      </span>
+      <span style="text-align:left">
+        <span style="display:flex;align-items:baseline;gap:5px"><span style="font:800 8px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)">XP</span><span data-mp="xptext" style="font:700 9.5px/1 var(--mono);color:var(--muted)">0 / 150</span></span>
+        <span style="display:block;width:96px;height:5px;margin-top:4px;border-radius:3px;background:var(--surface-strong);overflow:hidden"><span data-mp="xpbar" style="display:block;height:100%;width:0%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--blue-bright));transition:width .5s cubic-bezier(.4,0,.2,1)"></span></span>
+      </span>
+    </button>
+
+    <div style="display:flex;align-items:center;gap:2px;margin-left:2px">
+      <button data-action="compute" title="Compute settings" aria-label="Compute settings" style="display:grid;place-items:center;width:36px;height:36px;border-radius:9px;color:var(--muted);transition:all .16s"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"></path></svg></button>
+      
+      <button data-action="sound" title="Sound" aria-label="Toggle sound" style="display:grid;place-items:center;width:36px;height:36px;border-radius:9px;color:var(--muted);transition:all .16s"><svg data-mp="soundicon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"></path></svg></button>
+      <button data-action="help" title="Help" aria-label="Help" style="display:grid;place-items:center;width:36px;height:36px;border-radius:9px;color:var(--muted);transition:all .16s"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.2 9a2.8 2.8 0 0 1 5.4 1c0 1.9-2.8 2.5-2.8 2.5"></path><path d="M12 17h.01"></path></svg></button>
+    </div>
+  </header>
+
+  <main style="height:calc(100vh - 80px);min-height:0;position:relative;overflow:hidden">
+
+    <!-- PLAYGROUND SCREEN -->
+    <section data-screen="playground" data-screen-label="Model Playground" style="position:absolute;inset:0;display:flex;gap:12px;padding:12px 14px;min-height:0">
+
+      <!-- LEFT RAIL: MISSION + CONTROLS -->
+      <aside data-tour="mission" style="flex:0 0 266px;display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div style="flex:0 0 auto;display:flex;gap:4px;padding:4px;background:var(--surface-strong);border-radius:11px">
+          <button data-action="mode" data-mode="lesson" data-mp="mode-lesson" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:8px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);font:700 11px/1 var(--sans)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>Lesson Plan</button>
+          <button data-action="mode" data-mode="sandbox" data-mp="mode-sandbox" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:8px;background:transparent;color:var(--muted);font:700 11px/1 var(--sans)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 8.5A2 2 0 0 0 7 21h10a2 2 0 0 0 1.7-3.5L14 9V3"></path></svg>Sandbox</button>
+        </div>
+        <div style="flex:0 0 auto;position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(150deg,var(--navy),var(--navy-deep));color:#fff;box-shadow:var(--shadow-m)">
+          <div style="position:absolute;inset:0;background:radial-gradient(120% 90% at 100% 0%,rgba(185,217,235,.28),transparent 60%);pointer-events:none"></div>
+          <div style="position:relative;padding:13px 14px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+              <span style="display:inline-flex;align-items:center;gap:6px;font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--columbia)"><span data-mp="mkicker">Mission 1 of 8</span></span>
+              <div data-mp="m-nav" style="display:flex;gap:3px">
+                <button data-action="mission-prev" aria-label="Previous mission" style="display:grid;place-items:center;width:23px;height:23px;border-radius:6px;background:rgba(255,255,255,.12);color:#fff;font-size:14px">‹</button>
+                <button data-action="mission-next" aria-label="Next mission" style="display:grid;place-items:center;width:23px;height:23px;border-radius:6px;background:rgba(255,255,255,.12);color:#fff;font-size:14px">›</button>
+              </div>
+            </div>
+            <h2 data-mp="mtitle" style="font:500 20px/1.08 var(--serif);letter-spacing:.01em;margin-bottom:5px">Separate the Two Clouds</h2>
+            <p data-mp="mgoal" style="font:400 12px/1.4 var(--sans);color:rgba(255,255,255,.8)">Train until validation loss falls below the target using a single hidden layer.</p>
+            <div data-mp="m-objective" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px">
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;background:rgba(255,255,255,.12);font:700 10px/1 var(--sans)"><span style="color:var(--columbia);letter-spacing:.04em">DATASET</span><span data-mp="m-obj-ds" style="color:#fff">Two Clouds</span></span>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;background:rgba(255,255,255,.12);font:700 10px/1 var(--sans)"><span style="color:var(--columbia);letter-spacing:.04em">GOAL</span><span data-mp="m-obj-target" style="color:#fff;font-family:var(--mono)">val loss &lt; 0.08</span></span>
+            </div>
+            <div data-mp="m-progress" style="display:flex;align-items:center;gap:8px;margin-top:11px">
+              <div style="flex:1 1 auto;height:6px;border-radius:4px;background:rgba(255,255,255,.16);overflow:hidden"><span data-mp="mprog" style="display:block;height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,var(--columbia),var(--gold));transition:width .4s"></span></div>
+              <span data-mp="mprogtext" style="font:700 10px/1 var(--mono);color:var(--columbia)">0/8</span>
+            </div>
+            <div data-mp="m-actions" style="display:flex;gap:7px;margin-top:12px">
+              <button data-action="hint" style="flex:0 0 auto;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.14);color:#fff;font:700 11.5px/1 var(--sans);transition:background .16s">Hint</button>
+              <button data-action="check" data-tour="check" style="flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;background:var(--gold);color:#3a2600;font:800 11.5px/1 var(--sans);box-shadow:0 2px 0 rgba(0,0,0,.12);transition:transform .12s">Check Solution</button>
+            </div>
+            <div data-mp="hintbox" style="display:none;margin-top:10px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.1);border-left:3px solid var(--gold)">
+              <p data-mp="hinttext" style="font:400 11px/1.45 var(--sans);color:rgba(255,255,255,.92)">Keep the two original features, then add just enough neurons to bend the boundary.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex:1 1 auto;display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
+          <div style="flex:0 0 auto;display:flex;padding:5px 6px;gap:3px;border-bottom:1px solid var(--line);background:var(--surface-soft)">
+            <button data-action="ctab" data-ctab="data" data-mp="ctab-data" style="flex:1;padding:7px 4px;border-radius:7px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);font:700 11px/1 var(--sans)">Data</button>
+            <button data-action="ctab" data-ctab="model" data-mp="ctab-model" style="flex:1;padding:7px 4px;border-radius:7px;background:transparent;color:var(--muted);font:700 11px/1 var(--sans)">Model</button>
+            <button data-action="ctab" data-ctab="train" data-mp="ctab-train" style="flex:1;padding:7px 4px;border-radius:7px;background:transparent;color:var(--muted);font:700 11px/1 var(--sans)">Train</button>
+          </div>
+          <div style="flex:1 1 auto;min-height:0;overflow:auto;padding:13px 14px">
+
+            <div data-mp="cpane-data">
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Dataset</p>
+              <div data-mp="datasets" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">
+                <button data-action="dataset" data-ds="gaussian" style="display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;border:1.5px solid var(--blue);background:var(--columbia-soft);color:var(--ink);font:600 11px/1 var(--sans)"><span style="width:16px;height:16px;border-radius:4px;background:radial-gradient(circle at 30% 35%,var(--blue) 0 26%,transparent 27%),radial-gradient(circle at 72% 74%,var(--gold-ink) 0 26%,transparent 27%)"></span>Two clouds</button>
+                <button data-action="dataset" data-ds="xor" style="display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:600 11px/1 var(--sans)"><span style="width:16px;height:16px;border-radius:4px;background:conic-gradient(var(--blue) 0 25%,var(--gold-ink) 0 50%,var(--blue) 0 75%,var(--gold-ink) 0)"></span>XOR</button>
+                <button data-action="dataset" data-ds="circle" style="display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:600 11px/1 var(--sans)"><span style="width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,var(--blue) 0 30%,var(--gold-ink) 42% 100%)"></span>Ring</button>
+                <button data-action="dataset" data-ds="spiral" style="display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:600 11px/1 var(--sans)"><span style="width:16px;height:16px;border-radius:50%;background:conic-gradient(from 0deg,var(--blue),var(--gold-ink),var(--blue))"></span>Spiral</button>
+              </div>
+              <label style="display:flex;align-items:center;justify-content:space-between;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:5px"><span>Noise</span><span data-mp="noiseval" style="font:600 10px/1 var(--mono);color:var(--ink)">0%</span></label>
+              <input data-action="noise" type="range" min="0" max="50" value="0" step="5" style="width:100%;accent-color:var(--blue);margin-bottom:12px">
+              <label style="display:flex;align-items:center;justify-content:space-between;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:5px"><span>Training split</span><span data-mp="splitval" style="font:600 10px/1 var(--mono);color:var(--ink)">70%</span></label>
+              <input data-action="split" type="range" min="40" max="90" value="70" step="10" style="width:100%;accent-color:var(--blue);margin-bottom:14px">
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Input features</p>
+              <div data-mp="features" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px"></div>
+              <button data-action="regen" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface-soft);color:var(--ink);font:700 11px/1 var(--sans);transition:all .16s">Regenerate examples</button>
+            </div>
+
+            <div data-mp="cpane-model" style="display:none">
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Activation</p>
+              <div data-mp="acts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:14px"></div>
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Regularization</p>
+              <div style="display:flex;gap:6px;margin-bottom:6px">
+                <label style="flex:1"><span style="display:block;font:700 9.5px/1 var(--sans);color:var(--muted);margin-bottom:4px">Type</span>
+                  <select data-action="reg" style="width:100%;padding:7px 8px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"><option value="none">None</option><option value="l1">L1</option><option value="l2">L2</option></select></label>
+                <label style="flex:1"><span style="display:block;font:700 9.5px/1 var(--sans);color:var(--muted);margin-bottom:4px">Rate</span>
+                  <input data-action="regrate" type="number" min="0" max="0.3" step="0.001" value="0" style="width:100%;padding:7px 8px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"></label>
+              </div>
+              <p style="font:400 10.5px/1.45 var(--sans);color:var(--faint);margin-top:10px">Structure is edited directly on the network — use the <strong style="color:var(--muted)">− / +</strong> controls over each layer.</p>
+            </div>
+
+            <div data-mp="cpane-train" style="display:none">
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Optimizer</p>
+              <select data-action="optimizer" style="width:100%;padding:8px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface);margin-bottom:12px"><option value="adam">Adam</option><option value="momentum">Momentum</option><option value="rmsprop">RMSProp</option><option value="sgd">SGD</option><option value="adamw">AdamW</option></select>
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Loss</p>
+              <select data-action="lossfn" style="width:100%;padding:8px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface);margin-bottom:12px"><option value="square">Mean square error</option><option value="cross-entropy">Cross entropy</option></select>
+              <label style="display:flex;align-items:center;justify-content:space-between;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:5px"><span>Learning rate</span><span data-mp="lrval" style="font:600 10px/1 var(--mono);color:var(--ink)">0.030</span></label>
+              <input data-action="lr" type="range" min="-4" max="0" value="-1.52" step="0.01" style="width:100%;accent-color:var(--blue);margin-bottom:12px">
+              <label style="display:block;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:5px">Batch size</label>
+              <select data-action="batch" style="width:100%;padding:8px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"><option value="1">1</option><option value="5">5</option><option value="10" selected="">10</option><option value="20">20</option><option value="50">50</option></select>
+            </div>
+
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER: NETWORK HERO -->
+      <div data-tour="network" style="flex:1 1 auto;display:flex;flex-direction:column;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-m);overflow:hidden">
+        <div style="flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;row-gap:8px">
+          <div style="min-width:0;white-space:nowrap;flex:0 0 auto">
+            <p style="font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink)">Live workbench</p>
+            <h3 style="font:500 17px/1.1 var(--serif);color:var(--ink);margin-top:2px;white-space:nowrap">Neural Network</h3>
+          </div>
+          <div data-tour="presets" style="display:flex;gap:5px;margin-left:6px;flex:0 0 auto">
+            <button data-action="preset" data-preset="shallow" style="padding:6px 11px;border-radius:20px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);font:700 10.5px/1 var(--sans);transition:all .16s">Shallow</button>
+            <button data-action="preset" data-preset="wide" style="padding:6px 11px;border-radius:20px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);font:700 10.5px/1 var(--sans);transition:all .16s">Wide</button>
+            <button data-action="preset" data-preset="deep" style="padding:6px 11px;border-radius:20px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);font:700 10.5px/1 var(--sans);transition:all .16s">Deep</button>
+          </div>
+          <div style="display:flex;gap:3px;padding:3px;border-radius:9px;background:var(--surface-strong);flex:0 0 auto;margin-left:auto">
+            <button data-action="view" data-view="activations" data-mp="view-activations" style="padding:6px 9px;border-radius:6px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);font:700 10.5px/1 var(--sans)">Activations</button>
+            <button data-action="view" data-view="weights" data-mp="view-weights" style="padding:6px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10.5px/1 var(--sans)">Weights</button>
+            <button data-action="view" data-view="gradients" data-mp="view-gradients" style="padding:6px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10.5px/1 var(--sans)">Gradients</button>
+          </div>
+          <div data-tour="transport" style="display:flex;align-items:center;gap:6px;margin-left:4px;flex:0 0 auto">
+            <button data-action="reset" title="Reset (R)" aria-label="Reset" style="display:grid;place-items:center;width:38px;height:38px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);transition:all .16s"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg></button>
+            <button data-action="play" data-tour="play" title="Play / Pause (Space)" aria-label="Play or pause" style="display:grid;place-items:center;width:46px;height:46px;border-radius:12px;background:var(--navy);color:#fff;box-shadow:0 3px 0 var(--navy-deep),var(--shadow-m);transition:all .12s">
+              <svg data-mp="playicon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+              <svg data-mp="pauseicon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
+            </button>
+            <button data-action="step" title="One step (S)" aria-label="One step" style="display:grid;place-items:center;width:38px;height:38px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);transition:all .16s"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5v14l9-7zM16 5h2.5v14H16z"></path></svg></button>
+          </div>
+        </div>
+
+        <div data-tour="metrics" style="flex:0 0 auto;display:flex;align-items:center;gap:0;padding:0 14px;height:42px;border-bottom:1px solid var(--line);background:var(--surface-soft)">
+          <div style="display:flex;flex-direction:column;padding-right:18px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Epoch</span><span data-mp="m-epoch" style="font:700 15px/1.1 var(--mono);color:var(--ink)">0</span></div>
+          <div style="width:1px;height:22px;background:var(--line)"></div>
+          <div style="display:flex;flex-direction:column;padding:0 18px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Train loss</span><span data-mp="m-train" style="font:700 15px/1.1 var(--mono);color:var(--blue)">—</span></div>
+          <div style="width:1px;height:22px;background:var(--line)"></div>
+          <div style="display:flex;flex-direction:column;padding:0 18px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Val loss</span><span data-mp="m-val" style="font:700 15px/1.1 var(--mono);color:var(--gold-ink)">—</span></div>
+          <div style="width:1px;height:22px;background:var(--line)"></div>
+          <div style="display:flex;flex-direction:column;padding:0 18px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Examples/sec</span><span data-mp="m-speed" style="font:700 15px/1.1 var(--mono);color:var(--ink)">0</span></div>
+          <div style="flex:1 1 auto"></div>
+          <span data-mp="statuspill" style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;background:var(--surface-strong);color:var(--muted);font:700 10px/1 var(--sans)"><span data-mp="statusdot" style="width:7px;height:7px;border-radius:50%;background:var(--faint)"></span><span data-mp="statustext">Ready</span></span>
+        </div>
+
+        <div ref="{{ netRef }}" style="flex:1 1 auto;position:relative;min-height:0;overflow:hidden;background:radial-gradient(130% 100% at 50% 0%,var(--surface),var(--surface-soft))"></div>
+      </div>
+
+      <!-- RIGHT RAIL: BOUNDARY + LOSS + INSPECTOR -->
+      <aside style="flex:0 0 320px;display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div data-tour="boundary" style="flex:1.5 1 0;min-height:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line)">
+            <div><p style="font:800 8.5px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink)">Model output</p><h4 style="font:500 15px/1.1 var(--serif);color:var(--ink);margin-top:2px">Decision Boundary</h4></div>
+            <span data-mp="boundpill" style="font:700 9.5px/1 var(--mono);padding:4px 8px;border-radius:6px;background:var(--surface-strong);color:var(--muted)">tanh</span>
+          </div>
+          <div style="position:relative;flex:1 1 auto;min-height:0;width:100%;background:var(--surface-strong)">
+            <canvas ref="{{ boundaryRef }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
+            <span style="position:absolute;left:8px;bottom:6px;font:700 10px/1 var(--mono);color:var(--faint)">x₁</span>
+            <span style="position:absolute;left:6px;top:8px;font:700 10px/1 var(--mono);color:var(--faint)">x₂</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;flex-wrap:wrap">
+            <span style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted)"><i style="width:9px;height:9px;border-radius:50%;background:var(--blue)"></i>Class A</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted)"><i style="width:9px;height:9px;border-radius:50%;background:var(--gold-ink)"></i>Class B</span>
+            <label style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted);cursor:pointer;margin-left:auto"><input data-action="showval" type="checkbox" style="accent-color:var(--blue)">Test</label>
+            <label style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted);cursor:pointer"><input data-action="discretize" type="checkbox" style="accent-color:var(--blue)">Discrete</label>
+          </div>
+        </div>
+
+        <div style="flex:0 0 auto;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line)">
+            <div><p style="font:800 8.5px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink)">History</p><h4 style="font:500 15px/1.1 var(--serif);color:var(--ink);margin-top:2px">Loss</h4></div>
+            <button data-action="clearloss" style="font:700 10px/1 var(--sans);color:var(--faint);padding:4px 6px;border-radius:6px">Clear</button>
+          </div>
+          <div style="position:relative;width:100%;height:86px"><canvas ref="{{ lossRef }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas></div>
+        </div>
+
+        <div data-tour="inspector" style="flex:1 1 auto;display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line)">
+            <div><p style="font:800 8.5px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink)">Inspect</p><h4 style="font:500 15px/1.1 var(--serif);color:var(--ink);margin-top:2px">Selected Unit</h4></div>
+            <span data-mp="inspkind" style="font:700 9px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:20px;background:var(--surface-strong);color:var(--faint)">None</span>
+          </div>
+          <div data-mp="inspbody" style="flex:1 1 auto;min-height:0;overflow:auto;padding:12px">
+            <p style="font:400 12px/1.5 var(--sans);color:var(--faint);text-align:center;padding:14px 8px">Click a neuron or connection in the network to inspect its weight, bias, and output.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- TEXT LAB SCREEN -->
+    <section data-screen="text" data-screen-label="Text Lab" style="position:absolute;inset:0;display:none;gap:12px;padding:12px 14px;min-height:0">
+
+      <!-- LEFT: LESSON + CONTROLS -->
+      <aside style="flex:0 0 266px;display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div style="flex:0 0 auto;position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(150deg,var(--navy),var(--navy-deep));color:#fff;box-shadow:var(--shadow-m)">
+          <div style="position:absolute;inset:0;background:radial-gradient(120% 90% at 100% 0%,rgba(185,217,235,.28),transparent 60%);pointer-events:none"></div>
+          <div style="position:relative;padding:13px 14px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+              <span style="font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--columbia)"><span data-mp="t-kicker">Lesson 1 of 8</span></span>
+              <div style="display:flex;gap:3px">
+                <button data-action="t-prev" aria-label="Previous lesson" style="display:grid;place-items:center;width:23px;height:23px;border-radius:6px;background:rgba(255,255,255,.12);color:#fff;font-size:14px">‹</button>
+                <button data-action="t-next" aria-label="Next lesson" style="display:grid;place-items:center;width:23px;height:23px;border-radius:6px;background:rgba(255,255,255,.12);color:#fff;font-size:14px">›</button>
+              </div>
+            </div>
+            <h2 data-mp="t-title" style="font:500 20px/1.08 var(--serif);letter-spacing:.01em;margin-bottom:5px">Count What Follows</h2>
+            <p data-mp="t-goal" style="font:400 12px/1.4 var(--sans);color:rgba(255,255,255,.8)">Build a character Markov chain, then sample a short passage from its transition counts.</p>
+            <div style="display:flex;gap:7px;margin-top:12px">
+              <button data-action="t-hint" style="flex:0 0 auto;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.14);color:#fff;font:700 11.5px/1 var(--sans)">Hint</button>
+              <button data-action="t-check" style="flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;background:var(--gold);color:#3a2600;font:800 11.5px/1 var(--sans);box-shadow:0 2px 0 rgba(0,0,0,.12)">Check Lesson</button>
+            </div>
+            <div data-mp="t-hintbox" style="display:none;margin-top:10px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.1);border-left:3px solid var(--gold)">
+              <p data-mp="t-hinttext" style="font:400 11px/1.45 var(--sans);color:rgba(255,255,255,.92)">Click a token in the flow to see the counts for every token that follows it.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex:1 1 auto;display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
+          <div style="flex:0 0 auto;display:flex;padding:5px 6px;gap:3px;border-bottom:1px solid var(--line);background:var(--surface-soft)">
+            <button data-action="tctab" data-tctab="corpus" data-mp="tctab-corpus" style="flex:1;padding:7px 4px;border-radius:7px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);font:700 11px/1 var(--sans)">Corpus</button>
+            <button data-action="tctab" data-tctab="tokens" data-mp="tctab-tokens" style="flex:1;padding:7px 4px;border-radius:7px;background:transparent;color:var(--muted);font:700 11px/1 var(--sans)">Tokens</button>
+            <button data-action="tctab" data-tctab="model" data-mp="tctab-model" style="flex:1;padding:7px 4px;border-radius:7px;background:transparent;color:var(--muted);font:700 11px/1 var(--sans)">Model</button>
+          </div>
+          <div style="flex:1 1 auto;min-height:0;overflow:auto;padding:13px 14px">
+
+            <div data-mp="tcpane-corpus">
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Text source</p>
+              <div data-mp="t-sources" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+                <button data-action="t-source" data-src="shakespeare-all" style="text-align:left;padding:8px 10px;border-radius:8px;border:1.5px solid var(--blue);background:var(--columbia-soft);color:var(--ink);font:600 11.5px/1.2 var(--sans)">Shakespeare <span style="color:var(--faint);font-weight:500">· Complete works</span></button>
+                <button data-action="t-source" data-src="tempest" style="text-align:left;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:600 11.5px/1.2 var(--sans)">The Tempest <span style="color:var(--faint);font-weight:500">· shorter, simpler</span></button>
+                <button data-action="t-source" data-src="tinystories" style="text-align:left;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:600 11.5px/1.2 var(--sans)">TinyStories <span style="color:var(--faint);font-weight:500">· simple English</span></button>
+                <button data-action="t-source" data-src="nursery" style="text-align:left;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:600 11.5px/1.2 var(--sans)">Classroom rhyme <span style="color:var(--faint);font-weight:500">· short, for Markov</span></button>
+              </div>
+              <textarea data-action="t-corpustext" data-mp="t-corpusinput" rows="6" spellcheck="false" style="width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font:400 11px/1.5 var(--mono);resize:none"></textarea>
+              <div style="display:flex;justify-content:space-between;margin:7px 0 10px;font:600 10px/1 var(--mono);color:var(--faint)"><span><span data-mp="t-charcount">0</span> chars</span><span><span data-mp="t-tokcount2">0</span> tokens</span></div>
+              <button data-action="t-prepare" style="width:100%;padding:9px;border-radius:8px;background:var(--navy);color:#fff;font:700 11px/1 var(--sans)">Prepare corpus</button>
+            </div>
+
+            <div data-mp="tcpane-tokens" style="display:none">
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Token pieces</p>
+              <div data-mp="t-tokenizers" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
+                <button data-action="t-tok" data-tok="char" style="padding:8px 6px;border-radius:8px;border:1.5px solid var(--blue);background:var(--columbia-soft);color:var(--navy);font:700 11px/1 var(--sans)">Characters</button>
+                <button data-action="t-tok" data-tok="word" style="padding:8px 6px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:700 11px/1 var(--sans)">Words</button>
+                <button data-action="t-tok" data-tok="syllable" style="padding:8px 6px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:700 11px/1 var(--sans)">Syllables</button>
+                <button data-action="t-tok" data-tok="bpe" style="padding:8px 6px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:700 11px/1 var(--sans)">BPE pieces</button>
+              </div>
+              <p style="font:400 10.5px/1.45 var(--sans);color:var(--faint)">Smaller pieces make a smaller vocabulary and more transitions to learn; larger pieces do the opposite.</p>
+            </div>
+
+            <div data-mp="tcpane-model" style="display:none">
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Model type</p>
+              <div data-mp="t-models" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+                <button data-action="t-model" data-model="markov" style="text-align:left;padding:9px 11px;border-radius:8px;border:1.5px solid var(--blue);background:var(--columbia-soft);color:var(--ink);font:700 11.5px/1.1 var(--sans)">Markov chain<span style="display:block;font:500 10px/1.3 var(--sans);color:var(--faint);margin-top:2px">Counted transitions</span></button>
+                <button data-action="t-model" data-model="rnn" style="text-align:left;padding:9px 11px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:700 11.5px/1.1 var(--sans)">Simple RNN<span style="display:block;font:500 10px/1.3 var(--sans);color:var(--faint);margin-top:2px">Recurrent memory</span></button>
+                <button data-action="t-model" data-model="gpt" style="text-align:left;padding:9px 11px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:700 11.5px/1.1 var(--sans)">Mini GPT<span style="display:block;font:500 10px/1.3 var(--sans);color:var(--faint);margin-top:2px">One causal-attention block, char-level</span></button>
+                <button data-action="t-model" data-model="embed" style="display:none;text-align:left;padding:9px 11px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:700 11.5px/1.1 var(--sans)">Word Vectors<span style="display:block;font:500 10px/1.3 var(--sans);color:var(--faint);margin-top:2px">Learned embeddings &amp; analogies</span></button>
+              </div>
+              <div data-mp="t-sizewrap" style="display:none;margin-bottom:12px">
+                <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Model size</p>
+                <div style="display:flex;gap:5px">
+                  <button data-action="t-size" data-size="small" data-mp="t-size-small" style="flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:700 10.5px/1 var(--sans)">Small</button>
+                  <button data-action="t-size" data-size="medium" data-mp="t-size-medium" style="flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--blue);background:var(--columbia-soft);color:var(--navy);font:700 10.5px/1 var(--sans)">Medium</button>
+                  <button data-action="t-size" data-size="large" data-mp="t-size-large" style="flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:700 10.5px/1 var(--sans)">Large</button>
+                </div>
+              </div>
+              <div data-mp="t-orderwrap" style="display:block"><span style="display:block;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:6px">Markov order</span>
+                <div style="display:flex;gap:5px">
+                  <button data-action="t-order-btn" data-order="1" data-mp="t-order-1" style="flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--blue);background:var(--columbia-soft);color:var(--navy);font:700 11px/1 var(--sans)">Order 1</button>
+                  <button data-action="t-order-btn" data-order="2" data-mp="t-order-2" style="flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:700 11px/1 var(--sans)">Order 2</button>
+                </div></div>
+            </div>
+
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER: TOKEN WORKBENCH -->
+      <div style="flex:1 1 auto;display:flex;flex-direction:column;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-m);overflow:hidden">
+        <div style="flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;row-gap:8px">
+          <div style="white-space:nowrap;flex:0 0 auto"><p style="font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink)">Live workbench</p><h3 style="font:500 17px/1.1 var(--serif);color:var(--ink);margin-top:2px;white-space:nowrap">Token Workbench</h3></div>
+          <div style="display:flex;gap:3px;padding:3px;border-radius:9px;background:var(--surface-strong);flex:0 0 auto;margin-left:auto">
+            <button data-action="tview" data-tview="tokens" data-mp="tview-tokens" style="padding:6px 10px;border-radius:6px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);font:700 10.5px/1 var(--sans)">Tokens</button>
+            <button data-action="tview" data-tview="transitions" data-mp="tview-transitions" style="padding:6px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10.5px/1 var(--sans)">Transitions</button>
+            <button data-action="tview" data-tview="generate" data-mp="tview-generate" style="padding:6px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10.5px/1 var(--sans)">Generate</button>
+            <button data-action="tview" data-tview="train" data-mp="tview-train" style="display:none;padding:6px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10.5px/1 var(--sans)">Train GPT</button>
+            <button data-action="tview" data-tview="arch" data-mp="tview-arch" style="display:none;padding:6px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10.5px/1 var(--sans)">Architecture</button>
+            <button data-action="tview" data-tview="embeddings" data-mp="tview-embeddings" style="display:none;padding:6px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10.5px/1 var(--sans)">Embeddings</button>
+          </div>
+        </div>
+
+        <div style="flex:0 0 auto;display:flex;align-items:center;padding:0 14px;height:42px;border-bottom:1px solid var(--line);background:var(--surface-soft)">
+          <div style="display:flex;flex-direction:column;padding-right:16px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="Total number of tokens (pieces) in the prepared corpus.">Tokens</span><span data-mp="tm-tokens" style="font:700 15px/1.1 var(--mono);color:var(--ink)">0</span></div>
+          <div style="width:1px;height:22px;background:var(--line)"></div>
+          <div style="display:flex;flex-direction:column;padding:0 16px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="Number of distinct tokens the model can read and produce.">Vocabulary</span><span data-mp="tm-vocab" style="font:700 15px/1.1 var(--mono);color:var(--blue)">0</span></div>
+          <div style="width:1px;height:22px;background:var(--line)"></div>
+          <div style="display:flex;flex-direction:column;padding:0 16px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="Distinct context to next-token pairs counted in the corpus.">Transitions</span><span data-mp="tm-trans" style="font:700 15px/1.1 var(--mono);color:var(--gold-ink)">0</span></div>
+          <div style="width:1px;height:22px;background:var(--line)"></div>
+          <div style="display:flex;flex-direction:column;padding:0 16px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="How surprised the model is: 2^(average bits per token). Lower is better; 1.0 would be perfect.">Perplexity</span><span data-mp="tm-ppl" style="font:700 15px/1.1 var(--mono);color:var(--ink)">—</span></div>
+        </div>
+
+        <div style="flex:1 1 auto;position:relative;min-height:0;overflow:hidden">
+          <!-- Tokens view -->
+          <div data-mp="tview-pane-tokens" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:14px 16px;min-height:0">
+            <p style="font:400 11.5px/1.4 var(--sans);color:var(--faint);margin-bottom:10px">Each chip is one token. Click any token to see what tends to follow it.</p>
+            <div data-mp="t-tokenflow" style="flex:1 1 auto;min-height:0;overflow:auto;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start"></div>
+          </div>
+          <!-- Transitions view -->
+          <div data-mp="tview-pane-transitions" style="position:absolute;inset:0;display:none;flex-direction:column;padding:14px 16px;min-height:0">
+            <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px"><p style="font:400 12px/1.3 var(--sans);color:var(--muted)">After the token</p><span data-mp="t-ctxchip" style="font:700 13px/1 var(--mono);padding:5px 10px;border-radius:7px;background:var(--columbia-soft);color:var(--navy);border:1px solid var(--blue)">—</span><p style="font:400 12px/1.3 var(--sans);color:var(--muted)">these are most likely next:</p></div>
+            <div data-mp="t-transbars" style="flex:1 1 auto;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:7px"></div>
+          </div>
+          <!-- Generate view -->
+          <div data-mp="tview-pane-generate" style="position:absolute;inset:0;display:none;flex-direction:column;padding:14px 16px;min-height:0">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <button data-action="t-generate" style="display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:var(--navy);color:#fff;font:700 12px/1 var(--sans);box-shadow:0 2px 0 var(--navy-deep)"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>Generate passage</button>
+              <label style="display:flex;align-items:center;gap:8px;flex:1 1 auto"><span style="font:700 10px/1 var(--sans);color:var(--muted);white-space:nowrap" title="Sampling randomness: low is safe and repetitive, high is surprising and error-prone.">Temperature</span><input data-action="t-temp" type="range" min="0.3" max="1.4" step="0.1" value="0.9" style="flex:1 1 auto;accent-color:var(--blue)"><span data-mp="t-tempval" style="font:600 11px/1 var(--mono);color:var(--ink)">0.9</span></label>
+            </div>
+            <div data-mp="t-genout" style="flex:1 1 auto;min-height:0;overflow:auto;padding:16px 18px;border-radius:10px;background:var(--surface-soft);border:1px solid var(--line);font:400 15px/1.65 var(--serif);color:var(--ink);white-space:pre-wrap">Press <strong>Generate</strong> to sample a passage from the model.</div>
+          </div>
+          <!-- Train GPT view -->
+          <div data-mp="tview-pane-train" style="position:absolute;inset:0;display:none;flex-direction:column;padding:14px 16px;min-height:0">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:11px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:6px;flex:0 0 auto">
+                <button data-action="gpt-reset" aria-label="Reset model" title="Reset" style="display:grid;place-items:center;width:36px;height:36px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg></button>
+                <button data-action="gpt-play" title="Train / pause" style="display:grid;place-items:center;width:44px;height:44px;border-radius:11px;background:var(--navy);color:#fff;box-shadow:0 3px 0 var(--navy-deep)"><svg data-mp="gpt-playicon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><svg data-mp="gpt-pauseicon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg></button>
+                <button data-action="gpt-step" title="One update" style="display:grid;place-items:center;width:36px;height:36px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5v14l9-7zM16 5h2.5v14H16z"></path></svg></button>
+              </div>
+              <div style="display:flex;gap:16px;flex:1 1 auto">
+                <div style="display:flex;flex-direction:column"><span style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="Number of optimizer (gradient-descent) steps taken so far.">Updates</span><span data-mp="gpt-stepv" style="font:700 15px/1.1 var(--mono);color:var(--ink)">0</span></div>
+                <div style="display:flex;flex-direction:column"><span title="How many full passes over the training corpus have completed." style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Epoch</span><span data-mp="gpt-epoch" style="font:700 15px/1.1 var(--mono);color:var(--ink)">0.00</span></div>
+                <div style="display:flex;flex-direction:column"><span style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="Average prediction error (cross-entropy). Lower means better next-token predictions.">Loss</span><span data-mp="gpt-lossv" style="font:700 15px/1.1 var(--mono);color:var(--blue)">—</span></div>
+                <div style="display:flex;flex-direction:column"><span style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="Training throughput: tokens processed per second.">Chars/sec</span><span data-mp="gpt-tps" style="font:700 15px/1.1 var(--mono);color:var(--ink)">0</span></div>
+                <div style="display:flex;flex-direction:column"><span style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="Number of trainable weights (parameters) in the model.">Params</span><span data-mp="gpt-params" style="font:700 15px/1.1 var(--mono);color:var(--gold-ink)">0</span></div>
+              </div>
+            </div>
+            <canvas data-mp="gpt-losscanvas" style="width:100%;height:86px;display:block;border-radius:10px;background:var(--surface-soft);border:1px solid var(--line);margin-bottom:11px"></canvas>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:10px;flex-wrap:wrap">
+              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink)">Live sample</p>
+              <div style="display:flex;align-items:center;gap:12px">
+                <label style="display:flex;align-items:center;gap:7px"><span style="font:700 9.5px/1 var(--sans);color:var(--muted)" title="Sampling randomness: low is safe and repetitive, high is surprising and error-prone.">Temp</span><input data-action="gpt-temp" type="range" min="0.4" max="1.2" step="0.1" value="0.7" style="width:96px;accent-color:var(--blue)"><span data-mp="gpt-tempv" style="font:600 10px/1 var(--mono);color:var(--ink)">0.7</span></label>
+                <input data-action="gpt-ctx" data-mp="gpt-ctx" placeholder="Prompt…" spellcheck="false" style="width:118px;padding:7px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font:400 11px/1 var(--mono)">
+                <button data-action="gpt-sample" style="padding:7px 13px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface-soft);color:var(--ink);font:700 10.5px/1 var(--sans)">Sample</button>
+              </div>
+            </div>
+            <div data-mp="gpt-sample" style="flex:1 1 auto;min-height:0;overflow:auto;padding:13px 15px;border-radius:10px;background:var(--surface-soft);border:1px solid var(--line);font:400 13.5px/1.6 var(--serif);color:var(--ink);white-space:pre-wrap">Press <strong>Train</strong> to start. A tiny one-block transformer learns character by character on the corpus above; its output drifts from noise toward Shakespearean text as the loss falls. Then <strong>Sample</strong> to read what it has learned.</div>
+          </div>
+          <!-- Embeddings view -->
+          <div data-mp="tview-pane-embeddings" style="position:absolute;inset:0;display:none;flex-direction:column;padding:12px 14px;min-height:0">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:9px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:6px">
+                <button data-action="gpt-reset" title="Reset" style="display:grid;place-items:center;width:36px;height:36px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg></button>
+                <button data-action="gpt-play" title="Train / pause" style="display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:var(--navy);color:#fff;box-shadow:0 3px 0 var(--navy-deep)"><svg data-mp="gpt-playicon2" width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg><svg data-mp="gpt-pauseicon2" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg></button>
+                <button data-action="gpt-step" title="One update" style="display:grid;place-items:center;width:36px;height:36px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5v14l9-7zM16 5h2.5v14H16z"></path></svg></button>
+              </div>
+              <div style="display:flex;gap:15px"><div style="display:flex;flex-direction:column"><span style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="Number of optimizer (gradient-descent) steps taken so far.">Updates</span><span data-mp="emb-updates" style="font:700 14px/1.1 var(--mono);color:var(--ink)">0</span></div><div style="display:flex;flex-direction:column"><span style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)" title="Average prediction error (cross-entropy). Lower means better next-token predictions.">Loss</span><span data-mp="emb-loss" style="font:700 14px/1.1 var(--mono);color:var(--blue)">—</span></div></div>
+              <div style="margin-left:auto;display:flex;gap:3px;padding:3px;border-radius:9px;background:var(--surface-strong)">
+                <button data-action="emb-dim" data-dim="2" data-mp="emb-dim-2" style="padding:5px 10px;border-radius:6px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);font:700 10px/1 var(--sans)">2D</button>
+                <button data-action="emb-dim" data-dim="3" data-mp="emb-dim-3" style="padding:5px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10px/1 var(--sans)">3D</button>
+              </div>
+            </div>
+            <div style="flex:1 1 auto;display:flex;gap:12px;min-height:0">
+              <div style="flex:1 1 auto;min-width:0;position:relative"><canvas data-mp="emb-canvas" style="position:absolute;inset:0;width:100%;height:100%;border-radius:10px;background:var(--surface-soft);border:1px solid var(--line)"></canvas></div>
+              <div style="flex:0 0 200px;display:flex;flex-direction:column;gap:9px;min-height:0">
+                <div style="padding:11px 12px;border-radius:10px;background:var(--surface-soft);border:1px solid var(--line)">
+                  <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:8px">Vector analogy</p>
+                  <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:9px">
+                    <select data-mp="emb-a" style="flex:1 1 60px;min-width:0;padding:6px 4px;border-radius:6px;border:1px solid var(--line-strong);background:var(--surface);font:600 11px/1 var(--mono)"></select>
+                    <span style="font:700 13px/1 var(--mono);color:var(--muted)">−</span>
+                    <select data-mp="emb-b" style="flex:1 1 60px;min-width:0;padding:6px 4px;border-radius:6px;border:1px solid var(--line-strong);background:var(--surface);font:600 11px/1 var(--mono)"></select>
+                    <span style="font:700 13px/1 var(--mono);color:var(--muted)">+</span>
+                    <select data-mp="emb-c" style="flex:1 1 60px;min-width:0;padding:6px 4px;border-radius:6px;border:1px solid var(--line-strong);background:var(--surface);font:600 11px/1 var(--mono)"></select>
+                  </div>
+                  <button data-action="emb-solve" style="width:100%;padding:8px;border-radius:8px;background:var(--navy);color:#fff;font:700 11px/1 var(--sans)">Solve →</button>
+                </div>
+                <div style="flex:1 1 auto;min-height:0;overflow:auto;padding:11px 12px;border-radius:10px;background:var(--surface-soft);border:1px solid var(--line)">
+                  <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:7px">Nearest tokens</p>
+                  <ol data-mp="emb-neighbors" style="margin:0;padding-left:18px;font:600 12px/1.9 var(--mono);color:var(--ink)"><li style="color:var(--faint)">Train, then Solve.</li></ol>
+                </div>
+              </div>
+            </div>
+            <p style="font:400 10px/1.4 var(--sans);color:var(--faint);margin-top:8px"><strong style="color:var(--muted)">Honest note.</strong> These vectors come from the model you trained on Shakespeare; classical directions (royalty, capital) only partly emerge at this scale — more training and data sharpen them.</p>
+          </div>
+          <!-- Architecture view -->
+          <div data-mp="tview-pane-arch" style="position:absolute;inset:0;display:none;flex-direction:column;padding:16px 20px;min-height:0;overflow:auto">
+            <div data-mp="arch-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: NOTICE + INSPECTOR -->
+      <aside style="flex:0 0 320px;display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div style="flex:0 0 auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);padding:13px 14px">
+          <p style="font:800 8.5px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:5px">Notice</p>
+          <h4 style="font:500 16px/1.15 var(--serif);color:var(--ink);margin-bottom:6px">What should I notice?</h4>
+          <p data-mp="t-notice" style="font:400 12px/1.5 var(--sans);color:var(--muted)">Character tokens make a tiny vocabulary but need long context. Word tokens make a bigger vocabulary and read more naturally.</p>
+        </div>
+        <div style="flex:1 1 auto;display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line)">
+            <div><p style="font:800 8.5px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink)">Inspect</p><h4 style="font:500 15px/1.1 var(--serif);color:var(--ink);margin-top:2px">Selected Transition</h4></div>
+            <span data-mp="t-inspkind" style="font:700 9px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:20px;background:var(--surface-strong);color:var(--faint)">None</span>
+          </div>
+          <div data-mp="t-inspbody" style="flex:1 1 auto;min-height:0;overflow:auto;padding:12px">
+            <p style="font:400 12px/1.5 var(--sans);color:var(--faint);text-align:center;padding:14px 8px">Select a token in the flow, then a next-token bar, to inspect its transition count and probability.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <footer style="flex:0 0 auto;height:24px;display:flex;align-items:center;gap:8px;padding:0 16px;background:var(--surface);border-top:1px solid var(--line)">
+    <span data-mp="livestatus" style="font:500 10.5px/1 var(--sans);color:var(--faint)">Model Playground is ready.</span>
+    <span style="flex:1 1 auto"></span>
+    <span style="font:500 10.5px/1 var(--sans);color:var(--faint)">Progress saved in this browser · <a href="https://cs3-erc.org/research-experience-for-teachers/" target="_blank" rel="noopener noreferrer">CS3 Research Experience for Teachers</a></span>
+  </footer>
+
+  <!-- TOAST -->
+  <div data-mp="toast" style="position:absolute;top:66px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:60;display:none;align-items:center;gap:11px;padding:11px 18px 11px 13px;background:var(--navy);color:#fff;border-radius:12px;box-shadow:var(--shadow-l);opacity:0;transition:all .35s cubic-bezier(.4,0,.2,1)">
+    <span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--gold);color:#3a2600"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+    <div><p data-mp="toasttitle" style="font:800 13px/1.1 var(--sans)">Mission complete</p><p data-mp="toastbody" style="font:500 11px/1.2 var(--sans);color:var(--columbia)">+100 XP earned</p></div>
+  </div>
+
+  <!-- QUEST OVERLAY -->
+  <div data-mp="questlayer" style="position:absolute;inset:0;z-index:70;display:none">
+    <button data-action="quest-close" aria-label="Close" style="position:absolute;inset:0;background:rgba(6,16,31,.55);border:none;cursor:default"></button>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:860px;max-width:94vw;max-height:88vh;display:flex;flex-direction:column;background:var(--surface);border-radius:16px;box-shadow:var(--shadow-l);overflow:hidden;animation:cs3pop .28s both">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);background:linear-gradient(120deg,var(--navy),var(--navy-deep));color:#fff">
+        <div><p style="font:800 9px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;color:var(--columbia)">Learning path</p><h2 style="font:500 24px/1.1 var(--serif);margin-top:3px">Quest Map</h2></div>
+        <button data-action="quest-close" aria-label="Close" style="display:grid;place-items:center;width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.14);color:#fff"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+      </div>
+      <div data-mp="questbody" style="flex:1 1 auto;overflow:auto;padding:22px 24px"></div>
+    </div>
+  </div>
+
+  <!-- HELP / COMPUTE DIALOGS -->
+  <div data-mp="dialoglayer" style="position:absolute;inset:0;z-index:75;display:none">
+    <button data-action="dialog-close" aria-label="Close" style="position:absolute;inset:0;background:rgba(6,16,31,.5);border:none;cursor:default"></button>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:520px;max-width:92vw;max-height:86vh;display:flex;flex-direction:column;background:var(--surface);border-radius:14px;box-shadow:var(--shadow-l);overflow:hidden;animation:cs3pop .24s both">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)">
+        <div><p data-mp="dialogeyebrow" style="font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink)">Reference</p><h2 data-mp="dialogtitle" style="font:500 20px/1.1 var(--serif);color:var(--ink);margin-top:3px">Help</h2></div>
+        <button data-action="dialog-close" aria-label="Close" style="display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:var(--surface-strong);color:var(--muted)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+      </div>
+      <div data-mp="dialogbody" style="flex:1 1 auto;overflow:auto;padding:18px"></div>
+    </div>
+  </div>
+
+  <!-- COACH-MARK TOUR -->
+  <div data-mp="tourlayer" style="position:absolute;inset:0;z-index:80;display:none">
+    <svg data-mp="tourmask" style="position:absolute;inset:0;width:100%;height:100%"><defs><mask id="cs3tourmask"><rect width="100%" height="100%" fill="#fff"></rect><rect data-mp="tourhole" x="0" y="0" width="0" height="0" rx="12" fill="#000"></rect></mask></defs><rect width="100%" height="100%" fill="rgba(6,16,31,.66)" mask="url(#cs3tourmask)"></rect><rect data-mp="tourring" x="0" y="0" width="0" height="0" rx="12" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-dasharray="7 5"></rect></svg>
+    <div data-mp="tourcard" style="position:absolute;width:290px;padding:16px;background:var(--surface);border-radius:13px;box-shadow:var(--shadow-l);transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font:700 11px/1 var(--mono)"><span data-mp="tournum">1</span></span><span data-mp="tourstepcount" style="font:800 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)">Step 1 of 8</span></div>
+      <h3 data-mp="tourtitle" style="font:500 18px/1.15 var(--serif);color:var(--ink);margin-bottom:5px">Welcome</h3>
+      <p data-mp="tourbody" style="font:400 12.5px/1.5 var(--sans);color:var(--muted);margin-bottom:14px">Let me show you around the workbench.</p>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button data-action="tour-skip" style="font:700 11px/1 var(--sans);color:var(--faint);padding:6px 4px">Skip</button>
+        <span style="flex:1 1 auto"></span>
+        <button data-action="tour-back" data-mp="tourback" style="padding:8px 12px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font:700 11px/1 var(--sans)">Back</button>
+        <button data-action="tour-next" style="padding:8px 14px;border-radius:8px;background:var(--navy);color:#fff;font:700 11px/1 var(--sans)"><span data-mp="tournext">Next</span></button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1366,&quot;height&quot;:768},&quot;tourOnLoad&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Experience&quot;,&quot;label&quot;:&quot;Coach-mark tour on first load&quot;},&quot;signalFlow&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Experience&quot;,&quot;label&quot;:&quot;Animated signal flow in the network&quot;},&quot;reduceMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Experience&quot;,&quot;label&quot;:&quot;Reduce motion&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Gold&quot;,&quot;options&quot;:[&quot;Gold&quot;,&quot;Magenta&quot;,&quot;Burnt Orange&quot;,&quot;Olive&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Experience&quot;,&quot;label&quot;:&quot;Highlight accent&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  netRef = React.createRef();
+  boundaryRef = React.createRef();
+  lossRef = React.createRef();
+
+  // All teaching content (missions, lessons, hints, tour, corpora, UI copy, XP values)
+  // lives in the editable JSON files under content/ — see README.md.
+  // It is loaded in componentDidMount() and assigned to:
+  //   this.missions, this.textLessons, this.tour, this.corpusSamples, this.ui, this.cfg
+  missions = [];
+  textLessons = [];
+  tour = [];
+  corpusSamples = {};
+  featureDefs = [
+    {k:"x1",label:"x₁"},{k:"x2",label:"x₂"},{k:"x1sq",label:"x₁²"},{k:"x2sq",label:"x₂²"},
+    {k:"x1x2",label:"x₁x₂"},{k:"sinx1",label:"sin x₁"},{k:"sinx2",label:"sin x₂"}
+  ];
+  actDefs = [["tanh","Tanh"],["relu","ReLU"],["leaky-relu","Leaky"],["elu","ELU"],["gelu","GELU"],["silu","SiLU"]];
+
+  state = {
+    lab:"playground", theme:"light", reduce:false, muted:false,
+    ctab:"data", view:"activations",
+    dataset:"gaussian", features:["x1","x2"], noise:0, split:70,
+    activation:"tanh", optimizer:"adam", lossfn:"square", lr:0.03, batch:10, reg:"none", regrate:0,
+    hidden:[3], playing:false, showVal:false, discretize:false,
+    mode:"lesson", mission:0, done:[], xp:0,
+    hintOpen:false
+  };
+  txt = { source:"tempest", tokenizer:"char", model:"markov", order:1, temp:0.9, tview:"tokens", tctab:"corpus", lesson:0, tokens:[], vocab:[], counts:null, totals:null, ctx:null, next:null, ready:false, dirty:false, done:[] };
+
+  // ---------- lifecycle ----------
+  componentDidMount(){
+    this.reduce = !!(this.props.reduceMotion);
+    this.signalFlow = this.props.signalFlow !== false;
+    this.tourOnLoad = this.props.tourOnLoad !== false;
+    const accent = (this.props.accent||"Gold");
+    this.applyAccent(accent);
+    this.loadContent().then(()=>this.initApp(), (err)=>this.showContentError(err));
+  }
+  // Loads the editable teaching content from content/*.json (see README.md).
+  loadContent(){
+    const files = {
+      missions:"content/missions.json",
+      textLessons:"content/text-lessons.json",
+      tour:"content/tour.json",
+      corpusSamples:"content/corpus-samples.json",
+      ui:"content/ui-text.json",
+      cfg:"content/config.json"
+    };
+    const keys = Object.keys(files);
+    return Promise.all(keys.map(k=>
+      fetch(files[k]).then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+        .catch(e=>{ throw new Error(files[k]+" — "+(e&&e.message?e.message:"failed to load")); })
+    )).then(vals=>{ keys.forEach((k,i)=>{ this[k]=vals[i]; }); });
+  }
+  showContentError(err){
+    const r = this.rootRef.current; if(!r) return;
+    const d = document.createElement("div");
+    d.style.cssText = "position:absolute;inset:0;z-index:200;display:grid;place-items:center;background:var(--page);padding:24px";
+    d.innerHTML = '<div style="max-width:520px;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;box-shadow:var(--shadow-l);padding:26px 28px">'
+      + '<h2 style="font:500 22px/1.2 var(--serif);color:var(--ink);margin-bottom:10px">Could not load the toolkit content</h2>'
+      + '<p style="font:400 13px/1.55 var(--sans);color:var(--muted);margin-bottom:10px">The lesson files in the <strong>content/</strong> folder could not be loaded:</p>'
+      + '<p style="font:600 12px/1.5 var(--mono);color:var(--bad);background:var(--bad-soft);border-radius:8px;padding:9px 12px;margin-bottom:14px;word-break:break-word">'+String(err&&err.message?err.message:err)+'</p>'
+      + '<p style="font:400 13px/1.55 var(--sans);color:var(--muted)">If you opened this file by double-clicking it, the browser blocks reading local JSON files. Instead, double-click <strong>Start AI Toolkit.cmd</strong> in the toolkit folder — it serves the folder locally and opens the app. If a content file was edited, check it for JSON syntax errors (a trailing comma is the usual culprit).</p></div>';
+    r.appendChild(d);
+  }
+  initApp(){
+    this.load();
+    this.root = this.rootRef.current;
+    this.root.dataset.theme = this.state.theme;
+    this.root.dataset.reduce = this.reduce ? "1":"0";
+    this.selected = null;
+    this.lossHistory = [];
+    this.optimizersUsed = new Set([this.state.optimizer]);
+    this.exPerSec = 0; this._exWindow = 0; this._exTime = performance.now();
+    this.applyMission(this.state.mission, true);
+    this.buildData();
+    this.buildModel();
+    this.renderFeatures(); this.renderActs(); this.syncControls();
+    this.renderNetwork();
+    this.sizeCanvases();
+    this.drawBoundary(); this.drawLoss(); this.updateMetrics();
+    this.updateMissionCard(); this.updateXP(); this.setMode(this.state.mode);
+    this.ro = new ResizeObserver(()=>{ this.sizeCanvases(); this.renderNetwork(); this.drawBoundary(); this.drawLoss(); });
+    this.ro.observe(this.netRef.current); this.ro.observe(this.rootRef.current);
+    this._key = (e)=>this.onKey(e); window.addEventListener("keydown",this._key);
+    this._raf = requestAnimationFrame((t)=>this.loop(t));
+    if(this.tourOnLoad && !this._tourDone){ setTimeout(()=>this.startTour(),700); }
+    else { this.status(this.ui.messages.welcomeBack); }
+  }
+  componentWillUnmount(){
+    cancelAnimationFrame(this._raf);
+    if(this.ro) this.ro.disconnect();
+    window.removeEventListener("keydown",this._key);
+  }
+  renderVals(){
+    return { rootRef:this.rootRef, netRef:this.netRef, boundaryRef:this.boundaryRef, lossRef:this.lossRef,
+      onClick:(e)=>this.onClick(e), onInput:(e)=>this.onInput(e), onChange:(e)=>this.onChange(e) };
+  }
+
+  // ---------- persistence ----------
+  load(){
+    try{
+      const raw = localStorage.getItem("cs3_toolkit_v2");
+      if(raw){ const d=JSON.parse(raw); if(d.theme)this.state.theme=d.theme; if(d.muted!=null)this.state.muted=d.muted;
+        if(Array.isArray(d.done))this.state.done=d.done; if(typeof d.xp==="number")this.state.xp=d.xp; this._tourDone=!!d.tourDone; }
+    }catch(e){}
+  }
+  save(){
+    try{ localStorage.setItem("cs3_toolkit_v2", JSON.stringify({theme:this.state.theme,muted:this.state.muted,done:this.state.done,xp:this.state.xp,tourDone:!!this._tourDone})); }catch(e){}
+  }
+  applyAccent(name){
+    const map={Gold:["#f0b323","#946200","#fff5db"],Magenta:["#ae2573","#8a1d5b","#fbe9f3"],"Burnt Orange":["#b94700","#8f3700","#fdece2"],Olive:["#76881d","#5c6a17","#f2f4e2"]};
+    const v=map[name]||map.Gold; const r=this.rootRef.current; if(!r)return;
+    r.style.setProperty("--accent",v[0]); r.style.setProperty("--accent-ink",v[1]); r.style.setProperty("--accent-soft",v[2]);
+  }
+  $(sel){ return this.root ? this.root.querySelector('[data-mp="'+sel+'"]') : null; }
+  $all(sel){ return this.root ? Array.prototype.slice.call(this.root.querySelectorAll('[data-mp="'+sel+'"]')) : []; }
+  setTxt(sel,v){ const el=this.$(sel); if(el)el.textContent=v; }
+  // Fills {placeholders} in message templates from content/ui-text.json.
+  fmt(template,vars){ return String(template).replace(/\{(\w+)\}/g,(s,k)=>vars[k]!=null?vars[k]:s); }
+
+  // ---------- math / rng ----------
+  rng(seed){ let s=seed>>>0; return function(){ s+=0x6D2B79F5; let t=s; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
+  gauss(rand){ let u=0,v=0; while(!u)u=rand(); while(!v)v=rand(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+  act(name,z){
+    switch(name){
+      case "relu": return z>0?z:0;
+      case "leaky-relu": return z>0?z:0.02*z;
+      case "elu": return z>0?z:(Math.exp(z)-1);
+      case "gelu": return 0.5*z*(1+Math.tanh(0.7978845608*(z+0.044715*z*z*z)));
+      case "silu": return z/(1+Math.exp(-z));
+      default: return Math.tanh(z);
+    }
+  }
+  actD(name,z){
+    switch(name){
+      case "relu": return z>0?1:0;
+      case "leaky-relu": return z>0?1:0.02;
+      case "elu": return z>0?1:Math.exp(z);
+      case "gelu": { const e=0.001,a=this.act("gelu",z+e),b=this.act("gelu",z-e); return (a-b)/(2*e); }
+      case "silu": { const s=1/(1+Math.exp(-z)); return s*(1+z*(1-s)); }
+      default: { const t=Math.tanh(z); return 1-t*t; }
+    }
+  }
+
+  // ---------- data ----------
+  buildData(){
+    const rand=this.rng(1337 + this.state.dataset.length*7 + Math.round(this.state.noise));
+    const n=220, pts=[], ds=this.state.dataset, noise=this.state.noise/100;
+    const jit=()=>this.gauss(rand)*noise*2.2;
+    for(let i=0;i<n;i++){
+      let x,y,lab;
+      if(ds==="gaussian"){ const c=i%2?1:-1; x=c*2+this.gauss(rand)*1.1+jit(); y=c*2+this.gauss(rand)*1.1+jit(); lab=c; }
+      else if(ds==="xor"){ x=(rand()*2-1)*4.6; y=(rand()*2-1)*4.6; lab=(x*y>=0)?1:-1; if(rand()<noise)lab=-lab; x+=jit();y+=jit(); }
+      else if(ds==="circle"){ const r=i%2?(rand()*1.7+0.4):(rand()*1.7+3.0); const a=rand()*6.283; x=Math.cos(a)*r+jit(); y=Math.sin(a)*r+jit(); lab=i%2?1:-1; }
+      else { const arm=i%2; const t=(i/n)*3.2+rand()*0.28; const r=t*1.35; const a=t*2.2+arm*Math.PI; x=Math.cos(a)*r+this.gauss(rand)*0.18+jit(); y=Math.sin(a)*r+this.gauss(rand)*0.18+jit(); lab=arm?1:-1; }
+      pts.push({x:Math.max(-5.4,Math.min(5.4,x)),y:Math.max(-5.4,Math.min(5.4,y)),lab});
+    }
+    for(let i=pts.length-1;i>0;i--){ const j=Math.floor(rand()*(i+1)); const t=pts[i];pts[i]=pts[j];pts[j]=t; }
+    const cut=Math.round(pts.length*this.state.split/100);
+    this.train=pts.slice(0,cut); this.val=pts.slice(cut);
+  }
+  featVec(x,y){
+    const nx=x/5,ny=y/5,f=this.state.features,out=[];
+    for(let i=0;i<f.length;i++){ const k=f[i];
+      out.push(k==="x1"?nx:k==="x2"?ny:k==="x1sq"?nx*nx:k==="x2sq"?ny*ny:k==="x1x2"?nx*ny:k==="sinx1"?Math.sin(nx*3):k==="sinx2"?Math.sin(ny*3):0); }
+    return out;
+  }
+
+  // ---------- model ----------
+  buildModel(){
+    const rand=this.rng(9871);
+    const sizes=[this.state.features.length, ...this.state.hidden, 1];
+    this.sizes=sizes; this.layers=[];
+    for(let l=0;l<sizes.length-1;l++){
+      const inN=sizes[l],outN=sizes[l+1],W=new Float32Array(inN*outN),b=new Float32Array(outN);
+      const scale=Math.sqrt(2/(inN+outN));
+      for(let i=0;i<W.length;i++)W[i]=this.gauss(rand)*scale;
+      this.layers.push({inN,outN,W,b,z:new Float32Array(outN),a:new Float32Array(outN),
+        gW:new Float32Array(inN*outN),gB:new Float32Array(outN),
+        mW:new Float32Array(inN*outN),vW:new Float32Array(inN*outN),mB:new Float32Array(outN),vB:new Float32Array(outN),
+        isOut:l===sizes.length-2});
+    }
+    this.actNodes=sizes.map(s=>new Float32Array(s));
+    this.epoch=0; this.t=0; this.lossHistory=[]; this.trainLoss=NaN; this.valLoss=NaN;
+    this._cursor=0;
+  }
+  forward(vec,store){
+    let a=vec;
+    if(store) this.actNodes[0]=Float32Array.from(vec.map(v=>Math.max(-1,Math.min(1,v))));
+    for(let l=0;l<this.layers.length;l++){
+      const L=this.layers[l];
+      for(let o=0;o<L.outN;o++){ let s=L.b[o]; for(let i=0;i<L.inN;i++)s+=L.W[o*L.inN+i]*a[i]; L.z[o]=s;
+        L.a[o]=L.isOut?(this.state.lossfn==="cross-entropy"?(2/(1+Math.exp(-s))-1):Math.tanh(s)):this.act(this.state.activation,s); }
+      a=L.a;
+      if(store) for(let o=0;o<L.outN;o++) this.actNodes[l+1][o]=a[o];
+    }
+    return a[0];
+  }
+  trainBatch(){
+    if(!this.train.length) return;
+    const bs=Math.min(this.state.batch,this.train.length);
+    for(let l=0;l<this.layers.length;l++){ this.layers[l].gW.fill(0); this.layers[l].gB.fill(0); }
+    for(let s=0;s<bs;s++){
+      if(this._cursor>=this.train.length){ this._cursor=0; this.epoch++; }
+      const p=this.train[this._cursor++]; const vec=this.featVec(p.x,p.y);
+      const out=this.forward(vec,false);
+      let dOut=(out-p.lab);
+      const last=this.layers[this.layers.length-1];
+      let delta=[dOut*(1-out*out)+1e-6*0];
+      if(this.state.lossfn==="cross-entropy") delta=[ (out-p.lab)*0.5 ];
+      // backprop
+      let acts=[vec]; for(let l=0;l<this.layers.length;l++)acts.push(Array.from(this.layers[l].a));
+      let d=delta;
+      for(let l=this.layers.length-1;l>=0;l--){
+        const L=this.layers[l],aPrev=acts[l];
+        const nd=new Float32Array(L.inN);
+        for(let o=0;o<L.outN;o++){ const g=d[o];
+          for(let i=0;i<L.inN;i++){ L.gW[o*L.inN+i]+=g*aPrev[i]; nd[i]+=g*L.W[o*L.inN+i]; }
+          L.gB[o]+=g;
+        }
+        if(l>0){ const P=this.layers[l-1]; for(let i=0;i<L.inN;i++) nd[i]*=this.actD(this.state.activation,P.z[i]); d=nd; }
+      }
+    }
+    this.applyGrads(bs);
+    this._exWindow+=bs;
+  }
+  applyGrads(bs){
+    const lr=this.state.lr, opt=this.state.optimizer, reg=this.state.reg, rr=this.state.regrate; this.t++;
+    const b1=0.9,b2=0.999,eps=1e-8;
+    const upd=(arr,g,m,v,idx,val)=>{
+      let grad=g/bs;
+      if(reg==="l2")grad+=rr*val; else if(reg==="l1")grad+=rr*(val>0?1:val<0?-1:0);
+      if(opt==="sgd") return val-lr*grad;
+      if(opt==="momentum"){ m[idx]=0.9*m[idx]-lr*grad; return val+m[idx]; }
+      if(opt==="rmsprop"){ v[idx]=0.9*v[idx]+0.1*grad*grad; return val-lr*grad/(Math.sqrt(v[idx])+eps); }
+      // adam / adamw
+      m[idx]=b1*m[idx]+(1-b1)*grad; v[idx]=b2*v[idx]+(1-b2)*grad*grad;
+      const mh=m[idx]/(1-Math.pow(b1,this.t)), vh=v[idx]/(1-Math.pow(b2,this.t));
+      let nv=val-lr*mh/(Math.sqrt(vh)+eps);
+      if(opt==="adamw") nv-=lr*rr*val;
+      return nv;
+    };
+    for(let l=0;l<this.layers.length;l++){ const L=this.layers[l];
+      for(let k=0;k<L.W.length;k++) L.W[k]=upd(L.W,L.gW[k],L.mW,L.vW,k,L.W[k]);
+      for(let o=0;o<L.outN;o++) L.b[o]=upd(L.b,L.gB[o],L.mB,L.vB,o,L.b[o]);
+    }
+  }
+  computeLoss(set){
+    if(!set.length)return NaN; let s=0; const step=Math.max(1,Math.floor(set.length/80));
+    let c=0; for(let i=0;i<set.length;i+=step){ const p=set[i]; const o=this.forward(this.featVec(p.x,p.y),false); s+=0.5*(o-p.lab)*(o-p.lab); c++; }
+    return s/c;
+  }
+  sampleActivations(){
+    if(!this.train.length)return; const N=Math.min(30,this.train.length);
+    const acc=this.sizes.map(s=>new Float32Array(s));
+    for(let i=0;i<N;i++){ const p=this.train[Math.floor(i*this.train.length/N)]; this.forward(this.featVec(p.x,p.y),true);
+      for(let l=0;l<this.sizes.length;l++)for(let u=0;u<this.sizes[l];u++)acc[l][u]+=Math.abs(this.actNodes[l][u]); }
+    for(let l=0;l<this.sizes.length;l++)for(let u=0;u<this.sizes[l];u++)this.actNodes[l][u]=Math.min(1,acc[l][u]/N);
+  }
+
+  // ---------- loop ----------
+  loop(t){
+    if(this.state.playing){
+      const start=performance.now();
+      let guard=0;
+      while(performance.now()-start<7 && guard<400){ this.trainBatch(); guard++; }
+      this._frames=(this._frames||0)+1;
+      this.sampleActivations();
+      this.updateNetworkVisual();
+      if(this._frames%3===0){ this.trainLoss=this.computeLoss(this.train); this.valLoss=this.computeLoss(this.val);
+        this.lossHistory.push([this.trainLoss,this.valLoss]); if(this.lossHistory.length>260)this.lossHistory.shift();
+        this.drawBoundary(); this.drawLoss(); this.updateMetrics(); this.updateMissionProgress(); }
+      const now=performance.now(); if(now-this._exTime>500){ this.exPerSec=Math.round(this._exWindow/((now-this._exTime)/1000)); this._exWindow=0; this._exTime=now; this.setTxt("m-speed",this.exPerSec.toLocaleString()); }
+    }
+    if(this.state.lab==="text" && this.txt.gptPlaying && this.gpt){ this.gptTrainChunk(); }
+    this._raf=requestAnimationFrame((tt)=>this.loop(tt));
+  }
+
+  // ---------- network render ----------
+  layout(){
+    const el=this.netRef.current; const W=el.clientWidth,H=el.clientHeight;
+    const padX=78,padTop=94,padBot=54; const uW=W-padX*2,availH=Math.max(80,H-padTop-padBot);
+    const L=this.sizes.length; const cols=[];
+    const maxN=Math.max.apply(null,this.sizes);
+    const r=Math.max(9,Math.min(20,availH/(maxN*2.7)));
+    const maxGap=r*3.2;
+    for(let l=0;l<L;l++){ const x=L===1?W/2:padX+uW*l/(L-1); const n=this.sizes[l];
+      const gap=n>1?Math.min(maxGap,availH/(n-1)):0; const colH=gap*(n-1); const y0=padTop+(availH-colH)/2;
+      const ys=[]; for(let u=0;u<n;u++)ys.push(n===1?padTop+availH/2:y0+gap*u); cols.push({x,ys}); }
+    return {W,H,cols,r,padTop,labelY:H-20};
+  }
+  renderNetwork(){
+    const el=this.netRef.current; if(!el)return; el.innerHTML="";
+    const lay=this.layout(); this._lay=lay;
+    const svgNS="http://www.w3.org/2000/svg";
+    const svg=document.createElementNS(svgNS,"svg"); svg.setAttribute("width",lay.W); svg.setAttribute("height",lay.H);
+    svg.style.position="absolute"; svg.style.inset="0";
+    const eg=document.createElementNS(svgNS,"g"); const ng=document.createElementNS(svgNS,"g"); const lg=document.createElementNS(svgNS,"g");
+    this.edgeEls=[]; this.nodeEls=[];
+    // edges
+    for(let l=0;l<this.layers.length;l++){ const A=lay.cols[l],B=lay.cols[l+1];
+      for(let o=0;o<this.sizes[l+1];o++)for(let i=0;i<this.sizes[l];i++){
+        const line=document.createElementNS(svgNS,"line");
+        line.setAttribute("x1",A.x+lay.r); line.setAttribute("y1",A.ys[i]); line.setAttribute("x2",B.x-lay.r); line.setAttribute("y2",B.ys[o]);
+        line.setAttribute("stroke-linecap","round"); line.style.cursor="pointer";
+        line.setAttribute("data-action","select-edge"); line.setAttribute("data-l",l); line.setAttribute("data-i",i); line.setAttribute("data-o",o);
+        eg.appendChild(line); this.edgeEls.push({el:line,l,i,o});
+      }
+    }
+    // nodes
+    for(let l=0;l<this.sizes.length;l++){ const C=lay.cols[l];
+      for(let u=0;u<this.sizes[l];u++){
+        const g=document.createElementNS(svgNS,"g"); g.style.cursor="pointer";
+        g.setAttribute("data-action","select-node"); g.setAttribute("data-l",l); g.setAttribute("data-u",u);
+        const halo=document.createElementNS(svgNS,"circle"); halo.setAttribute("cx",C.x); halo.setAttribute("cy",C.ys[u]); halo.setAttribute("r",lay.r+7); halo.setAttribute("fill","currentColor"); halo.style.opacity="0";
+        const c=document.createElementNS(svgNS,"circle"); c.setAttribute("cx",C.x); c.setAttribute("cy",C.ys[u]); c.setAttribute("r",lay.r);
+        c.setAttribute("stroke-width","2.5"); c.setAttribute("fill",this.css("--surface"));
+        const tx=document.createElementNS(svgNS,"text"); tx.setAttribute("x",C.x); tx.setAttribute("y",C.ys[u]+4); tx.setAttribute("text-anchor","middle");
+        tx.style.font="600 "+Math.max(8,lay.r*0.62)+"px var(--mono)"; tx.style.fill=this.css("--ink"); tx.style.pointerEvents="none";
+        tx.textContent=l===0?(this.featureDefs.find(f=>f.k===this.state.features[u])||{label:"x"}).label:(l===this.sizes.length-1?"ŷ":"h"+(u+1));
+        g.appendChild(halo); g.appendChild(c); g.appendChild(tx); ng.appendChild(g);
+        this.nodeEls.push({g,halo,c,tx,l,u});
+      }
+      const lb=document.createElementNS(svgNS,"text"); lb.setAttribute("x",C.x); lb.setAttribute("y",lay.H-20); lb.setAttribute("text-anchor","middle");
+      lb.style.font="800 9px var(--sans)"; lb.style.letterSpacing=".12em"; lb.style.fill=this.css("--faint");
+      lb.textContent=l===0?"INPUTS":(l===this.sizes.length-1?"OUTPUT":"HIDDEN "+l); lg.appendChild(lb);
+    }
+    svg.appendChild(eg); svg.appendChild(ng); svg.appendChild(lg); el.appendChild(svg);
+    // HTML control pills over hidden layers
+    for(let h=0;h<this.state.hidden.length;h++){ const col=lay.cols[h+1];
+      const pill=document.createElement("div");
+      pill.style.cssText="position:absolute;top:48px;left:"+col.x+"px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:3px;border-radius:20px;background:var(--surface);border:1px solid var(--line-strong);box-shadow:var(--shadow-s);z-index:3";
+      pill.innerHTML='<button data-action="dec-neuron" data-h="'+h+'" aria-label="Remove neuron" style="width:22px;height:22px;border-radius:50%;background:var(--surface-strong);color:var(--ink);font:700 15px/1 var(--sans);display:grid;place-items:center">−</button>'
+        +'<span style="font:700 11px/1 var(--mono);color:var(--ink);min-width:14px;text-align:center">'+this.state.hidden[h]+'</span>'
+        +'<button data-action="inc-neuron" data-h="'+h+'" aria-label="Add neuron" style="width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font:700 15px/1 var(--sans);display:grid;place-items:center">+</button>';
+      el.appendChild(pill);
+    }
+    // layer add/remove control (top-center of hidden region)
+    const centerX=(lay.cols[1]&&lay.cols[lay.cols.length-2])?(lay.cols[1].x+lay.cols[lay.cols.length-2].x)/2:(lay.cols[1]?lay.cols[1].x:lay.W/2);
+    const bar=document.createElement("div");
+    bar.style.cssText="position:absolute;top:12px;left:"+centerX+"px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:5px 6px 5px 12px;border-radius:22px;background:var(--navy);color:#fff;box-shadow:var(--shadow-m);z-index:5;white-space:nowrap";
+    bar.innerHTML='<span style="font:800 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--columbia)">Layers</span>'
+      +'<button data-action="dec-layer" aria-label="Remove layer" style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font:700 16px/1 var(--sans);display:grid;place-items:center">−</button>'
+      +'<span style="font:700 13px/1 var(--mono);min-width:12px;text-align:center">'+this.state.hidden.length+'</span>'
+      +'<button data-action="inc-layer" aria-label="Add layer" style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#3a2600;font:700 16px/1 var(--sans);display:grid;place-items:center">+</button>';
+    el.appendChild(bar);
+    this.updateNetworkVisual();
+  }
+  updateNetworkVisual(){
+    if(!this.edgeEls||!this.layers.length)return;
+    const view=this.state.view; const blue=this.css("--blue"),gold=this.css("--gold-ink");
+    let max=1e-4;
+    for(const e of this.edgeEls){ const L=this.layers[e.l]; const val=view==="gradients"?L.gW[e.o*L.inN+e.i]:L.W[e.o*L.inN+e.i]; if(Math.abs(val)>max)max=Math.abs(val); }
+    for(const e of this.edgeEls){ const L=this.layers[e.l]; const val=view==="gradients"?L.gW[e.o*L.inN+e.i]:L.W[e.o*L.inN+e.i];
+      const st=Math.min(1,Math.abs(val)/max);
+      e.el.setAttribute("stroke",val>=0?blue:gold);
+      e.el.setAttribute("stroke-width",(0.6+st*4).toFixed(2));
+      e.el.style.opacity=(0.16+st*0.7).toFixed(2);
+      if(this.signalFlow && this.state.playing && st>0.12 && !this.reduce){ e.el.setAttribute("stroke-dasharray","5 7"); e.el.style.animation="cs3flow "+(0.9-st*0.5).toFixed(2)+"s linear infinite"; }
+      else { e.el.removeAttribute("stroke-dasharray"); e.el.style.animation="none"; }
+    }
+    for(const nd of this.nodeEls){ const a=(this.actNodes[nd.l]&&this.actNodes[nd.l][nd.u])||0;
+      const isOut=nd.l===this.sizes.length-1, isIn=nd.l===0;
+      nd.c.setAttribute("stroke",isOut?this.css("--good"):isIn?this.css("--blue"):this.css("--navy"));
+      if(view==="activations"){ const col=isOut?this.css("--good"):this.css("--blue");
+        nd.halo.setAttribute("fill",col); nd.halo.style.color=col; nd.halo.style.opacity=(a*0.5).toFixed(2);
+        nd.c.setAttribute("fill", this.mix(this.css("--surface"), col, a*0.55));
+        if(this.state.playing && a>0.35 && !this.reduce) nd.halo.style.animation="cs3pulse 1.6s ease-in-out infinite"; else nd.halo.style.animation="none";
+      } else { nd.halo.style.opacity="0"; nd.halo.style.animation="none"; nd.c.setAttribute("fill",this.css("--surface")); }
+    }
+    this.highlightSelection();
+  }
+  mix(a,b,t){ const pa=this.parse(a),pb=this.parse(b); t=Math.max(0,Math.min(1,t));
+    return "rgb("+Math.round(pa[0]+(pb[0]-pa[0])*t)+","+Math.round(pa[1]+(pb[1]-pa[1])*t)+","+Math.round(pa[2]+(pb[2]-pa[2])*t)+")"; }
+  parse(c){ const d=document.createElement("div"); d.style.color=c; this.root.appendChild(d); const m=getComputedStyle(d).color.match(/\d+/g); this.root.removeChild(d); return m?m.map(Number):[0,0,0]; }
+  css(v){ return getComputedStyle(this.root).getPropertyValue(v).trim()||"#888"; }
+
+  // ---------- boundary + loss ----------
+  sizeCanvases(){
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    [this.boundaryRef.current,this.lossRef.current].forEach(c=>{ if(!c)return; const r=c.getBoundingClientRect();
+      c.width=Math.max(2,Math.round(r.width*dpr)); c.height=Math.max(2,Math.round(r.height*dpr)); const ctx=c.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); });
+  }
+  drawBoundary(){
+    const cv=this.boundaryRef.current; if(!cv)return; const ctx=cv.getContext("2d");
+    const dpr=Math.min(2,window.devicePixelRatio||1); const w=cv.width/dpr,h=cv.height/dpr;
+    const res=52; const img=ctx.createImageData(res,res);
+    const A=this.parse(this.css("--blue")),B=this.parse(this.css("--gold-ink")),mid=this.parse(this.css("--surface"));
+    for(let j=0;j<res;j++)for(let i=0;i<res;i++){
+      const x=(-1+2*i/(res-1))*5, y=(1-2*j/(res-1))*5; let o=this.layers.length?this.forward(this.featVec(x,y),false):0;
+      if(this.state.discretize)o=o>=0?1:-1;
+      const t=(o+1)/2; let R,G,Bb;
+      const col=o<0?A:B, k=Math.min(1,Math.abs(o));
+      R=mid[0]+(col[0]-mid[0])*(0.16+k*0.66); G=mid[1]+(col[1]-mid[1])*(0.16+k*0.66); Bb=mid[2]+(col[2]-mid[2])*(0.16+k*0.66);
+      const idx=(j*res+i)*4; img.data[idx]=R; img.data[idx+1]=G; img.data[idx+2]=Bb; img.data[idx+3]=255;
+    }
+    const off=document.createElement("canvas"); off.width=res;off.height=res; off.getContext("2d").putImageData(img,0,0);
+    ctx.imageSmoothingEnabled=true; ctx.clearRect(0,0,w,h); ctx.drawImage(off,0,0,w,h);
+    const pt=(p,fill)=>{ const px=(p.x/5*0.5+0.5)*w, py=(0.5-p.y/5*0.5)*h; ctx.beginPath(); ctx.arc(px,py,3.1,0,6.283);
+      ctx.fillStyle=p.lab<0?this.css("--blue"):this.css("--gold-ink"); ctx.globalAlpha=fill; ctx.fill(); ctx.globalAlpha=1;
+      ctx.lineWidth=1; ctx.strokeStyle="rgba(255,255,255,.75)"; ctx.stroke(); };
+    this.train.forEach(p=>pt(p,1));
+    if(this.state.showVal) this.val.forEach(p=>{ const px=(p.x/5*0.5+0.5)*w, py=(0.5-p.y/5*0.5)*h; ctx.beginPath(); ctx.rect(px-2.6,py-2.6,5.2,5.2); ctx.fillStyle=p.lab<0?this.css("--blue"):this.css("--gold-ink"); ctx.globalAlpha=.9; ctx.fill(); ctx.globalAlpha=1; ctx.strokeStyle="rgba(255,255,255,.8)"; ctx.lineWidth=1; ctx.stroke(); });
+  }
+  drawLoss(){
+    const cv=this.lossRef.current; if(!cv)return; const ctx=cv.getContext("2d");
+    const dpr=Math.min(2,window.devicePixelRatio||1); const w=cv.width/dpr,h=cv.height/dpr;
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle=this.css("--line"); ctx.lineWidth=1;
+    for(let g=1;g<4;g++){ const y=h*g/4; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    const H=this.lossHistory; if(H.length<2){ ctx.fillStyle=this.css("--faint"); ctx.font="11px var(--sans)"; ctx.fillText("Press play to plot loss…",10,h/2); return; }
+    let mx=0; for(const p of H){ mx=Math.max(mx,p[0],p[1]); } mx=Math.max(mx,0.05);
+    const line=(idx,color)=>{ ctx.beginPath(); for(let i=0;i<H.length;i++){ const x=i/(H.length-1)*w, y=h-Math.min(1,H[i][idx]/mx)*(h-8)-4; i?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke(); };
+    line(1,this.css("--gold-ink")); line(0,this.css("--blue"));
+  }
+  updateMetrics(){
+    this.setTxt("m-epoch",(this.epoch||0).toLocaleString());
+    this.setTxt("m-train",isFinite(this.trainLoss)?this.trainLoss.toFixed(3):"—");
+    this.setTxt("m-val",isFinite(this.valLoss)?this.valLoss.toFixed(3):"—");
+    this.setTxt("boundpill",this.state.activation);
+  }
+
+  // ---------- interaction ----------
+  onClick(e){
+    const t=e.target.closest("[data-action]"); if(!t)return; const a=t.getAttribute("data-action");
+    const H={
+      play:()=>this.togglePlay(), step:()=>this.step(), reset:()=>this.reset(),
+      "inc-neuron":()=>this.changeNeuron(+t.getAttribute("data-h"),1),
+      "dec-neuron":()=>this.changeNeuron(+t.getAttribute("data-h"),-1),
+      "inc-layer":()=>this.changeLayer(1), "dec-layer":()=>this.changeLayer(-1),
+      preset:()=>this.preset(t.getAttribute("data-preset")),
+      "select-node":()=>this.selectNode(+t.getAttribute("data-l"),+t.getAttribute("data-u")),
+      "select-edge":()=>this.selectEdge(+t.getAttribute("data-l"),+t.getAttribute("data-i"),+t.getAttribute("data-o")),
+      view:()=>this.setView(t.getAttribute("data-view")),
+      dataset:()=>this.setDataset(t.getAttribute("data-ds")),
+      feature:()=>this.toggleFeature(t.getAttribute("data-feat")),
+      act:()=>this.setAct(t.getAttribute("data-act")),
+      regen:()=>{ this.buildData(); this.drawBoundary(); this.sfx("click"); this.status("Regenerated examples."); },
+      ctab:()=>this.setCtab(t.getAttribute("data-ctab")),
+      lab:()=>this.setLab(t.getAttribute("data-lab")),
+      theme:()=>this.toggleTheme(), sound:()=>this.toggleSound(),
+      help:()=>this.openDialog("help"), compute:()=>this.openDialog("compute"),
+      "dialog-close":()=>{ this.$("dialoglayer").style.display="none"; },
+      quest:()=>this.openQuest(), "quest-close":()=>{ this.$("questlayer").style.display="none"; },
+      "quest-go":()=>this.questGo(+t.getAttribute("data-m")),
+      hint:()=>this.toggleHint(), check:()=>this.check(),
+      "mission-prev":()=>this.gotoMission(this.state.mission-1), "mission-next":()=>this.gotoMission(this.state.mission+1),
+      reveal:()=>{ const b=this.$("answerbox"); if(b)b.style.display="block"; },
+      clearloss:()=>{ this.lossHistory=[]; this.drawLoss(); },
+      mode:()=>this.setMode(t.getAttribute("data-mode")),
+      "tour-next":()=>this.tourNext(1), "tour-back":()=>this.tourNext(-1), "tour-skip":()=>this.endTour()
+    };
+    if(H[a]){ H[a](); return; }
+    this.textClick(a,t);
+  }
+  onInput(e){
+    const t=e.target.closest("[data-action]"); if(!t)return; const a=t.getAttribute("data-action");
+    if(a==="noise"){ this.state.noise=+t.value; this.setTxt("noiseval",t.value+"%"); this.buildData(); this.drawBoundary(); }
+    else if(a==="split"){ this.state.split=+t.value; this.setTxt("splitval",t.value+"%"); this.buildData(); this.drawBoundary(); }
+    else if(a==="lr"){ this.state.lr=Math.pow(10,+t.value); this.setTxt("lrval",this.state.lr.toFixed(this.state.lr<0.01?4:3)); }
+    else if(a==="regrate"){ this.state.regrate=+t.value; }
+    else if(a==="t-temp"){ this.txt.temp=+t.value; this.setTxt("t-tempval",(+t.value).toFixed(1)); }
+    else if(a==="gpt-temp"){ this.txt.gptTemp=+t.value; this.setTxt("gpt-tempv",(+t.value).toFixed(1)); }
+    else if(a==="gpt-ctx"){ this.txt.gptPrompt=t.value; }
+    else if(a==="t-corpustext"){ this.txt.dirty=true; this.setTxt("t-charcount",t.value.length); }
+  }
+  onChange(e){
+    const t=e.target.closest("[data-action]"); if(!t)return; const a=t.getAttribute("data-action");
+    if(a==="optimizer"){ this.state.optimizer=t.value; if(this.optimizersUsed)this.optimizersUsed.add(t.value); }
+    else if(a==="lossfn"){ this.state.lossfn=t.value; }
+    else if(a==="batch")this.state.batch=+t.value;
+    else if(a==="reg")this.state.reg=t.value;
+    else if(a==="showval"){ this.state.showVal=t.checked; this.drawBoundary(); }
+    else if(a==="discretize"){ this.state.discretize=t.checked; this.drawBoundary(); }
+  }
+  onKey(e){
+    if(e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
+    if(e.key===" "){ e.preventDefault(); this.togglePlay(); }
+    else if(e.key==="s"||e.key==="S")this.step();
+    else if(e.key==="r"||e.key==="R")this.reset();
+    else if(e.key==="1")this.setLab("playground");
+    else if(e.key==="2")this.setLab("text");
+    else if(e.key==="Escape"){ this.$("questlayer").style.display="none"; this.$("dialoglayer").style.display="none"; if(this.$("tourlayer").style.display!=="none")this.endTour(); }
+  }
+
+  togglePlay(){ this.state.playing=!this.state.playing; this.$("playicon").style.display=this.state.playing?"none":"block"; this.$("pauseicon").style.display=this.state.playing?"block":"none";
+    const dot=this.$("statusdot"),pill=this.$("statuspill"); if(this.state.playing){ dot.style.background=this.css("--good"); this.setTxt("statustext","Training"); pill.style.color=this.css("--good"); this.sfx("click"); } else { dot.style.background=this.css("--faint"); this.setTxt("statustext","Paused"); pill.style.color=this.css("--muted"); }
+    this.updateNetworkVisual(); this.status(this.state.playing?"Training…":"Paused."); }
+  step(){ for(let i=0;i<8;i++)this.trainBatch(); this.sampleActivations(); this.trainLoss=this.computeLoss(this.train); this.valLoss=this.computeLoss(this.val);
+    this.lossHistory.push([this.trainLoss,this.valLoss]); this.updateNetworkVisual(); this.drawBoundary(); this.drawLoss(); this.updateMetrics(); this.updateMissionProgress(); this.awardXP(this.cfg.stepXP,true); this.sfx("tick"); this.status("Ran one step."); }
+  reset(){ this.state.playing=false; this.$("playicon").style.display="block"; this.$("pauseicon").style.display="none"; this.buildModel(); this.sampleActivations(); this.updateNetworkVisual(); this.drawBoundary(); this.drawLoss(); this.updateMetrics(); this.setTxt("statustext","Ready"); this.$("statusdot").style.background=this.css("--faint"); this.sfx("click"); this.status("Model reset."); }
+  changeNeuron(h,d){ const cur=this.state.hidden[h]; const nv=Math.max(1,Math.min(8,cur+d)); if(nv===cur)return; this.state.hidden[h]=nv; this.rebuild(); this.sfx("tick"); }
+  changeLayer(d){ let hl=this.state.hidden.slice(); if(d>0){ if(hl.length>=4)return; hl.push(4); } else { if(hl.length<=0)return; hl.pop(); } this.state.hidden=hl; this.rebuild(); this.sfx(d>0?"unlock":"tick"); }
+  preset(p){ this.state.hidden = p==="shallow"?[4]:p==="wide"?[8]:[6,5,4]; this.rebuild(); this.sfx("unlock"); this.status(p.charAt(0).toUpperCase()+p.slice(1)+" preset applied."); }
+  rebuild(){ this.selected=null; this.buildModel(); this.renderNetwork(); this.sampleActivations(); this.updateNetworkVisual(); this.drawBoundary(); this.drawLoss(); this.updateMetrics(); this.updateInspector(); }
+  setView(v){ this.state.view=v; ["activations","weights","gradients"].forEach(k=>{ const b=this.$("view-"+k); if(!b)return; const on=k===v; b.style.background=on?this.css("--surface"):"transparent"; b.style.color=on?this.css("--ink"):this.css("--muted"); b.style.boxShadow=on?"var(--shadow-s)":"none"; }); this.updateNetworkVisual(); }
+  setDataset(ds){ this.state.dataset=ds; this.$all("").length; Array.prototype.forEach.call(this.root.querySelectorAll('[data-action="dataset"]'),b=>{ const on=b.getAttribute("data-ds")===ds; b.style.borderColor=on?this.css("--blue"):this.css("--line"); b.style.background=on?this.css("--columbia-soft"):this.css("--surface"); b.style.color=on?this.css("--ink"):this.css("--muted"); }); this.buildData(); this.drawBoundary(); this.sfx("click"); }
+  toggleFeature(k){ let f=this.state.features.slice(); if(f.indexOf(k)>=0){ if(f.length<=1)return; f=f.filter(x=>x!==k); } else f.push(k); this.state.features=f; this.renderFeatures(); this.rebuild(); this.sfx("tick"); }
+  setAct(a){ this.state.activation=a; this.renderActs(); this.updateMetrics(); this.rebuild(); }
+  setCtab(c){ this.state.ctab=c; ["data","model","train"].forEach(k=>{ const tab=this.$("ctab-"+k),pane=this.$("cpane-"+k); const on=k===c;
+    if(tab){ tab.style.background=on?this.css("--surface"):"transparent"; tab.style.color=on?this.css("--ink"):this.css("--muted"); tab.style.boxShadow=on?"var(--shadow-s)":"none"; } if(pane)pane.style.display=on?"block":"none"; }); }
+  setLab(l){ this.state.lab=l; Array.prototype.forEach.call(this.root.querySelectorAll("[data-screen]"),s=>{ s.style.display=s.getAttribute("data-screen")===l?"flex":"none"; });
+    Array.prototype.forEach.call(this.root.querySelectorAll("[data-labtab]"),b=>{ const on=b.getAttribute("data-labtab")===l; b.style.background=on?this.css("--surface"):"transparent"; b.style.color=on?this.css("--ink"):this.css("--muted"); b.style.boxShadow=on?"var(--shadow-s)":"none"; const num=b.querySelector("span"); if(num){ num.style.background=on?this.css("--navy"):this.css("--surface-strong"); num.style.color=on?"#fff":this.css("--muted"); } });
+    if(l==="playground"){ this.sizeCanvases(); this.renderNetwork(); this.drawBoundary(); this.drawLoss(); }
+    if(l==="text"){ if(!this.txt.ready)this.initText(); } this.sfx("click");
+    this.status((l==="text"?"Text Lab":"Model Playground")+" is ready."); }
+
+  toggleTheme(){ this.state.theme=this.state.theme==="light"?"dark":"light"; this.root.dataset.theme=this.state.theme; this.save();
+    setTimeout(()=>{ this.renderNetwork(); this.drawBoundary(); this.drawLoss(); },30); this.sfx("click"); }
+  toggleSound(){ this.state.muted=!this.state.muted; this.$("soundicon").style.opacity=this.state.muted?"0.4":"1"; this.save(); if(!this.state.muted)this.sfx("click"); }
+
+  // ---------- inspector ----------
+  selectNode(l,u){ this.selected={kind:"node",l,u}; this.updateInspector(); this.highlightSelection(); this.sfx("tick"); }
+  selectEdge(l,i,o){ this.selected={kind:"edge",l,i,o}; this.updateInspector(); this.highlightSelection(); this.sfx("tick"); }
+  highlightSelection(){ if(!this.nodeEls)return;
+    this.nodeEls.forEach(n=>{ n.c.setAttribute("stroke-width",(this.selected&&this.selected.kind==="node"&&this.selected.l===n.l&&this.selected.u===n.u)?"4":"2.5"); });
+    this.edgeEls.forEach(e=>{ const on=this.selected&&this.selected.kind==="edge"&&this.selected.l===e.l&&this.selected.i===e.i&&this.selected.o===e.o; e.el.style.filter=on?"drop-shadow(0 0 4px currentColor)":"none"; });
+  }
+  updateInspector(){ const body=this.$("inspbody"),kind=this.$("inspkind"); if(!body)return; const s=this.selected;
+    if(!s){ kind.textContent="None"; body.innerHTML='<p style="font:400 12px/1.5 var(--sans);color:var(--faint);text-align:center;padding:14px 8px">Click a neuron or connection in the network to inspect its weight, bias, and output.</p>'; return; }
+    const row=(k,v,c)=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)"><span style="font:600 11px/1 var(--sans);color:var(--muted)">'+k+'</span><span style="font:700 13px/1 var(--mono);color:'+(c||"var(--ink)")+'">'+v+'</span></div>';
+    if(s.kind==="node"){ kind.textContent=s.l===0?"Input":s.l===this.sizes.length-1?"Output":"Neuron";
+      const act=(this.actNodes[s.l]&&this.actNodes[s.l][s.u]||0);
+      let bias="—"; if(s.l>0){ bias=this.layers[s.l-1].b[s.u].toFixed(3); }
+      const name=s.l===0?(this.featureDefs.find(f=>f.k===this.state.features[s.u])||{label:"x"}).label:(s.l===this.sizes.length-1?"ŷ":"h"+(s.u+1));
+      body.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--columbia-soft);border:2px solid var(--navy);font:600 13px/1 var(--mono);color:var(--navy)">'+name+'</span><div><p style="font:700 12px/1 var(--sans);color:var(--ink)">Layer '+s.l+'</p><p style="font:500 10.5px/1.2 var(--sans);color:var(--faint)">'+(s.l===0?"Input feature":s.l===this.sizes.length-1?"Model prediction":"Hidden unit")+'</p></div></div>'
+        +row("Activation",act.toFixed(3),"var(--blue)")+(s.l>0?row("Bias",bias):"")+'<div style="margin-top:10px;height:8px;border-radius:5px;background:var(--surface-strong);overflow:hidden"><span style="display:block;height:100%;width:'+(act*100).toFixed(0)+'%;background:linear-gradient(90deg,var(--blue),var(--blue-bright))"></span></div><p style="font:400 10px/1.4 var(--sans);color:var(--faint);margin-top:6px">Activation strength (mean over a sample of examples).</p>';
+    } else { kind.textContent="Weight"; const L=this.layers[s.l]; const w=L.W[s.o*L.inN+s.i]; const g=L.gW[s.o*L.inN+s.i];
+      const from=s.l===0?(this.featureDefs.find(f=>f.k===this.state.features[s.i])||{label:"x"}).label:"h"+(s.i+1);
+      const to=(s.l+1)===this.sizes.length-1?"ŷ":"h"+(s.o+1);
+      body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:10px"><span style="display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--columbia-soft);border:2px solid var(--blue);font:600 12px/1 var(--mono);color:var(--blue)">'+from+'</span><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="'+(w>=0?"var(--blue)":"var(--gold-ink)")+'" stroke-width="2"><path d="M0 6h26M22 2l5 4-5 4" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--gold-soft);border:2px solid var(--gold-ink);font:600 12px/1 var(--mono);color:var(--gold-ink)">'+to+'</span></div>'
+        +row("Weight",w.toFixed(3),w>=0?"var(--blue)":"var(--gold-ink)")+row("Gradient",g.toFixed(4))+row("Sign",w>=0?"positive (+)":"negative (−)")+'<p style="font:400 10px/1.4 var(--sans);color:var(--faint);margin-top:8px">Blue connections push the output up; amber pull it down. Thickness reflects magnitude.</p>';
+    }
+  }
+
+  // ---------- missions / gamification ----------
+  applyMission(idx){ const m=this.missions[idx];
+    this.state.dataset=m.dataset; this.state.hidden=m.hidden.slice(); this.state.noise=m.noise||0;
+  }
+  gotoMission(i){ if(i<0||i>=this.missions.length)return; if(i>0 && this.state.done.indexOf(i-1)<0 && this.state.done.indexOf(i)<0){ this.guide(this.fmt(this.ui.messages.lockedMission,{n:i})); this.sfx("click"); return; }
+    this.stopPulse("mission-next"); this.state.mission=i; this.applyMission(i,false); this.optimizersUsed=new Set([this.state.optimizer]); this.state.playing=false; this.$("playicon").style.display="block"; this.$("pauseicon").style.display="none";
+    this.renderFeatures(); this.buildData(); this.rebuild(); this.syncControls(); this.updateMissionCard(); this.state.hintOpen=false; this.$("hintbox").style.display="none"; this.sfx("click"); }
+  updateMissionCard(){ const m=this.missions[this.state.mission], total=this.missions.length; this.setTxt("mkicker","Mission "+(this.state.mission+1)+" of "+total); this.setTxt("mtitle",m.title); this.setTxt("mgoal",m.goal); this.setTxt("hinttext",m.hint); this.setTxt("m-obj-ds",this.datasetLabel(m.dataset)); this.setTxt("m-obj-target","val loss < "+m.target);
+    this.setTxt("mprogtext",this.state.done.length+"/"+total); this.$("mprog").style.width=(this.state.done.length/total*100)+"%"; this.updateMissionProgress(); }
+  updateMissionProgress(){ const m=this.missions[this.state.mission]; const done=this.state.done.indexOf(this.state.mission)>=0;
+    const check=this.root.querySelector('[data-action="check"]'); if(check){ if(done){ check.textContent="✓ Completed"; } else check.textContent="Check Solution"; } }
+  toggleHint(){ this.state.hintOpen=!this.state.hintOpen; this.$("hintbox").style.display=this.state.hintOpen?"block":"none"; this.sfx("click"); }
+  // Mission requirements are data-driven: each mission in content/missions.json has a
+  // "rules" array evaluated by ruleOK(). See README.md for the list of rule types.
+  missionOK(m){ const need=(msg)=>({ok:false,msg:msg}); const val=this.valLoss, trained=this.epoch>=1&&isFinite(val);
+    if(!trained) return need(this.ui.messages.trainFirst);
+    for(const rule of (m.rules||[])){ if(!this.ruleOK(rule)) return need(rule.msg||"Requirement not met."); }
+    if(val>m.target) return need(this.fmt(this.ui.messages.almost,{val:val.toFixed(3),target:m.target.toFixed(2),hint:m.hint}));
+    return {ok:true};
+  }
+  ruleOK(rule){
+    const F=this.state.features, H=this.state.hidden, sum=H.reduce((a,b)=>a+b,0), maxW=Math.max.apply(null,H.concat([0]));
+    switch(rule.type){
+      case "any": return (rule.rules||[]).some(r=>this.ruleOK(r));
+      case "all": return (rule.rules||[]).every(r=>this.ruleOK(r));
+      case "layers-exact": return H.length===rule.value;
+      case "layers-min": return H.length>=rule.value;
+      case "layers-max": return H.length<=rule.value;
+      case "neurons-min": return sum>=rule.value;
+      case "width-min": return maxW>=rule.value;
+      case "width-max": return maxW<=rule.value;
+      case "features-only": return F.length===rule.value.length && rule.value.every(k=>F.indexOf(k)>=0);
+      case "feature-any": return rule.value.some(k=>F.indexOf(k)>=0);
+      case "noise-min": return this.state.noise>=rule.value;
+      case "optimizers-min": return (this.optimizersUsed?this.optimizersUsed.size:1)>=rule.value;
+      case "discrete-off": return !this.state.discretize;
+      default: console.warn("Unknown mission rule type:",rule.type); return true;
+    }
+  }
+  check(){ const m=this.missions[this.state.mission]; const r=this.missionOK(m);
+    if(r.ok){ const first=this.state.done.indexOf(this.state.mission)<0; if(first){ this.state.done.push(this.state.mission); this.awardXP(this.cfg.missionXP); this.save(); }
+      this.sfx("success"); this.showToast(this.ui.messages.missionComplete,"+"+(first?this.cfg.missionXP:0)+" XP · "+m.title); this.guide(m.answer); this.burst(); this.updateMissionCard(); this.pulseNext("mission-next"); }
+    else { this.sfx("click"); this.guide(r.msg); this.status(this.ui.messages.notYet); }
+  }
+  awardXP(n,silent){ const per=this.cfg.xpPerLevel; const before=Math.floor(this.state.xp/per); this.state.xp+=n; const after=Math.floor(this.state.xp/per);
+    this.updateXP(); if(after>before){ this.sfx("level"); this.showToast("Level "+(after+1)+"!","You reached level "+(after+1)); } if(!silent)this.save(); }
+  updateXP(){ const per=this.cfg.xpPerLevel; const lvl=Math.floor(this.state.xp/per)+1, into=this.state.xp%per, pct=into/per*100;
+    this.setTxt("level",lvl); this.setTxt("xptext",into+" / "+per); this.$("xpbar").style.width=pct+"%";
+    const badge=this.$("levelbadge"); if(badge)badge.style.background="conic-gradient(var(--accent) "+(pct*3.6)+"deg,var(--surface-strong) 0deg)"; }
+  showToast(title,body){ const t=this.$("toast"); this.setTxt("toasttitle",title); this.setTxt("toastbody",body); t.style.display="flex";
+    requestAnimationFrame(()=>{ t.style.opacity="1"; t.style.transform="translateX(-50%) translateY(0)"; }); clearTimeout(this._toast); this._toast=setTimeout(()=>{ t.style.opacity="0"; t.style.transform="translateX(-50%) translateY(-20px)"; setTimeout(()=>t.style.display="none",350); },2800); }
+  burst(){ if(this.reduce)return; const el=this.netRef.current; const ring=document.createElement("div"); ring.style.cssText="position:absolute;left:50%;top:50%;width:80px;height:80px;margin:-40px;border:3px solid var(--gold);border-radius:50%;animation:cs3ring .7s ease-out forwards;pointer-events:none;z-index:5"; el.appendChild(ring); setTimeout(()=>ring.remove(),720); }
+
+  openQuest(){ this.renderQuest(); this.$("questlayer").style.display="block"; this.sfx("click"); }
+  questGo(i){ this.$("questlayer").style.display="none"; this.gotoMission(i); }
+  renderQuest(){ const body=this.$("questbody"); const done=this.state.done;
+    let html='<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:14px 16px;border-radius:12px;background:var(--surface-soft);border:1px solid var(--line)">'
+      +'<div style="text-align:center"><p style="font:700 26px/1 var(--display);color:var(--navy)">'+(Math.floor(this.state.xp/this.cfg.xpPerLevel)+1)+'</p><p style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Level</p></div>'
+      +'<div style="width:1px;height:34px;background:var(--line)"></div>'
+      +'<div style="text-align:center"><p style="font:700 26px/1 var(--display);color:var(--gold-ink)">'+this.state.xp+'</p><p style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Total XP</p></div>'
+      +'<div style="width:1px;height:34px;background:var(--line)"></div>'
+      +'<div style="text-align:center"><p style="font:700 26px/1 var(--display);color:var(--good)">'+done.length+'/'+this.missions.length+'</p><p style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Missions</p></div></div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">';
+    this.missions.forEach((m,i)=>{ const isDone=done.indexOf(i)>=0; const unlocked=i===0||done.indexOf(i-1)>=0||isDone; const current=i===this.state.mission;
+      const bg=isDone?"var(--good-soft)":unlocked?"var(--surface)":"var(--surface-soft)";
+      const bd=current?"var(--navy)":isDone?"color-mix(in oklab,var(--good) 40%,transparent)":"var(--line)";
+      html+='<button '+(unlocked?'data-action="quest-go" data-m="'+i+'"':'disabled')+' style="text-align:left;padding:13px;border-radius:12px;background:'+bg+';border:1.5px solid '+bd+';'+(unlocked?'cursor:pointer':'opacity:.6;cursor:not-allowed')+';transition:transform .14s;position:relative">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:'+(isDone?"var(--good)":unlocked?"var(--navy)":"var(--line-strong)")+';color:#fff;font:700 13px/1 var(--display)">'+(isDone?"✓":(i+1))+'</span>'
+        +(current?'<span style="font:800 7.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--navy);background:var(--columbia-soft);padding:3px 6px;border-radius:20px">Current</span>':isDone?'<span style="font:800 7.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--good)">Done</span>':unlocked?'':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--faint)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>')+'</div>'
+        +'<p style="font:600 13px/1.15 var(--serif);color:var(--ink);margin-bottom:3px">'+m.title+'</p>'
+        +'<p style="font:500 10px/1.35 var(--sans);color:var(--faint)">'+m.restrict+'</p></button>';
+    });
+    html+='</div>'; body.innerHTML=html;
+  }
+
+  openDialog(kind){ const eb=this.$("dialogeyebrow"),ti=this.$("dialogtitle"),bo=this.$("dialogbody");
+    if(kind==="help"){ eb.textContent="Reference"; ti.textContent="Using the labs";
+      bo.innerHTML=this.helpHTML(); }
+    else { eb.textContent="Local compute"; ti.textContent="Performance"; bo.innerHTML=this.computeHTML(); }
+    this.$("dialoglayer").style.display="block"; this.sfx("click");
+  }
+  helpHTML(){ const kb=(k,d)=>'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)"><kbd style="font:700 11px/1 var(--mono);padding:4px 8px;border-radius:6px;background:var(--surface-strong);border:1px solid var(--line-strong);min-width:30px;text-align:center">'+k+'</kbd><span style="font:500 12px/1.3 var(--sans);color:var(--muted)">'+d+'</span></div>';
+    return '<p style="font:400 13px/1.55 var(--sans);color:var(--muted);margin-bottom:14px">A local, no-network toolkit for teaching neural networks and small language models. Everything runs in this browser.</p>'
+      +'<p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:8px">Keyboard</p>'
+      +kb("Space","Start or pause training")+kb("S","Run one training step")+kb("R","Reset the active model")+kb("1 / 2","Switch laboratory")
+      +'<p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink);margin:16px 0 8px">Classroom rhythm</p><p style="font:400 12px/1.55 var(--sans);color:var(--muted)">Ask for a prediction, run one step, inspect the visible change, then change one control and compare. Finish each mission with its classroom question.</p>';
+  }
+  computeHTML(){ const row=(t,d)=>'<label style="display:block;margin-bottom:14px"><span style="display:block;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:5px">'+t+'</span>'+d+'</label>';
+    return row("Decision-surface renderer",'<select style="width:100%;padding:8px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"><option>Automatic — WebGPU, WebGL, CPU</option><option>Prefer WebGPU</option><option>Prefer WebGL</option><option>CPU only</option></select>')
+      +row("Compute budget",'<select style="width:100%;padding:8px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"><option>Balanced</option><option>Low memory</option><option>Faster updates</option></select>')
+      +'<label style="display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:9px;background:var(--surface-soft);border:1px solid var(--line);margin-bottom:10px"><span><span style="display:block;font:700 12px/1 var(--sans);color:var(--ink)">Reduce animation</span><span style="display:block;font:500 10.5px/1.3 var(--sans);color:var(--faint);margin-top:2px">Fewer transitions and no signal flow.</span></span><input data-action="reducemotion" type="checkbox" style="accent-color:var(--blue);width:16px;height:16px"></label>'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:9px;background:var(--good-soft);border:1px solid color-mix(in oklab,var(--good) 22%,transparent)"><span style="font:600 11.5px/1.3 var(--sans);color:var(--good)">All computation is local. No data leaves this device.</span></div>';
+  }
+
+  // ---------- tour ----------
+  startTour(){ this._tourStep=0; this.$("tourlayer").style.display="block"; this.showTourStep(); }
+  showTourStep(){ const s=this.tour[this._tourStep]; const target=this.root.querySelector('[data-tour="'+s.sel+'"]'); if(!target){ this.tourNext(1); return; }
+    const rb=this.root.getBoundingClientRect(), tb=target.getBoundingClientRect();
+    const x=tb.left-rb.left-6, y=tb.top-rb.top-6, w=tb.width+12, h=tb.height+12;
+    ["tourhole","tourring"].forEach(id=>{ const e=this.$(id); e.setAttribute("x",x); e.setAttribute("y",y); e.setAttribute("width",w); e.setAttribute("height",h); });
+    this.setTxt("tournum",this._tourStep+1); this.setTxt("tourstepcount","Step "+(this._tourStep+1)+" of "+this.tour.length);
+    this.setTxt("tourtitle",s.title); this.setTxt("tourbody",s.body);
+    this.setTxt("tournext",this._tourStep===this.tour.length-1?"Finish":"Next"); this.$("tourback").style.visibility=this._tourStep===0?"hidden":"visible";
+    const card=this.$("tourcard"); const cw=290,ch=170; let cx=x+w+16; if(cx+cw>rb.width-10)cx=x-cw-16; if(cx<10)cx=Math.min(rb.width-cw-10,Math.max(10,x+w/2-cw/2));
+    let cy=y+h/2-ch/2; if(cy<10)cy=10; if(cy+ch>rb.height-10)cy=rb.height-ch-10;
+    card.style.left=cx+"px"; card.style.top=cy+"px";
+  }
+  tourNext(d){ this._tourStep+=d; if(this._tourStep>=this.tour.length){ this.endTour(); return; } if(this._tourStep<0)this._tourStep=0; this.sfx("tick"); this.showTourStep(); }
+  endTour(){ this.$("tourlayer").style.display="none"; this._tourDone=true; this.save(); this.guide(this.ui.messages.tourDone); }
+
+  // ---------- guidance / mode ----------
+  guide(t){ if(this.state.lab==="text"){ this.setTxt("t-hinttext",t); const b=this.$("t-hintbox"); if(b)b.style.display="block"; } else { this.setTxt("hinttext",t); const b=this.$("hintbox"); if(b){ b.style.display="block"; this.state.hintOpen=true; } } }
+  datasetLabel(ds){ return this.ui.datasetLabels[ds]||ds; }
+  setMode(m){ this.state.mode=m;
+    ["lesson","sandbox"].forEach(k=>{ const b=this.$("mode-"+k); if(!b)return; const on=k===m; b.style.background=on?this.css("--surface"):"transparent"; b.style.color=on?this.css("--ink"):this.css("--muted"); b.style.boxShadow=on?"var(--shadow-s)":"none"; });
+    const show=(sel,vis)=>{ const e=this.$(sel); if(e)e.style.display=vis?"flex":"none"; };
+    if(m==="sandbox"){ show("m-nav",false); show("m-objective",false); show("m-progress",false); show("m-actions",false); const hb=this.$("hintbox"); if(hb)hb.style.display="none";
+      this.setTxt("mkicker",this.ui.sandbox.kicker); this.setTxt("mtitle",this.ui.sandbox.title); this.setTxt("mgoal",this.ui.sandbox.goal); this.status("Sandbox mode — explore freely."); }
+    else { show("m-nav",true); show("m-objective",true); show("m-progress",true); show("m-actions",true); this.updateMissionCard(); this.status("Lesson Plan mode."); }
+    this.sfx("click"); }
+
+  // ---------- render helper chips ----------
+  renderFeatures(){ const wrap=this.$("features"); if(!wrap)return; wrap.innerHTML="";
+    this.featureDefs.forEach(f=>{ const on=this.state.features.indexOf(f.k)>=0; const b=document.createElement("button");
+      b.setAttribute("data-action","feature"); b.setAttribute("data-feat",f.k);
+      b.style.cssText="padding:6px 10px;border-radius:7px;border:1.5px solid "+(on?"var(--blue)":"var(--line)")+";background:"+(on?"var(--columbia-soft)":"var(--surface)")+";color:"+(on?"var(--navy)":"var(--muted)")+";font:600 11px/1 var(--mono)";
+      b.textContent=f.label; wrap.appendChild(b); }); }
+  renderActs(){ const wrap=this.$("acts"); if(!wrap)return; wrap.innerHTML="";
+    this.actDefs.forEach(([k,label])=>{ const on=this.state.activation===k; const b=document.createElement("button");
+      b.setAttribute("data-action","act"); b.setAttribute("data-act",k);
+      b.style.cssText="padding:7px 4px;border-radius:7px;border:1.5px solid "+(on?"var(--blue)":"var(--line)")+";background:"+(on?"var(--columbia-soft)":"var(--surface)")+";color:"+(on?"var(--navy)":"var(--muted)")+";font:700 10.5px/1 var(--sans)";
+      b.textContent=label; wrap.appendChild(b); }); }
+  syncControls(){ const set=(sel,val)=>{ const el=this.root.querySelector(sel); if(el)el.value=val; };
+    this.$("noiseval")&&this.setTxt("noiseval",this.state.noise+"%"); const nr=this.root.querySelector('[data-action="noise"]'); if(nr)nr.value=this.state.noise;
+    Array.prototype.forEach.call(this.root.querySelectorAll('[data-action="dataset"]'),b=>{ const on=b.getAttribute("data-ds")===this.state.dataset; b.style.borderColor=on?this.css("--blue"):this.css("--line"); b.style.background=on?this.css("--columbia-soft"):this.css("--surface"); b.style.color=on?this.css("--ink"):this.css("--muted"); }); }
+
+  status(t){ this.setTxt("livestatus",t); }
+
+  // ---------- TEXT LAB ----------
+  initText(){ const L=this.textLessons[this.txt.lesson]; this.txt.tokenizer=L.tokenizer; this.txt.model=L.model; this.txt.order=L.order; this.txt.source=L.source;
+    this.$("t-corpusinput").value=this.corpusText(this.txt.source);
+    this.syncTextControls(); this.prepareCorpus(true); this.updateTextLesson(); this.txt.ready=true; }
+  syncTextControls(){
+    Array.prototype.forEach.call(this.root.querySelectorAll('[data-action="t-source"]'),b=>{ const on=b.getAttribute("data-src")===this.txt.source; b.style.borderColor=on?this.css("--blue"):this.css("--line"); b.style.background=on?this.css("--columbia-soft"):this.css("--surface"); b.style.color=on?this.css("--ink"):this.css("--muted"); });
+    Array.prototype.forEach.call(this.root.querySelectorAll('[data-action="t-tok"]'),b=>{ const on=b.getAttribute("data-tok")===this.txt.tokenizer; b.style.borderColor=on?this.css("--blue"):this.css("--line"); b.style.background=on?this.css("--columbia-soft"):this.css("--surface"); b.style.color=on?this.css("--navy"):this.css("--muted"); });
+    Array.prototype.forEach.call(this.root.querySelectorAll('[data-action="t-model"]'),b=>{ const on=b.getAttribute("data-model")===this.txt.model; b.style.borderColor=on?this.css("--blue"):this.css("--line"); b.style.background=on?this.css("--columbia-soft"):this.css("--surface"); b.style.color=on?this.css("--ink"):this.css("--muted"); });
+    const ow=this.$("t-orderwrap"); if(ow)ow.style.display=this.txt.model==="markov"?"block":"none";
+    ["1","2"].forEach(k=>{ const b=this.$("t-order-"+k); if(b){ const on=(+k)===this.txt.order; b.style.borderColor=on?"var(--blue)":"var(--line)"; b.style.background=on?"var(--columbia-soft)":"var(--surface)"; b.style.color=on?"var(--navy)":"var(--muted)"; } });
+  }
+  setOrder(o){ this.txt.order=o; this.syncTextControls(); this.buildMarkov(); this.updateTextMetrics(); if(this.txt.selIndex!=null)this.selectCtxFromIndex(this.txt.selIndex); else if(this.txt.ctx)this.renderTransBars(); this.sfx("click"); }
+  tokenize(text,mode){
+    if(mode==="char") return Array.from(text);
+    if(mode==="word") return (text.toLowerCase().match(/[a-z']+|[.,;:!?-]/g))||[];
+    if(mode==="syllable"){ const words=(text.toLowerCase().match(/[a-z']+|[.,;:!?-]/g))||[]; const out=[]; words.forEach(w=>{ if(!/[a-z]/.test(w)){out.push(w);return;} const pieces=w.match(/[^aeiouy]*[aeiouy]+(?:[^aeiouy](?![aeiouy]))?/g); if(pieces&&pieces.join("")===w)out.push.apply(out,pieces); else out.push(w); }); return out; }
+    // bpe teaching approximation: 2-3 char pieces
+    const words=(text.toLowerCase().match(/[a-z']+|[.,;:!?-]/g))||[]; const out=[]; words.forEach(w=>{ if(w.length<=3){out.push(w);return;} for(let i=0;i<w.length;i+=3)out.push(w.slice(i,i+3)); }); return out;
+  }
+  prepareCorpus(silent){ const text=this.$("t-corpusinput").value||""; this.txt.tokens=this.tokenize(text,this.txt.tokenizer);
+    this.txt.vocab=Array.from(new Set(this.txt.tokens)); this.buildMarkov(); this.renderTokenFlow(); this.txt.ctx=null; this.txt.next=null; this.txt.selIndex=null; this.updateTextMetrics();
+    this.setTxt("t-tokcount2",this.txt.tokens.length); this.setTxt("t-charcount",text.length); this.resetTextInspector(); this.setTview(this.txt.tview); if(this.txt.model==="gpt"||this.txt.model==="rnn"||this.txt.model==="embed")this.initGPT(true);
+    if(!silent){ this.sfx("click"); this.status("Corpus prepared — "+this.txt.tokens.length+" tokens."); }
+  }
+  buildMarkov(){ const o=this.txt.order,tk=this.txt.tokens,counts={},totals={}; let edges=0;
+    for(let i=o;i<tk.length;i++){ const key=tk.slice(i-o,i).join("\u0001"),nx=tk[i]; if(!counts[key]){counts[key]={};totals[key]=0;} if(!counts[key][nx]){counts[key][nx]=0;edges++;} counts[key][nx]++; totals[key]++; }
+    this.txt.counts=counts; this.txt.totals=totals; this.txt.edges=edges;
+  }
+  chip(tok){ if(tok===" ")return "␣"; if(tok==="\n")return "⏎"; return tok; }
+  renderTokenFlow(){ const box=this.$("t-tokenflow"); if(!box)return; box.innerHTML=""; const tk=this.txt.tokens.slice(0,480);
+    const palette=this.css("--surface-strong");
+    tk.forEach((t,i)=>{ const b=document.createElement("button"); b.setAttribute("data-action","t-tokclick"); b.setAttribute("data-ti",i);
+      const isSpace=t===" "||t==="\n"; b.textContent=this.chip(t);
+      b.style.cssText="padding:4px 7px;border-radius:6px;border:1px solid var(--line);background:"+(isSpace?"transparent":"var(--surface-soft)")+";color:"+(isSpace?"var(--faint)":"var(--ink)")+";font:600 12px/1 var(--mono);transition:all .12s";
+      box.appendChild(b); });
+    if(this.txt.tokens.length>480){ const more=document.createElement("span"); more.style.cssText="padding:4px 7px;font:600 11px/1 var(--sans);color:var(--faint)"; more.textContent="+"+(this.txt.tokens.length-480)+" more"; box.appendChild(more); }
+  }
+  selectCtxFromIndex(i){ const o=this.txt.order,tk=this.txt.tokens; const start=Math.max(0,i-o+1); const ctx=tk.slice(start,i+1); if(ctx.length<o){ this.guide("Pick a token further into the text so there is enough context for order "+o+"."); return; }
+    this.txt.selIndex=i;
+    this.txt.ctx=ctx; this.txt.next=null; this.setTxt("t-ctxchip",ctx.map(x=>this.chip(x)).join(" ")); this.renderTransBars();
+    Array.prototype.forEach.call(this.root.querySelectorAll('[data-action="t-tokclick"]'),b=>{ const on=+b.getAttribute("data-ti")===i; b.style.borderColor=on?"var(--blue)":"var(--line)"; b.style.background=on?"var(--columbia-soft)":(b.textContent==="␣"||b.textContent==="⏎"?"transparent":"var(--surface-soft)"); b.style.color=on?"var(--navy)":(b.textContent==="␣"||b.textContent==="⏎"?"var(--faint)":"var(--ink)"); });
+    this.setTview("transitions"); this.sfx("tick");
+  }
+  renderTransBars(){ const box=this.$("t-transbars"); if(!box)return; box.innerHTML="";
+    if(this.txt.model!=="markov"){ box.appendChild(this.textModelCard()); return; }
+    const key=this.txt.ctx?this.txt.ctx.join("\u0001"):null; const dist=key!=null?this.txt.counts[key]:null;
+    if(!dist){ box.innerHTML='<p style="font:400 12.5px/1.5 var(--sans);color:var(--faint);text-align:center;padding:24px">This context does not appear in the corpus. Click a different token.</p>'; return; }
+    const total=this.txt.totals[key]; const entries=Object.keys(dist).map(k=>[k,dist[k]]).sort((a,b)=>b[1]-a[1]).slice(0,16);
+    entries.forEach(([tok,c])=>{ const p=c/total; const row=document.createElement("button"); row.setAttribute("data-action","t-barclick"); row.setAttribute("data-next",tok);
+      row.style.cssText="display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:5px 6px;border-radius:8px;background:transparent;transition:background .12s";
+      row.innerHTML='<span style="flex:0 0 66px;font:600 13px/1 var(--mono);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+this.chip(tok)+'</span>'
+        +'<span style="flex:1 1 auto;height:16px;border-radius:5px;background:var(--surface-strong);overflow:hidden"><span style="display:block;height:100%;width:'+(p*100).toFixed(1)+'%;border-radius:5px;background:linear-gradient(90deg,var(--blue),var(--blue-bright))"></span></span>'
+        +'<span style="flex:0 0 82px;text-align:right;font:600 11px/1 var(--mono);color:var(--muted)">'+c+' · '+(p*100).toFixed(0)+'%</span>';
+      box.appendChild(row); });
+  }
+  textModelCard(){ const d=document.createElement("div"); const m=this.txt.model;
+    const title=m==="rnn"?"Simple RNN":"Mini GPT"; const desc=m==="rnn"?"A learned hidden state flows left to right, carrying memory of earlier tokens into each prediction.":"A causal-attention block lets every token attend to all earlier tokens at once, then a feed-forward layer refines the result.";
+    d.style.cssText="display:flex;flex-direction:column;gap:14px;padding:8px 4px";
+    let stages=m==="rnn"?["Embed","h₀→h₁→h₂","Softmax"]:["Embed + Position","Masked attention","Feed-forward","Softmax"];
+    let flow='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+    stages.forEach((s,i)=>{ flow+='<span style="padding:9px 13px;border-radius:9px;background:var(--columbia-soft);border:1px solid var(--blue);font:600 12px/1 var(--sans);color:var(--navy)">'+s+'</span>'; if(i<stages.length-1)flow+='<svg width="20" height="12" viewBox="0 0 20 12" fill="none" stroke="var(--faint)" stroke-width="2"><path d="M0 6h15M12 2l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>'; });
+    flow+="</div>";
+    d.innerHTML='<div><h4 style="font:500 17px/1.1 var(--serif);color:var(--ink);margin-bottom:5px">'+title+'</h4><p style="font:400 12.5px/1.55 var(--sans);color:var(--muted)">'+desc+'</p></div>'+flow
+      +'<p style="font:400 11px/1.5 var(--sans);color:var(--faint);padding:10px 12px;border-radius:9px;background:var(--surface-soft);border:1px solid var(--line)"><strong style="color:var(--muted)">Teaching preview.</strong> The token flow and generation here use counted transitions; the diagram shows how '+title+' processes the same sequence.</p>';
+    return d;
+  }
+  barClick(next){ if(!this.txt.ctx)return; this.txt.next=next; const key=this.txt.ctx.join("\u0001"); const c=this.txt.counts[key][next]; const total=this.txt.totals[key];
+    const entries=Object.keys(this.txt.counts[key]).map(k=>[k,this.txt.counts[key][k]]).sort((a,b)=>b[1]-a[1]); const rank=entries.findIndex(e=>e[0]===next)+1;
+    this.setTxt("t-inspkind","Transition"); const body=this.$("t-inspbody");
+    const row=(k,v,cc)=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)"><span style="font:600 11px/1 var(--sans);color:var(--muted)">'+k+'</span><span style="font:700 13px/1 var(--mono);color:'+(cc||"var(--ink)")+'">'+v+'</span></div>';
+    body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:12px"><span style="padding:7px 11px;border-radius:8px;background:var(--columbia-soft);border:1px solid var(--blue);font:600 13px/1 var(--mono);color:var(--navy)">'+this.txt.ctx.map(x=>this.chip(x)).join(" ")+'</span><svg width="26" height="12" viewBox="0 0 26 12" fill="none" stroke="var(--gold-ink)" stroke-width="2"><path d="M0 6h20M17 2l5 4-5 4" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="padding:7px 11px;border-radius:8px;background:var(--gold-soft);border:1px solid var(--gold-ink);font:600 13px/1 var(--mono);color:var(--gold-ink)">'+this.chip(next)+'</span></div>'
+      +row("Count",c,"var(--blue)")+row("Probability",(c/total*100).toFixed(1)+"%")+row("Rank","#"+rank+" of "+entries.length)+'<p style="font:400 10.5px/1.45 var(--sans);color:var(--faint);margin-top:8px">Probability is this transition\'s share of all '+total+' continuations counted after this context.</p>';
+    this.sfx("tick");
+  }
+  resetTextInspector(){ this.setTxt("t-inspkind","None"); const b=this.$("t-inspbody"); if(b)b.innerHTML='<p style="font:400 12px/1.5 var(--sans);color:var(--faint);text-align:center;padding:14px 8px">Select a token in the flow, then a next-token bar, to inspect its transition count and probability.</p>'; }
+  updateTextMetrics(){ this.setTxt("tm-tokens",this.txt.tokens.length.toLocaleString()); this.setTxt("tm-vocab",this.txt.vocab.length); this.setTxt("tm-trans",(this.txt.edges||0).toLocaleString());
+    const o=this.txt.order,tk=this.txt.tokens; let sum=0,n=0; for(let i=o;i<tk.length;i++){ const key=tk.slice(i-o,i).join("\u0001"); const c=this.txt.counts[key]&&this.txt.counts[key][tk[i]]; const p=c?c/this.txt.totals[key]:1e-4; sum+=-Math.log2(p); n++; }
+    this.setTxt("tm-ppl",n?Math.pow(2,sum/n).toFixed(1):"—");
+  }
+  generateText(){ this.txt.sampled=true; if((this.txt.model==="gpt"||this.txt.model==="rnn")&&this.gpt){ if(!this.gpt){ this.guide("Open the Train panel and train the model first."); return; } const el=this.$("t-genout"); el.textContent="…generating…"; const self=this; setTimeout(()=>{ el.textContent=self.gpt.sample(200,self.txt.temp||0.8,"\n").trim(); el.style.animation="cs3fade .4s both"; self.awardXP(self.cfg.generateXP,true); },30); this.sfx("unlock"); this.status("Generated from Mini GPT."); return; }
+    if(!this.txt.counts){ this.guide("Prepare a corpus first, then generate."); return; }
+    const o=this.txt.order,keys=Object.keys(this.txt.counts); if(!keys.length)return; const T=this.txt.temp;
+    let ctx=keys[Math.floor(Math.random()*keys.length)].split("\u0001"); const out=ctx.slice();
+    const N=this.txt.tokenizer==="char"?150:44;
+    for(let i=0;i<N;i++){ const key=ctx.join("\u0001"); let dist=this.txt.counts[key]; if(!dist){ ctx=keys[Math.floor(Math.random()*keys.length)].split("\u0001"); out.push.apply(out,this.txt.tokenizer==="char"?[]:[]); continue; }
+      const toks=Object.keys(dist); let ws=toks.map(k=>Math.pow(dist[k],1/T)); const sum=ws.reduce((a,b)=>a+b,0); let r=Math.random()*sum,pick=toks[0]; for(let j=0;j<toks.length;j++){ r-=ws[j]; if(r<=0){pick=toks[j];break;} }
+      out.push(pick); ctx=out.slice(out.length-o); }
+    let text; if(this.txt.tokenizer==="char")text=out.join(""); else { text=out.join(" ").replace(/\s+([.,;:!?])/g,"$1"); text=text.charAt(0).toUpperCase()+text.slice(1); }
+    const el=this.$("t-genout"); el.style.animation="none"; el.textContent=text; requestAnimationFrame(()=>el.style.animation="cs3fade .5s both"); this.sfx("unlock"); this.awardXP(this.cfg.generateXP,true); this.status("Generated a passage.");
+  }
+  corpusText(src){ if(src==="shakespeare-all"){ return (typeof window!=="undefined"&&window.CS3_SHAKESPEARE_ALL)?window.CS3_SHAKESPEARE_ALL:(this.corpusSamples.tempest||""); } if(src==="tempest"||src==="shakespeare"){ return (typeof window!=="undefined"&&window.CS3_SHAKESPEARE)?window.CS3_SHAKESPEARE:(this.corpusSamples.tempest||""); } if(src==="tinystories"){ return (typeof window!=="undefined"&&window.CS3_TINYSTORIES)?window.CS3_TINYSTORIES:""; } return this.corpusSamples[src]||""; }
+  initGPT(force){ if(!window.MiniGPT){ this.guide("The engine is still loading — try again in a moment."); return; } if(this.gpt&&!force)return;
+    const mode=this.txt.model, sz=this.txt.gptSize||"medium"; const C={small:{d:24,h:2,T:24},medium:{d:32,h:4,T:32},large:{d:48,h:4,T:40}}[sz];
+    const arch=(mode==="rnn")?"rnn":"gpt"; const rd={small:36,medium:56,large:80}[sz];
+    if(this.txt.tokenizer==="word"){ const units=this.capWords(this.tokenize(this.corpusText(this.txt.source),"word"),700); this.gpt=new window.MiniGPT(null,{arch:arch,units:units,d:arch==="rnn"?rd:C.d,h:C.h,T:Math.min(C.T,24),lr:0.004}); }
+    else if(arch==="rnn"){ this.gpt=new window.MiniGPT(this.corpusText(this.txt.source),{arch:"rnn",d:rd,T:C.T,lr:0.004}); }
+    else { this.gpt=new window.MiniGPT(this.corpusText(this.txt.source),{arch:"gpt",d:C.d,h:C.h,T:C.T,lr:0.0035}); }
+    this.txt.gptPlaying=false; this.txt.gptLoss=[]; this.txt.gptLossEMA=null; this.txt.gptTPS=0; this._gptTokT=performance.now(); this._gptTokBase=0; this._gptFrames=0; this.syncGptIcons();
+    this.setTxt("gpt-params",this.gpt.paramCount().toLocaleString()); this.setTxt("gpt-stepv","0"); this.setTxt("gpt-lossv","—"); this.setTxt("gpt-tps","0"); this.setTxt("emb-updates","0"); this.setTxt("emb-loss","—"); this.drawGptLoss();
+    if(this.gpt.wordMode && this.txt.tview==="embeddings"){ this.embHighlight=null; this.populateEmbSelects(); this.drawEmb(); } }
+  gptTrainChunk(){ if(!this.gpt)return; const t0=performance.now(); let n=0,ls=0; this.gpt.zeroGrad();
+    while(performance.now()-t0<8 && n<20){ ls+=this.gpt.trainWindow(); n++; } if(!n)return; this.gpt.adam(1/n);
+    const avg=ls/n; this.txt.gptLossEMA=this.txt.gptLossEMA==null?avg:this.txt.gptLossEMA*0.92+avg*0.08;
+    this.txt.gptLoss.push(this.txt.gptLossEMA); if(this.txt.gptLoss.length>320)this.txt.gptLoss.shift();
+    this.gpt.tokensSeen=(this.gpt.tokensSeen||0)+n*this.gpt.T; this._gptFrames=(this._gptFrames||0)+1;
+    if(this._gptFrames%2===0){ this.drawGptLoss(); this.updateGptMetrics(); if(this.txt.model==="embed"&&this.txt.tview==="embeddings"&&this._gptFrames%6===0)this.drawEmb(); } }
+  updateGptMetrics(){ if(!this.gpt)return; this.setTxt("gpt-stepv",this.gpt.step.toLocaleString()); this.setTxt("gpt-epoch",(this.gpt.data&&this.gpt.data.length?((this.gpt.tokensSeen||0)/this.gpt.data.length):0).toFixed(2)); this.setTxt("gpt-lossv",this.txt.gptLossEMA!=null?this.txt.gptLossEMA.toFixed(3):"—"); this.setTxt("emb-updates",this.gpt.step.toLocaleString()); this.setTxt("emb-loss",this.txt.gptLossEMA!=null?this.txt.gptLossEMA.toFixed(3):"—");
+    const now=performance.now(); if(now-this._gptTokT>500){ const seen=this.gpt.tokensSeen||0; this.txt.gptTPS=Math.round((seen-this._gptTokBase)/((now-this._gptTokT)/1000)); this._gptTokBase=seen; this._gptTokT=now; this.setTxt("gpt-tps",this.txt.gptTPS.toLocaleString()); } }
+  drawGptLoss(){ const cv=this.$("gpt-losscanvas"); if(!cv)return; const dpr=Math.min(2,window.devicePixelRatio||1); const r=cv.getBoundingClientRect(); if(!r.width)return; cv.width=r.width*dpr; cv.height=r.height*dpr; const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); const w=r.width,h=r.height; ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle=this.css("--line"); ctx.lineWidth=1; for(let g=1;g<3;g++){ const y=h*g/3; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    const H=this.txt.gptLoss||[]; if(H.length<2){ ctx.fillStyle=this.css("--faint"); ctx.font="11px var(--sans)"; ctx.fillText("Press Train to plot the loss…",10,h/2); return; }
+    let mx=0,mn=1e9; for(const v of H){ if(v>mx)mx=v; if(v<mn)mn=v; } const lo=Math.max(0,mn-0.08),hi=mx+0.08,rng=Math.max(0.2,hi-lo);
+    ctx.beginPath(); for(let i=0;i<H.length;i++){ const x=i/(H.length-1)*w, y=h-((H[i]-lo)/rng)*(h-12)-6; i?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.strokeStyle=this.css("--blue"); ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle=this.css("--faint"); ctx.font="9px var(--mono)"; ctx.fillText(hi.toFixed(2),4,11); ctx.fillText(lo.toFixed(2),4,h-4); }
+  gptPlay(){ if(!this.gpt){ this.initGPT(); if(!this.gpt)return; } this.txt.gptPlaying=!this.txt.gptPlaying; this.syncGptIcons(); this.sfx("click"); this.status(this.txt.gptPlaying?"Training…":"Training paused."); }
+  gptStep(){ if(!this.gpt){ this.initGPT(); if(!this.gpt)return; } for(let i=0;i<3;i++)this.gptTrainChunk(); this.drawGptLoss(); this.updateGptMetrics(); this.awardXP(this.cfg.trainStepXP,true); this.sfx("tick"); }
+  gptReset(){ this.txt.gptPlaying=false; this.initGPT(true); this.setTxt("gpt-sample","Model reset. Press Train to learn from the corpus again."); this.sfx("click"); this.status("Model reset."); }
+  gptSampleNow(){ if(!this.gpt){ this.guide("Press Train first, then sample."); return; } this.txt.sampled=true; const el=this.$("gpt-sample"); el.textContent="…generating…"; const ce=this.$("gpt-ctx"); const pr=(ce&&ce.value)?ce.value:"\n"; const self=this; setTimeout(()=>{ el.textContent=self.gpt.sample(180,self.txt.gptTemp||0.7,pr).trim(); el.style.animation="cs3fade .4s both"; self.awardXP(self.cfg.generateXP,true); },30); this.sfx("unlock"); }
+  syncGptIcons(){ const p=this.txt.gptPlaying; this.root.querySelectorAll('[data-mp="gpt-playicon"],[data-mp="gpt-playicon2"]').forEach(e=>e.style.display=p?"none":"block"); this.root.querySelectorAll('[data-mp="gpt-pauseicon"],[data-mp="gpt-pauseicon2"]').forEach(e=>e.style.display=p?"block":"none"); }
+  pulseNext(a){ const el=this.root.querySelector('[data-action="'+a+'"]'); if(el)el.style.animation="cs3attn 1.15s ease-in-out infinite"; }
+  stopPulse(a){ const el=this.root.querySelector('[data-action="'+a+'"]'); if(el)el.style.animation="none"; }
+  setSize(sz){ this.txt.gptSize=sz; ["small","medium","large"].forEach(k=>{ const b=this.$("t-size-"+k); if(b){ const on=k===sz; b.style.borderColor=on?"var(--blue)":"var(--line)"; b.style.background=on?"var(--columbia-soft)":"var(--surface)"; b.style.color=on?"var(--navy)":"var(--muted)"; } }); if(this.txt.model==="gpt"||this.txt.model==="rnn")this.initGPT(true); this.sfx("click"); }
+  setEmbDim(d){ this.txt.embDim=d; ["2","3"].forEach(k=>{ const b=this.$("emb-dim-"+k); if(b){ const on=(+k)===d; b.style.background=on?this.css("--surface"):"transparent"; b.style.color=on?this.css("--ink"):this.css("--muted"); b.style.boxShadow=on?"var(--shadow-s)":"none"; } }); this.drawEmb(); this.sfx("click"); }
+  populateEmbSelects(){ if(!this.gpt)return; const toks=this.gpt.chars.filter(t=>/^[a-z']+$/.test(t)); const opts=toks.map(t=>'<option value="'+t+'">'+t+'</option>').join(""); const set=(mp,def)=>{ const el=this.$(mp); if(!el)return; el.innerHTML=opts; if(toks.indexOf(def)>=0)el.value=def; }; set("emb-a","king"); set("emb-b","man"); set("emb-c","woman"); }
+  solveAnalogy(){ if(!this.gpt){ this.guide("Train the word vectors first."); return; } this.txt.analogySolved=true; const a=this.$("emb-a").value,b=this.$("emb-b").value,c=this.$("emb-c").value; const res=this.gpt.analogy(a,b,c,6); const ol=this.$("emb-neighbors"); if(!ol)return; if(!res){ ol.innerHTML='<li style="color:var(--faint)">Not in vocabulary.</li>'; return; } ol.innerHTML=res.map((r,i)=>'<li style="color:'+(i===0?"var(--navy)":"var(--ink)")+'">'+r.tok+' <span style="color:var(--faint);font-size:10px">'+r.sim.toFixed(2)+'</span></li>').join(""); this.embHighlight=[a,b,c,res[0]?res[0].tok:null]; this.drawEmb(); this.sfx("unlock"); }
+  drawEmb(){ const cv=this.$("emb-canvas"); if(!cv||!this.gpt||!this.gpt.pca)return; const dpr=Math.min(2,window.devicePixelRatio||1); const r=cv.getBoundingClientRect(); if(!r.width)return; cv.width=r.width*dpr; cv.height=r.height*dpr; const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); const w=r.width,h=r.height; ctx.clearRect(0,0,w,h);
+    const dim=this.txt.embDim||2; const pc=this.gpt.pca(dim===3?3:2); const V=pc.V,toks=pc.toks,co=pc.coords,k=pc.k; if(!V)return;
+    const pts=[]; let mnx=1e9,mxx=-1e9,mny=1e9,mxy=-1e9;
+    for(let i=0;i<V;i++){ let x,y; if(k===3){ const X=co[i*3],Y=co[i*3+1],Z=co[i*3+2],aa=0.62; x=X*Math.cos(aa)+Z*Math.sin(aa); y=Y*0.92-(Z*Math.cos(aa)-X*Math.sin(aa))*0.4; } else { x=co[i*2]; y=co[i*2+1]; } pts.push({x:x,y:y,tok:toks[i]}); if(x<mnx)mnx=x; if(x>mxx)mxx=x; if(y<mny)mny=y; if(y>mxy)mxy=y; }
+    const sc=Math.min((w-72)/Math.max(1e-6,mxx-mnx),(h-46)/Math.max(1e-6,mxy-mny)); const cx=(mnx+mxx)/2,cy=(mny+mxy)/2;
+    const groups={king:0,queen:0,man:0,woman:0,boy:0,girl:0,paris:1,france:1,rome:1,italy:1}; const gcol=[this.css("--navy"),this.css("--gold-ink")]; const hi=this.embHighlight||[]; ctx.font="600 11px var(--mono)";
+    pts.forEach(p=>{ const X=w/2+(p.x-cx)*sc, Y=h/2-(p.y-cy)*sc; const g=groups[p.tok]; const isHi=hi.indexOf(p.tok)>=0;
+      ctx.beginPath(); ctx.arc(X,Y,isHi?6:3.6,0,6.283); ctx.fillStyle=g===undefined?this.css("--faint"):gcol[g]; ctx.globalAlpha=isHi?1:(g===undefined?0.42:0.9); ctx.fill(); ctx.globalAlpha=1; if(isHi){ ctx.lineWidth=2.5; ctx.strokeStyle=this.css("--gold"); ctx.stroke(); }
+      if(g!==undefined||isHi){ ctx.fillStyle=g===undefined?this.css("--ink"):gcol[g]; ctx.fillText(p.tok,X+7,Y+3.5); } }); }
+  capWords(words,K){ const f={}; for(let i=0;i<words.length;i++)f[words[i]]=(f[words[i]]||0)+1; const top=Object.keys(f).sort((a,b)=>f[b]-f[a]).slice(0,K||700); const keep={}; top.forEach(w=>keep[w]=1); return words.map(w=>keep[w]?w:"<unk>"); }
+  sourceLabel(){ return (this.txt.source==="tempest"||this.txt.source==="shakespeare-all")?"Shakespeare":this.txt.source==="tinystories"?"TinyStories":"the corpus"; }
+  openEmbeddings(){ if(this.gpt&&this.gpt.wordMode){ this.setTview("embeddings"); this.refreshEmbView(); return; }
+    const ok=window.confirm("Word vectors are read from a WORD-LEVEL model.\n\nThis will retrain the current "+(this.txt.model==="rnn"?"Simple RNN":"Mini GPT")+" on "+this.sourceLabel()+" using word tokens (a fresh model with a capped vocabulary). Continue?");
+    if(!ok)return; this.txt.tokenizer="word"; this.syncTextControls(); this.initGPT(true); this.setTview("embeddings"); this.refreshEmbView(); this.guide("Training a word-level model — press play, then Solve an analogy."); }
+  refreshEmbView(){ if(this.gpt&&this.gpt.wordMode){ this.populateEmbSelects(); requestAnimationFrame(()=>this.drawEmb()); } }
+  renderArch(){ const body=this.$("arch-body"); if(!body)return; const m=this.txt.model, g=this.gpt; const d=g?g.d:32,h=g?g.h:4,T=g?g.T:32,V=g?g.V:66,pc=g?g.paramCount():0,wm=g?g.wordMode:false; const arch=(m==="rnn")?"rnn":"gpt";
+    const block=(t,su,ac)=>'<div style="border:1.5px solid '+(ac||'var(--line)')+';background:var(--surface);border-radius:10px;padding:9px 13px;text-align:center;box-shadow:var(--shadow-s)"><p style="font:700 12.5px/1.1 var(--sans);color:var(--ink)">'+t+'</p><p style="font:500 10px/1.3 var(--mono);color:var(--faint);margin-top:3px">'+su+'</p></div>';
+    const arrow='<div style="display:flex;justify-content:center;color:var(--faint);margin:5px 0"><svg width="13" height="14" viewBox="0 0 14 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 0v15M2 11l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+    let b; if(arch==="gpt"){ b=[block("Token + Position Embedding","vocab "+V+" · dim "+d+" · context "+T,"var(--blue)"),block("LayerNorm","normalize "+d+" features"),block("Masked Multi-Head Attention",h+" heads × "+((d/h)|0)+" dim · causal","var(--navy)"),block("Add &amp; LayerNorm","residual connection"),block("Feed-Forward · GELU",d+" → "+(4*d)+" → "+d,"var(--navy)"),block("Add &amp; LayerNorm","residual connection"),block("Linear Head → Softmax","tied to embedding → "+V+" logits","var(--gold-ink)")]; }
+    else { b=[block("Token Embedding","vocab "+V+" · dim "+d,"var(--blue)"),block("Recurrent Cell · tanh","hₜ = tanh(Wₓₕx + Wₕₕhₜ₋₁ + b) · "+d+" units","var(--navy)"),block("Unrolled "+T+" time steps","hidden state carries memory forward"),block("Linear Head → Softmax","tied to embedding → "+V+" logits","var(--gold-ink)")]; }
+    body.innerHTML='<div style="max-width:540px;margin:0 auto"><div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px"><div><p style="font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink)">Architecture</p><h3 style="font:500 19px/1.1 var(--serif);color:var(--ink);margin-top:3px">'+(arch==="gpt"?"Mini GPT — one transformer block":"Simple RNN — one recurrent layer")+'</h3></div><span style="font:700 12px/1 var(--mono);color:var(--gold-ink)">'+(pc?pc.toLocaleString()+" params":"")+'</span></div>'+b.join(arrow)+'<p style="font:400 11px/1.5 var(--sans);color:var(--faint);margin-top:14px">'+(wm?"Word-level tokens.":"Character-level tokens.")+' The forward pass and full backprop run on exactly these shapes — nothing is faked.</p></div>'; }
+  setTctab(c){ this.txt.tctab=c; ["corpus","tokens","model"].forEach(k=>{ const tab=this.$("tctab-"+k),pane=this.$("tcpane-"+k),on=k===c; if(tab){tab.style.background=on?this.css("--surface"):"transparent";tab.style.color=on?this.css("--ink"):this.css("--muted");tab.style.boxShadow=on?"var(--shadow-s)":"none";} if(pane)pane.style.display=on?"block":"none"; }); }
+  setTview(v){ this.txt.tview=v; ["tokens","transitions","generate","train","embeddings","arch"].forEach(k=>{ const tab=this.$("tview-"+k),pane=this.$("tview-pane-"+k),on=k===v; if(tab){tab.style.background=on?this.css("--surface"):"transparent";tab.style.color=on?this.css("--ink"):this.css("--muted");tab.style.boxShadow=on?"var(--shadow-s)":"none";} if(pane)pane.style.display=on?"flex":"none"; }); if(v==="transitions")this.renderTransBars(); if(v==="embeddings")requestAnimationFrame(()=>{this.refreshEmbView();}); if(v==="train")requestAnimationFrame(()=>this.drawGptLoss()); if(v==="arch")this.renderArch(); }
+  setTok(tok){ this.txt.tokenizer=tok; this.syncTextControls(); this.prepareCorpus(); if((this.txt.model==="gpt"||this.txt.model==="rnn")){ this.initGPT(true); if(this.txt.tview==="embeddings")this.refreshEmbView(); if(this.txt.tview==="arch")this.renderArch(); } }
+  setTModel(m){ this.txt.model=m; this.txt.gptPlaying=false; this.syncTextControls();
+    this.setTxt("t-notice", this.ui.modelNotices[m]||this.ui.modelNotices.gpt);
+    const trainTab=this.$("tview-train"), transTab=this.$("tview-transitions"), embTab=this.$("tview-embeddings"), sizeWrap=this.$("t-sizewrap");
+    const show=(el,v)=>{ if(el)el.style.display=v?"block":"none"; };
+    show(sizeWrap, m==="gpt"||m==="rnn");
+    if(m==="markov"){ show(trainTab,false); show(embTab,false); show(transTab,true); { const at=this.$("tview-arch"); if(at)at.style.display="none"; } if(this.txt.tview==="train"||this.txt.tview==="embeddings")this.setTview("transitions"); else if(this.txt.tview==="transitions")this.renderTransBars(); }
+    else if(m==="embed"){ this.txt.tokenizer="word"; this.txt.source="analogy"; this.$("t-corpusinput").value=this.corpusText("analogy"); this.syncTextControls(); this.prepareCorpus(true); show(transTab,false); show(trainTab,false); show(embTab,true); this.setTview("embeddings"); }
+    else { this.txt.source="tempest"; this.$("t-corpusinput").value=this.corpusText("tempest"); this.syncTextControls(); this.prepareCorpus(true); show(transTab,false); show(embTab,true); show(trainTab,true); { const at=this.$("tview-arch"); if(at)at.style.display="block"; } const tt=this.$("tview-train"); if(tt)tt.textContent=(m==="rnn"?"Train RNN":"Train GPT"); this.setTview("train"); }
+    this.sfx("click"); }
+  updateTextLesson(){ const L=this.textLessons[this.txt.lesson]; this.setTxt("t-kicker","Lesson "+(this.txt.lesson+1)+" of "+this.textLessons.length); this.setTxt("t-title",L.title); this.setTxt("t-goal",L.goal); this.setTxt("t-hinttext",L.hint); this.setTxt("t-notice",L.notice); }
+  gotoLesson(i){ if(i<0||i>=this.textLessons.length)return; this.stopPulse("t-next"); this.txt.lesson=i; const L=this.textLessons[i]; this.txt.tokenizer=L.tokenizer; this.txt.model=L.model; this.txt.order=L.order; this.txt.source=L.source;
+    this.$("t-corpusinput").value=this.corpusText(L.source); this.txt.sampled=false; this.txt.analogySolved=false; this.syncTextControls(); this.prepareCorpus(true); this.updateTextLesson(); this.$("t-hintbox").style.display="none"; this.sfx("click"); }
+  // Lesson requirements are data-driven: each lesson in content/text-lessons.json has a
+  // "check" object whose fields (model, order, tokenizer, requireSelection, minSteps,
+  // requireSample, requireAnalogy) are evaluated in order here. See README.md.
+  lessonOK(){ const L=this.textLessons[this.txt.lesson], c=L.check||{}, need=(m)=>({ok:false,msg:m}); const steps=this.gpt?this.gpt.step:0;
+    if(c.model && this.txt.model!==c.model) return need(c.modelMsg);
+    if(c.order && this.txt.order!==c.order) return need(c.orderMsg);
+    if(c.tokenizer && this.txt.tokenizer!==c.tokenizer) return need(c.tokenizerMsg);
+    if(c.requireSelection && this.txt.selIndex==null) return need(c.selectionMsg);
+    if(c.minSteps && steps<c.minSteps) return need(c.stepsMsg);
+    if(c.requireSample && !this.txt.sampled) return need(c.sampleMsg);
+    if(c.requireAnalogy && !this.txt.analogySolved) return need(c.analogyMsg);
+    return {ok:true};
+  }
+  textCheck(){ const r=this.lessonOK(); if(!r.ok){ this.sfx("click"); this.guide(r.msg); this.status(this.ui.messages.notYet); return; }
+    const first=this.txt.done.indexOf(this.txt.lesson)<0; if(first){ this.txt.done.push(this.txt.lesson); this.awardXP(this.cfg.lessonXP); this.save(); } this.sfx("success"); this.showToast(this.ui.messages.lessonComplete,"+"+(first?this.cfg.lessonXP:0)+" XP · "+this.textLessons[this.txt.lesson].title); this.guide(this.textLessons[this.txt.lesson].notice); this.pulseNext("t-next"); }
+  textClick(a,t){
+    if(a==="t-prepare")this.prepareCorpus();
+    else if(a==="t-source"){ this.txt.source=t.getAttribute("data-src"); this.$("t-corpusinput").value=this.corpusText(this.txt.source); this.syncTextControls(); this.prepareCorpus(); }
+    else if(a==="t-tok")this.setTok(t.getAttribute("data-tok"));
+    else if(a==="t-model")this.setTModel(t.getAttribute("data-model"));
+    else if(a==="tctab")this.setTctab(t.getAttribute("data-tctab"));
+    else if(a==="tview"){ const v=t.getAttribute("data-tview"); if(v==="embeddings")this.openEmbeddings(); else this.setTview(v); }
+    else if(a==="t-generate")this.generateText();
+    else if(a==="t-prev")this.gotoLesson(this.txt.lesson-1);
+    else if(a==="t-next")this.gotoLesson(this.txt.lesson+1);
+    else if(a==="t-hint"){ const b=this.$("t-hintbox"); b.style.display=b.style.display==="none"?"block":"none"; this.sfx("click"); }
+    else if(a==="t-check")this.textCheck();
+    else if(a==="t-tokclick")this.selectCtxFromIndex(+t.getAttribute("data-ti"));
+    else if(a==="t-barclick")this.barClick(t.getAttribute("data-next"));
+    else if(a==="t-order-btn")this.setOrder(+t.getAttribute("data-order"));
+    else if(a==="gpt-play")this.gptPlay();
+    else if(a==="gpt-step")this.gptStep();
+    else if(a==="gpt-reset")this.gptReset();
+    else if(a==="gpt-sample")this.gptSampleNow();
+    else if(a==="t-size")this.setSize(t.getAttribute("data-size"));
+    else if(a==="emb-solve")this.solveAnalogy();
+    else if(a==="emb-dim")this.setEmbDim(+t.getAttribute("data-dim"));
+  }
+
+  sfx(name){ if(this.state.muted)return; try{ this.ac=this.ac||new (window.AudioContext||window.webkitAudioContext)(); if(this.ac.state==="suspended")this.ac.resume(); }catch(e){ return; }
+    const ac=this.ac,t=ac.currentTime; const tone=(f,st,du,ty,g)=>{ const o=ac.createOscillator(),ga=ac.createGain(); o.type=ty||"sine"; o.frequency.value=f; o.connect(ga); ga.connect(ac.destination); ga.gain.setValueAtTime(0,t+st); ga.gain.linearRampToValueAtTime(g||0.03,t+st+0.01); ga.gain.exponentialRampToValueAtTime(0.0001,t+st+du); o.start(t+st); o.stop(t+st+du+0.02); };
+    if(name==="tick")tone(720,0,0.06,"triangle",0.02);
+    else if(name==="click")tone(430,0,0.05,"sine",0.02);
+    else if(name==="success"){ [523,659,784,1047].forEach((f,i)=>tone(f,i*0.08,0.4,"sine",0.045)); }
+    else if(name==="unlock"){ [392,523,659].forEach((f,i)=>tone(f,i*0.06,0.32,"triangle",0.035)); }
+    else if(name==="level"){ [523,659,784,988,1319].forEach((f,i)=>tone(f,i*0.07,0.5,"sine",0.05)); }
+  }
+}
+</script>
+</body>
+</html>

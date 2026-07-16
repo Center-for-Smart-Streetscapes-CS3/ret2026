@@ -1,0 +1,129 @@
+[
+  {
+    "title": "Separate the Two Clouds",
+    "dataset": "gaussian",
+    "goal": "Train a network with a single hidden layer until validation loss falls below the target.",
+    "hint": "Keep the two original features, then add just enough neurons to bend the boundary.",
+    "restrict": "1 hidden layer, original features",
+    "target": 0.08,
+    "hidden": [3],
+    "question": "Why can a single straight line already separate these clouds?",
+    "answer": "Because the two clusters sit on opposite sides of the plane, one linear split is enough; the hidden units mainly sharpen that split.",
+    "rules": [
+      { "type": "layers-exact", "value": 1, "msg": "Requirement: use exactly one hidden layer for this mission." },
+      { "type": "features-only", "value": ["x1", "x2"], "msg": "Requirement: keep only the two original features x₁ and x₂." }
+    ]
+  },
+  {
+    "title": "Discover a Hidden Layer",
+    "dataset": "xor",
+    "goal": "Bend the boundary through the opposite corners, because one straight line can never separate them.",
+    "hint": "XOR needs a hidden layer. Try 3 to 4 neurons with tanh.",
+    "restrict": "Needs nonlinearity",
+    "target": 0.12,
+    "hidden": [4],
+    "question": "What does the hidden layer let the model represent that a single neuron cannot?",
+    "answer": "A hidden layer composes several lines into a curved, nonlinear region, which is the key idea behind deep learning.",
+    "rules": [
+      { "type": "neurons-min", "value": 2, "msg": "Requirement: XOR needs a hidden layer, so add neurons until the boundary can bend." }
+    ]
+  },
+  {
+    "title": "Draw a Curved Boundary",
+    "dataset": "circle",
+    "goal": "Wrap the boundary around the inner ring.",
+    "hint": "A ring is radial. Add the x₁² and x₂² features, or widen the hidden layer.",
+    "restrict": "Curved region",
+    "target": 0.12,
+    "hidden": [5],
+    "question": "Which extra input feature makes a circular boundary almost trivial?",
+    "answer": "Because x₁²+x₂² encodes distance from the origin, the model can threshold a radius directly.",
+    "rules": [
+      {
+        "type": "any",
+        "msg": "Requirement: add a squared feature (x₁² or x₂²) or widen the hidden layer to at least 5 neurons.",
+        "rules": [
+          { "type": "feature-any", "value": ["x1sq", "x2sq"] },
+          { "type": "width-min", "value": 5 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Add Depth Carefully",
+    "dataset": "spiral",
+    "goal": "Untangle the two spirals with two hidden layers.",
+    "hint": "Use two layers of 6 to 8 neurons each. Lower the learning rate if training diverges.",
+    "restrict": "Up to 2 layers",
+    "target": 0.2,
+    "hidden": [7, 5],
+    "question": "Why does going deeper help here more than going wider?",
+    "answer": "Because later layers reuse curved features from earlier layers, a deep network can fold the space to follow the spiral.",
+    "rules": [
+      { "type": "layers-min", "value": 2, "msg": "Requirement: use two hidden layers to untangle the spiral." }
+    ]
+  },
+  {
+    "title": "Generalize Through Noise",
+    "dataset": "gaussian",
+    "goal": "Keep validation loss low even with 30% noise.",
+    "hint": "More noise rewards simpler models. Do not overbuild the network.",
+    "restrict": "Noise 30%",
+    "target": 0.16,
+    "hidden": [3],
+    "noise": 30,
+    "question": "Why can a smaller network generalize better on noisy data?",
+    "answer": "Because a small network lacks the parameters to memorize the noise, it captures the true signal.",
+    "rules": [
+      { "type": "noise-min", "value": 30, "msg": "Requirement: keep noise at 30%, because the goal is to generalize through it." },
+      {
+        "type": "all",
+        "msg": "Requirement: keep the model small (one layer, at most 4 neurons) so that it cannot memorize the noise.",
+        "rules": [
+          { "type": "layers-max", "value": 1 },
+          { "type": "width-max", "value": 4 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Compare Optimizers",
+    "dataset": "circle",
+    "goal": "Reach the target, then try a different optimizer and compare the loss curve.",
+    "hint": "Adam usually converges fastest. Switch the optimizer in the Train tab.",
+    "restrict": "Observe convergence",
+    "target": 0.13,
+    "hidden": [5],
+    "question": "What does an adaptive optimizer like Adam change about training?",
+    "answer": "Because Adam scales each parameter's step by its recent gradients, learning is faster and less sensitive to the learning rate.",
+    "rules": [
+      { "type": "optimizers-min", "value": 2, "msg": "Requirement: reach the target, then switch the optimizer in the Train tab and compare the loss curves; you must try at least two optimizers." }
+    ]
+  },
+  {
+    "title": "Fit a Continuous Signal",
+    "dataset": "gaussian",
+    "goal": "Notice how the same network draws a probability for every point on the plane.",
+    "hint": "Turn off 'Discrete' to see the smooth confidence gradient.",
+    "restrict": "Read the gradient",
+    "target": 0.1,
+    "hidden": [4],
+    "question": "What does the smooth colour gradient represent?",
+    "answer": "The gradient shows the model's confidence: predictions near the boundary are uncertain, while predictions far from the boundary are confident.",
+    "rules": [
+      { "type": "discrete-off", "msg": "Requirement: turn off 'Discrete' so that you can read the smooth probability gradient." }
+    ]
+  },
+  {
+    "title": "Final Challenge",
+    "dataset": "spiral",
+    "goal": "Master the spiral: drive validation loss as low as you can to win the badge.",
+    "hint": "Combine depth, the right features, and a patient learning rate.",
+    "restrict": "Anything goes",
+    "target": 0.16,
+    "hidden": [8, 6],
+    "question": "You have used data, depth, features, and optimizers: which mattered most?",
+    "answer": "For hard shapes, depth and good features usually dominate, while the optimizer mostly changes how quickly you reach the target.",
+    "rules": []
+  }
+]

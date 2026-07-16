@@ -1,0 +1,8 @@
+{
+  "xpPerLevel": 150,
+  "missionXP": 100,
+  "lessonXP": 80,
+  "stepXP": 2,
+  "trainStepXP": 3,
+  "generateXP": 4
+}

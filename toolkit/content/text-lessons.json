@@ -1,0 +1,128 @@
+[
+  {
+    "title": "Count What Follows",
+    "tokenizer": "char",
+    "model": "markov",
+    "order": 1,
+    "source": "nursery",
+    "goal": "Build a character Markov chain, then sample a passage from its transition counts.",
+    "hint": "Click a token in the flow to see the counts for every token that can follow it.",
+    "notice": "Character tokens make a tiny vocabulary, although the model needs a long context to look fluent.",
+    "check": {
+      "model": "markov",
+      "modelMsg": "Requirement: set the model to Markov, order 1.",
+      "order": 1,
+      "orderMsg": "Requirement: set the model to Markov, order 1.",
+      "requireSelection": true,
+      "selectionMsg": "Requirement: click a token in the flow to inspect what follows it."
+    }
+  },
+  {
+    "title": "Extend the Context",
+    "tokenizer": "char",
+    "model": "markov",
+    "order": 2,
+    "source": "nursery",
+    "goal": "Raise the Markov order to 2 and watch the samples begin to resemble words.",
+    "hint": "Because order 2 conditions on the last two tokens, there are far more contexts to count.",
+    "notice": "More context means sharper predictions, although it also means more transitions to store.",
+    "check": {
+      "order": 2,
+      "orderMsg": "Requirement: set the Markov order to 2.",
+      "requireSelection": true,
+      "selectionMsg": "Requirement: click a token to inspect its context of two tokens."
+    }
+  },
+  {
+    "title": "Compare Tokenizers",
+    "tokenizer": "word",
+    "model": "markov",
+    "order": 1,
+    "source": "nursery",
+    "goal": "Switch to word tokens and compare the vocabulary and readability.",
+    "hint": "Word tokens make a bigger vocabulary, although each transition is more meaningful.",
+    "notice": "Larger token pieces usually create a larger vocabulary with fewer, cleaner transitions.",
+    "check": {
+      "tokenizer": "word",
+      "tokenizerMsg": "Requirement: switch the tokenizer to Words.",
+      "requireSelection": true,
+      "selectionMsg": "Requirement: click a word to inspect its transitions."
+    }
+  },
+  {
+    "title": "Add Recurrent Memory",
+    "tokenizer": "word",
+    "model": "rnn",
+    "order": 1,
+    "source": "tempest",
+    "goal": "Meet the Simple RNN, a network that carries a memory vector across tokens.",
+    "hint": "Because an RNN reuses one hidden state, it can remember information from earlier tokens.",
+    "notice": "Because an RNN compresses earlier tokens into one learned memory vector, it does not need to store every transition.",
+    "check": {
+      "model": "rnn",
+      "modelMsg": "Requirement: select the Simple RNN model.",
+      "minSteps": 20,
+      "stepsMsg": "Requirement: press Train so that the RNN starts learning (at least 20 updates)."
+    }
+  },
+  {
+    "title": "Train the RNN",
+    "tokenizer": "word",
+    "model": "rnn",
+    "order": 1,
+    "source": "tempest",
+    "goal": "Understand how gradient steps reshape the RNN's memory over training.",
+    "hint": "Training nudges the recurrent weights so that the memory captures useful patterns.",
+    "notice": "The same backpropagation used in the Playground trains the RNN, unrolled through time.",
+    "check": {
+      "model": "rnn",
+      "modelMsg": "Requirement: select the Simple RNN model.",
+      "minSteps": 80,
+      "stepsMsg": "Requirement: keep training the RNN until it reaches at least 80 updates."
+    }
+  },
+  {
+    "title": "Compare Generated Text",
+    "tokenizer": "word",
+    "model": "markov",
+    "order": 2,
+    "source": "tempest",
+    "goal": "Generate passages and compare how each model continues the same prompt.",
+    "hint": "Temperature controls randomness: a low temperature produces repetitive text, while a high temperature produces surprising text.",
+    "notice": "Counting models and learned models can agree on common patterns, although they diverge on rare ones.",
+    "check": {
+      "requireSample": true,
+      "sampleMsg": "Requirement: generate a passage to compare the models."
+    }
+  },
+  {
+    "title": "Masked Attention",
+    "tokenizer": "word",
+    "model": "gpt",
+    "order": 1,
+    "source": "tempest",
+    "goal": "Meet Mini GPT, a model with one block of masked attention that looks back over the sequence.",
+    "hint": "Attention lets every token weigh all earlier tokens directly.",
+    "notice": "Attention is the mechanism behind modern language models, shown here at teaching scale.",
+    "check": {
+      "model": "gpt",
+      "modelMsg": "Requirement: select the Mini GPT model.",
+      "minSteps": 60,
+      "stepsMsg": "Requirement: train Mini GPT to at least 60 updates."
+    }
+  },
+  {
+    "title": "Embedding Directions",
+    "tokenizer": "word",
+    "model": "gpt",
+    "order": 1,
+    "source": "tempest",
+    "goal": "Open the Embeddings tab, train the word vectors, and solve an analogy such as king − man + woman.",
+    "hint": "The Embeddings tab retrains the model on Shakespeare with word tokens, then lets you solve analogies from its learned vectors.",
+    "notice": "Directions in embedding space can capture analogies, a hallmark of learned representations.",
+    "check": {
+      "requireAnalogy": true,
+      "analogyMsg": "Requirement: open the Embeddings tab, train the word vectors, and solve an analogy."
+    }
+  }
+]

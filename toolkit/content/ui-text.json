@@ -1,0 +1,29 @@
+{
+  "datasetLabels": {
+    "gaussian": "Two Clouds",
+    "xor": "XOR",
+    "circle": "Ring",
+    "spiral": "Spiral"
+  },
+  "modelNotices": {
+    "markov": "A Markov chain counts and stores every transition it sees, so it is simple and exact, although its table grows quickly.",
+    "rnn": "An RNN learns one compressed memory vector, trained by backpropagation through time.",
+    "embed": "A model trained on word tokens; its learned vectors reveal analogies and directions.",
+    "gpt": "A real transformer with one block of masked attention: train it here on the corpus."
+  },
+  "sandbox": {
+    "kicker": "Sandbox mode",
+    "title": "Free Exploration",
+    "goal": "All datasets, features, network depths, and optimizers are open. Experiment freely; training steps still earn XP."
+  },
+  "messages": {
+    "welcomeBack": "Welcome back! Press play to train, or open the Quest Map to pick a mission.",
+    "tourDone": "You are all set. Try mission one: press play and watch the boundary form.",
+    "lockedMission": "Finish mission {n} first to unlock this one.",
+    "trainFirst": "Train the model first (press play or step), then check your solution.",
+    "almost": "Almost! Validation loss is {val}; get it below {target}. {hint}",
+    "missionComplete": "Mission complete!",
+    "lessonComplete": "Lesson complete!",
+    "notYet": "Not yet. Check the requirement."
+  }
+}
