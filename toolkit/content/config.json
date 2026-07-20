@@ -1,5 +1,7 @@
 {
   "xpPerLevel": 150,
+  "foundationsXP": 50,
+  "basicsXP": 60,
   "missionXP": 100,
   "lessonXP": 80,
   "stepXP": 2,

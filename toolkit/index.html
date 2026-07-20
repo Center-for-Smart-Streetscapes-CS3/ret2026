@@ -56,6 +56,14 @@
 @keyframes cs3bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes cs3ring{0%{transform:scale(.6);opacity:.5}100%{transform:scale(1.5);opacity:0}}
 @keyframes cs3attn{0%,100%{box-shadow:0 0 0 0 rgba(240,179,35,.75)}50%{box-shadow:0 0 0 7px rgba(240,179,35,0)}}
+.cs3app .fcell{display:grid;place-items:center;min-width:44px;height:36px;padding:0 9px;border-radius:7px;background:var(--surface-soft);border:1.5px solid var(--line);font:600 13px/1 var(--mono);color:var(--ink);transition:all .12s}
+.cs3app .fcell.hl{background:var(--gold-soft);border-color:var(--gold);color:var(--gold-ink);transform:scale(1.09)}
+.cs3app .fedge{transition:stroke .12s,opacity .12s}
+.cs3app g.hl line.fedge{stroke:var(--gold)!important;stroke-width:4!important;opacity:1!important}
+.cs3app .fnode circle{transition:stroke .12s}
+.cs3app .fnode.hl circle{stroke:var(--gold)!important;stroke-width:3.5!important}
+.cs3app .fop{font:500 19px/1 var(--serif);color:var(--muted);padding:0 4px}
+.cs3app .fveclbl{font:600 9px/1.2 var(--sans);color:var(--faint);text-align:center;margin-top:4px}
 .cs3app[data-reduce="1"] *{animation-duration:.001ms!important;transition-duration:.001ms!important}
 </style>
 <script src="data/shakespeare-corpus.js"></script>
@@ -77,8 +85,12 @@
       </div>
     </div>
 
-    <nav style="display:flex;gap:4px;padding:4px;background:var(--surface-strong);border-radius:11px;margin-left:6px" aria-label="Laboratories">
-      <button data-action="lab" data-lab="playground" data-tour="labs" data-labtab="playground" style="display:flex;align-items:center;gap:9px;padding:7px 14px 7px 11px;border-radius:8px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);transition:all .18s">
+    <nav data-tour="labs" style="display:flex;gap:4px;padding:4px;background:var(--surface-strong);border-radius:11px;margin-left:6px" aria-label="Laboratories">
+      <button data-action="lab" data-lab="foundations" data-labtab="foundations" style="display:flex;align-items:center;gap:9px;padding:7px 14px 7px 11px;border-radius:8px;background:transparent;color:var(--muted);transition:all .18s">
+        <span style="display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--surface-strong);color:var(--muted);font:800 11px/1 var(--mono)">00</span>
+        <span style="text-align:left"><span style="display:block;font:700 12.5px/1.1 var(--sans)">Foundations</span><span style="display:block;font:500 9.5px/1.1 var(--sans);color:var(--faint)">Features &amp; weights</span></span>
+      </button>
+      <button data-action="lab" data-lab="playground" data-labtab="playground" style="display:flex;align-items:center;gap:9px;padding:7px 14px 7px 11px;border-radius:8px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);transition:all .18s">
         <span style="display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--navy);color:#fff;font:800 11px/1 var(--mono)">01</span>
         <span style="text-align:left"><span style="display:block;font:700 12.5px/1.1 var(--sans)">Model Playground</span><span style="display:block;font:500 9.5px/1.1 var(--sans);color:var(--faint)">Networks &amp; boundaries</span></span>
       </button>
@@ -111,6 +123,47 @@
   </header>
 
   <main style="height:calc(100vh - 80px);min-height:0;position:relative;overflow:hidden">
+
+    <!-- FOUNDATIONS SCREEN -->
+    <section data-screen="foundations" data-screen-label="Foundations" style="position:absolute;inset:0;display:none;gap:12px;padding:12px 14px;min-height:0">
+      <aside style="flex:0 0 286px;display:flex;flex-direction:column;gap:10px;min-height:0">
+        <div data-tour="f-mission" style="flex:0 0 auto;position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(150deg,var(--navy),var(--navy-deep));color:#fff;box-shadow:var(--shadow-m)">
+          <div style="position:absolute;inset:0;background:radial-gradient(120% 90% at 100% 0%,rgba(185,217,235,.28),transparent 60%);pointer-events:none"></div>
+          <div style="position:relative;padding:13px 14px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+              <span style="font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--columbia)"><span data-mp="f-kicker">Foundations, mission 1 of 4</span></span>
+              <div style="display:flex;gap:3px">
+                <button data-action="f-prev" aria-label="Previous mission" style="display:grid;place-items:center;width:23px;height:23px;border-radius:6px;background:rgba(255,255,255,.12);color:#fff;font-size:14px">‹</button>
+                <button data-action="f-next" aria-label="Next mission" style="display:grid;place-items:center;width:23px;height:23px;border-radius:6px;background:rgba(255,255,255,.12);color:#fff;font-size:14px">›</button>
+              </div>
+            </div>
+            <h2 data-mp="f-title" style="font:500 20px/1.08 var(--serif);letter-spacing:.01em;margin-bottom:5px">Predicting Numbers</h2>
+            <p data-mp="f-goal" style="font:400 12px/1.4 var(--sans);color:rgba(255,255,255,.8)"></p>
+            <div style="display:flex;gap:7px;margin-top:12px">
+              <button data-action="f-hint" style="flex:0 0 auto;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.14);color:#fff;font:700 11.5px/1 var(--sans)">Hint</button>
+              <button data-action="f-check" style="flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;background:var(--gold);color:#3a2600;font:800 11.5px/1 var(--sans);box-shadow:0 2px 0 rgba(0,0,0,.12)">Check Mission</button>
+            </div>
+            <div data-mp="f-hintbox" style="display:none;margin-top:10px;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,.1);border-left:3px solid var(--gold)">
+              <p data-mp="f-hinttext" style="font:400 11px/1.45 var(--sans);color:rgba(255,255,255,.92)"></p>
+            </div>
+          </div>
+        </div>
+        <div style="flex:0 0 auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);padding:13px 14px">
+          <p style="font:800 8.5px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:6px">The problem</p>
+          <p data-mp="f-story" style="font:400 12.5px/1.55 var(--sans);color:var(--muted)"></p>
+        </div>
+        <div style="flex:1 1 auto"></div>
+        <p data-mp="f-note" style="flex:0 0 auto;font:400 10px/1.45 var(--sans);color:var(--faint);padding:0 2px"></p>
+      </aside>
+      <div style="flex:1 1 auto;display:flex;flex-direction:column;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-m);overflow:hidden">
+        <div style="flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line)">
+          <div style="white-space:nowrap"><p style="font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink)">Worked example</p><h3 data-mp="f-stagetitle" style="font:500 17px/1.1 var(--serif);color:var(--ink);margin-top:2px">The linear layer</h3></div>
+          <div style="flex:1 1 auto"></div>
+          <span style="font:600 10.5px/1 var(--sans);color:var(--faint)">Hover any cell, edge, or node to trace it</span>
+        </div>
+        <div data-tour="f-stage" data-mp="f-stage" style="flex:1 1 auto;min-height:0;overflow:auto;padding:18px 22px"></div>
+      </div>
+    </section>
 
     <!-- PLAYGROUND SCREEN -->
     <section data-screen="playground" data-screen-label="Model Playground" style="position:absolute;inset:0;display:flex;gap:12px;padding:12px 14px;min-height:0">
@@ -154,8 +207,8 @@
         <div style="flex:1 1 auto;display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
           <div style="flex:0 0 auto;display:flex;padding:5px 6px;gap:3px;border-bottom:1px solid var(--line);background:var(--surface-soft)">
             <button data-action="ctab" data-ctab="data" data-mp="ctab-data" style="flex:1;padding:7px 4px;border-radius:7px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);font:700 11px/1 var(--sans)">Data</button>
-            <button data-action="ctab" data-ctab="model" data-mp="ctab-model" style="flex:1;padding:7px 4px;border-radius:7px;background:transparent;color:var(--muted);font:700 11px/1 var(--sans)">Model</button>
-            <button data-action="ctab" data-ctab="train" data-mp="ctab-train" style="flex:1;padding:7px 4px;border-radius:7px;background:transparent;color:var(--muted);font:700 11px/1 var(--sans)">Train</button>
+            <button data-action="ctab" data-ctab="model" data-mp="ctab-model" data-ui="tab-model" style="flex:1;padding:7px 4px;border-radius:7px;background:transparent;color:var(--muted);font:700 11px/1 var(--sans)">Model</button>
+            <button data-action="ctab" data-ctab="train" data-mp="ctab-train" data-ui="tab-train" style="flex:1;padding:7px 4px;border-radius:7px;background:transparent;color:var(--muted);font:700 11px/1 var(--sans)">Train</button>
           </div>
           <div style="flex:1 1 auto;min-height:0;overflow:auto;padding:13px 14px">
 
@@ -168,11 +221,11 @@
                 <button data-action="dataset" data-ds="spiral" style="display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:600 11px/1 var(--sans)"><span style="width:16px;height:16px;border-radius:50%;background:conic-gradient(from 0deg,var(--blue),var(--gold-ink),var(--blue))"></span>Spiral</button>
               </div>
               <label style="display:flex;align-items:center;justify-content:space-between;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:5px"><span>Noise</span><span data-mp="noiseval" style="font:600 10px/1 var(--mono);color:var(--ink)">0%</span></label>
-              <input data-action="noise" type="range" min="0" max="50" value="0" step="5" style="width:100%;accent-color:var(--blue);margin-bottom:12px">
+              <input data-action="noise" type="range" min="0" max="50" data-init="0" step="5" style="width:100%;accent-color:var(--blue);margin-bottom:12px">
               <label style="display:flex;align-items:center;justify-content:space-between;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:5px"><span>Training split</span><span data-mp="splitval" style="font:600 10px/1 var(--mono);color:var(--ink)">70%</span></label>
-              <input data-action="split" type="range" min="40" max="90" value="70" step="10" style="width:100%;accent-color:var(--blue);margin-bottom:14px">
-              <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Input features</p>
-              <div data-mp="features" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px"></div>
+              <input data-action="split" type="range" min="40" max="90" data-init="70" step="10" style="width:100%;accent-color:var(--blue);margin-bottom:14px">
+              <p data-ui="features" style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Input features</p>
+              <div data-mp="features" data-ui="features" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px"></div>
               <button data-action="regen" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface-soft);color:var(--ink);font:700 11px/1 var(--sans);transition:all .16s">Regenerate examples</button>
             </div>
 
@@ -184,7 +237,7 @@
                 <label style="flex:1"><span style="display:block;font:700 9.5px/1 var(--sans);color:var(--muted);margin-bottom:4px">Type</span>
                   <select data-action="reg" style="width:100%;padding:7px 8px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"><option value="none">None</option><option value="l1">L1</option><option value="l2">L2</option></select></label>
                 <label style="flex:1"><span style="display:block;font:700 9.5px/1 var(--sans);color:var(--muted);margin-bottom:4px">Rate</span>
-                  <input data-action="regrate" type="number" min="0" max="0.3" step="0.001" value="0" style="width:100%;padding:7px 8px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"></label>
+                  <input data-action="regrate" type="number" min="0" max="0.3" step="0.001" data-init="0" style="width:100%;padding:7px 8px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"></label>
               </div>
               <p style="font:400 10.5px/1.45 var(--sans);color:var(--faint);margin-top:10px">Structure is edited directly on the network — use the <strong style="color:var(--muted)">− / +</strong> controls over each layer.</p>
             </div>
@@ -195,7 +248,7 @@
               <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:8px">Loss</p>
               <select data-action="lossfn" style="width:100%;padding:8px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface);margin-bottom:12px"><option value="square">Mean square error</option><option value="cross-entropy">Cross entropy</option></select>
               <label style="display:flex;align-items:center;justify-content:space-between;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:5px"><span>Learning rate</span><span data-mp="lrval" style="font:600 10px/1 var(--mono);color:var(--ink)">0.030</span></label>
-              <input data-action="lr" type="range" min="-4" max="0" value="-1.52" step="0.01" style="width:100%;accent-color:var(--blue);margin-bottom:12px">
+              <input data-action="lr" type="range" min="-4" max="0" data-init="-1.52" step="0.01" style="width:100%;accent-color:var(--blue);margin-bottom:12px">
               <label style="display:block;font:700 10px/1 var(--sans);color:var(--muted);margin-bottom:5px">Batch size</label>
               <select data-action="batch" style="width:100%;padding:8px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"><option value="1">1</option><option value="5">5</option><option value="10" selected="">10</option><option value="20">20</option><option value="50">50</option></select>
             </div>
@@ -211,17 +264,17 @@
             <p style="font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink)">Live workbench</p>
             <h3 style="font:500 17px/1.1 var(--serif);color:var(--ink);margin-top:2px;white-space:nowrap">Neural Network</h3>
           </div>
-          <div data-tour="presets" style="display:flex;gap:5px;margin-left:6px;flex:0 0 auto">
+          <div data-tour="presets" data-ui="presets" style="display:flex;gap:5px;margin-left:6px;flex:0 0 auto">
             <button data-action="preset" data-preset="shallow" style="padding:6px 11px;border-radius:20px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);font:700 10.5px/1 var(--sans);transition:all .16s">Shallow</button>
             <button data-action="preset" data-preset="wide" style="padding:6px 11px;border-radius:20px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);font:700 10.5px/1 var(--sans);transition:all .16s">Wide</button>
             <button data-action="preset" data-preset="deep" style="padding:6px 11px;border-radius:20px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);font:700 10.5px/1 var(--sans);transition:all .16s">Deep</button>
           </div>
-          <div style="display:flex;gap:3px;padding:3px;border-radius:9px;background:var(--surface-strong);flex:0 0 auto;margin-left:auto">
+          <div data-ui="views" style="display:flex;gap:3px;padding:3px;border-radius:9px;background:var(--surface-strong);flex:0 0 auto;margin-left:auto">
             <button data-action="view" data-view="activations" data-mp="view-activations" style="padding:6px 9px;border-radius:6px;background:var(--surface);box-shadow:var(--shadow-s);color:var(--ink);font:700 10.5px/1 var(--sans)">Activations</button>
             <button data-action="view" data-view="weights" data-mp="view-weights" style="padding:6px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10.5px/1 var(--sans)">Weights</button>
             <button data-action="view" data-view="gradients" data-mp="view-gradients" style="padding:6px 10px;border-radius:6px;background:transparent;color:var(--muted);font:700 10.5px/1 var(--sans)">Gradients</button>
           </div>
-          <div data-tour="transport" style="display:flex;align-items:center;gap:6px;margin-left:4px;flex:0 0 auto">
+          <div data-tour="transport" data-ui="transport" style="display:flex;align-items:center;gap:6px;margin-left:4px;flex:0 0 auto">
             <button data-action="reset" title="Reset (R)" aria-label="Reset" style="display:grid;place-items:center;width:38px;height:38px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);transition:all .16s"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg></button>
             <button data-action="play" data-tour="play" title="Play / Pause (Space)" aria-label="Play or pause" style="display:grid;place-items:center;width:46px;height:46px;border-radius:12px;background:var(--navy);color:#fff;box-shadow:0 3px 0 var(--navy-deep),var(--shadow-m);transition:all .12s">
               <svg data-mp="playicon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
@@ -231,7 +284,7 @@
           </div>
         </div>
 
-        <div data-tour="metrics" style="flex:0 0 auto;display:flex;align-items:center;gap:0;padding:0 14px;height:42px;border-bottom:1px solid var(--line);background:var(--surface-soft)">
+        <div data-tour="metrics" data-ui="metrics" style="flex:0 0 auto;display:flex;align-items:center;gap:0;padding:0 14px;height:42px;border-bottom:1px solid var(--line);background:var(--surface-soft)">
           <div style="display:flex;flex-direction:column;padding-right:18px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Epoch</span><span data-mp="m-epoch" style="font:700 15px/1.1 var(--mono);color:var(--ink)">0</span></div>
           <div style="width:1px;height:22px;background:var(--line)"></div>
           <div style="display:flex;flex-direction:column;padding:0 18px"><span style="font:700 8.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Train loss</span><span data-mp="m-train" style="font:700 15px/1.1 var(--mono);color:var(--blue)">—</span></div>
@@ -261,12 +314,12 @@
           <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;flex-wrap:wrap">
             <span style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted)"><i style="width:9px;height:9px;border-radius:50%;background:var(--blue)"></i>Class A</span>
             <span style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted)"><i style="width:9px;height:9px;border-radius:50%;background:var(--gold-ink)"></i>Class B</span>
-            <label style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted);cursor:pointer;margin-left:auto"><input data-action="showval" type="checkbox" style="accent-color:var(--blue)">Test</label>
-            <label style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted);cursor:pointer"><input data-action="discretize" type="checkbox" style="accent-color:var(--blue)">Discrete</label>
+            <label data-ui="boundaryopts" style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted);cursor:pointer;margin-left:auto"><input data-action="showval" type="checkbox" style="accent-color:var(--blue)">Test</label>
+            <label data-ui="boundaryopts" style="display:inline-flex;align-items:center;gap:5px;font:600 10px/1 var(--sans);color:var(--muted);cursor:pointer"><input data-action="discretize" type="checkbox" style="accent-color:var(--blue)">Discrete</label>
           </div>
         </div>
 
-        <div style="flex:0 0 auto;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
+        <div data-ui="loss" style="flex:0 0 auto;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line)">
             <div><p style="font:800 8.5px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink)">History</p><h4 style="font:500 15px/1.1 var(--serif);color:var(--ink);margin-top:2px">Loss</h4></div>
             <button data-action="clearloss" style="font:700 10px/1 var(--sans);color:var(--faint);padding:4px 6px;border-radius:6px">Clear</button>
@@ -274,7 +327,7 @@
           <div style="position:relative;width:100%;height:86px"><canvas ref="{{ lossRef }}" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas></div>
         </div>
 
-        <div data-tour="inspector" style="flex:1 1 auto;display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
+        <div data-tour="inspector" data-ui="inspector" style="flex:1 1 auto;display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-s);overflow:hidden">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line)">
             <div><p style="font:800 8.5px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink)">Inspect</p><h4 style="font:500 15px/1.1 var(--serif);color:var(--ink);margin-top:2px">Selected Unit</h4></div>
             <span data-mp="inspkind" style="font:700 9px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:20px;background:var(--surface-strong);color:var(--faint)">None</span>
@@ -411,7 +464,7 @@
           <div data-mp="tview-pane-generate" style="position:absolute;inset:0;display:none;flex-direction:column;padding:14px 16px;min-height:0">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
               <button data-action="t-generate" style="display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:var(--navy);color:#fff;font:700 12px/1 var(--sans);box-shadow:0 2px 0 var(--navy-deep)"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>Generate passage</button>
-              <label style="display:flex;align-items:center;gap:8px;flex:1 1 auto"><span style="font:700 10px/1 var(--sans);color:var(--muted);white-space:nowrap" title="Sampling randomness: low is safe and repetitive, high is surprising and error-prone.">Temperature</span><input data-action="t-temp" type="range" min="0.3" max="1.4" step="0.1" value="0.9" style="flex:1 1 auto;accent-color:var(--blue)"><span data-mp="t-tempval" style="font:600 11px/1 var(--mono);color:var(--ink)">0.9</span></label>
+              <label style="display:flex;align-items:center;gap:8px;flex:1 1 auto"><span style="font:700 10px/1 var(--sans);color:var(--muted);white-space:nowrap" title="Sampling randomness: low is safe and repetitive, high is surprising and error-prone.">Temperature</span><input data-action="t-temp" type="range" min="0.3" max="1.4" step="0.1" data-init="0.9" style="flex:1 1 auto;accent-color:var(--blue)"><span data-mp="t-tempval" style="font:600 11px/1 var(--mono);color:var(--ink)">0.9</span></label>
             </div>
             <div data-mp="t-genout" style="flex:1 1 auto;min-height:0;overflow:auto;padding:16px 18px;border-radius:10px;background:var(--surface-soft);border:1px solid var(--line);font:400 15px/1.65 var(--serif);color:var(--ink);white-space:pre-wrap">Press <strong>Generate</strong> to sample a passage from the model.</div>
           </div>
@@ -435,7 +488,7 @@
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:10px;flex-wrap:wrap">
               <p style="font:800 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent-ink)">Live sample</p>
               <div style="display:flex;align-items:center;gap:12px">
-                <label style="display:flex;align-items:center;gap:7px"><span style="font:700 9.5px/1 var(--sans);color:var(--muted)" title="Sampling randomness: low is safe and repetitive, high is surprising and error-prone.">Temp</span><input data-action="gpt-temp" type="range" min="0.4" max="1.2" step="0.1" value="0.7" style="width:96px;accent-color:var(--blue)"><span data-mp="gpt-tempv" style="font:600 10px/1 var(--mono);color:var(--ink)">0.7</span></label>
+                <label style="display:flex;align-items:center;gap:7px"><span style="font:700 9.5px/1 var(--sans);color:var(--muted)" title="Sampling randomness: low is safe and repetitive, high is surprising and error-prone.">Temp</span><input data-action="gpt-temp" type="range" min="0.4" max="1.2" step="0.1" data-init="0.7" style="width:96px;accent-color:var(--blue)"><span data-mp="gpt-tempv" style="font:600 10px/1 var(--mono);color:var(--ink)">0.7</span></label>
                 <input data-action="gpt-ctx" data-mp="gpt-ctx" placeholder="Prompt…" spellcheck="false" style="width:118px;padding:7px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font:400 11px/1 var(--mono)">
                 <button data-action="gpt-sample" style="padding:7px 13px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface-soft);color:var(--ink);font:700 10.5px/1 var(--sans)">Sample</button>
               </div>
@@ -517,15 +570,34 @@
     <div><p data-mp="toasttitle" style="font:800 13px/1.1 var(--sans)">Mission complete</p><p data-mp="toastbody" style="font:500 11px/1.2 var(--sans);color:var(--columbia)">+100 XP earned</p></div>
   </div>
 
-  <!-- QUEST OVERLAY -->
-  <div data-mp="questlayer" style="position:absolute;inset:0;z-index:70;display:none">
+  <!-- QUEST OVERLAY (fills the main area below the header) -->
+  <div data-mp="questlayer" style="position:absolute;top:56px;bottom:24px;left:0;right:0;z-index:70;display:none">
     <button data-action="quest-close" aria-label="Close" style="position:absolute;inset:0;background:rgba(6,16,31,.55);border:none;cursor:default"></button>
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:860px;max-width:94vw;max-height:88vh;display:flex;flex-direction:column;background:var(--surface);border-radius:16px;box-shadow:var(--shadow-l);overflow:hidden;animation:cs3pop .28s both">
+    <div style="position:absolute;inset:12px 14px;display:flex;flex-direction:column;background:var(--surface);border-radius:16px;box-shadow:var(--shadow-l);overflow:hidden;animation:cs3pop .28s both">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);background:linear-gradient(120deg,var(--navy),var(--navy-deep));color:#fff">
         <div><p style="font:800 9px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;color:var(--columbia)">Learning path</p><h2 style="font:500 24px/1.1 var(--serif);margin-top:3px">Quest Map</h2></div>
         <button data-action="quest-close" aria-label="Close" style="display:grid;place-items:center;width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.14);color:#fff"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
       </div>
       <div data-mp="questbody" style="flex:1 1 auto;overflow:auto;padding:22px 24px"></div>
+    </div>
+  </div>
+
+  <!-- MISSION INTRO (large purpose box shown when a mission starts) -->
+  <div data-mp="introlayer" style="position:absolute;top:56px;bottom:24px;left:0;right:0;z-index:66;display:none">
+    <button data-action="intro-start" aria-label="Close" style="position:absolute;inset:0;background:rgba(6,16,31,.55);border:none;cursor:default"></button>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:680px;max-width:92%;max-height:94%;overflow:auto;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-l);animation:cs3pop .28s both">
+      <div style="position:relative;padding:26px 30px;background:linear-gradient(150deg,var(--navy),var(--navy-deep));color:#fff;overflow:hidden">
+        <div style="position:absolute;inset:0;background:radial-gradient(120% 100% at 100% 0%,rgba(185,217,235,.28),transparent 60%);pointer-events:none"></div>
+        <p data-mp="intro-kicker" style="position:relative;font:800 10px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--columbia);margin-bottom:10px">Mission</p>
+        <h2 data-mp="intro-title" style="position:relative;font:500 34px/1.12 var(--serif);letter-spacing:.01em">Mission title</h2>
+      </div>
+      <div style="padding:22px 30px 26px">
+        <p style="font:800 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:9px">Purpose</p>
+        <p data-mp="intro-goal" style="font:400 17px/1.55 var(--serif);color:var(--ink)"></p>
+        <p data-mp="intro-story" style="display:none;font:400 13.5px/1.6 var(--sans);color:var(--muted);margin-top:12px"></p>
+        <div data-mp="intro-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px"></div>
+        <button data-action="intro-start" style="margin-top:22px;width:100%;padding:14px;border-radius:12px;background:var(--gold);color:#3a2600;font:800 14px/1 var(--sans);box-shadow:0 3px 0 rgba(0,0,0,.15);transition:transform .12s">Start the mission</button>
+      </div>
     </div>
   </div>
 
@@ -569,7 +641,9 @@ class Component extends DCLogic {
   // All teaching content (missions, lessons, hints, tour, corpora, UI copy, XP values)
   // lives in the editable JSON files under content/ — see README.md.
   // It is loaded in componentDidMount() and assigned to:
-  //   this.missions, this.textLessons, this.tour, this.corpusSamples, this.ui, this.cfg
+  //   this.foundations, this.basics, this.missions, this.textLessons, this.tour, this.corpusSamples, this.ui, this.cfg
+  foundations = [];
+  basics = [];
   missions = [];
   textLessons = [];
   tour = [];
@@ -586,7 +660,7 @@ class Component extends DCLogic {
     dataset:"gaussian", features:["x1","x2"], noise:0, split:70,
     activation:"tanh", optimizer:"adam", lossfn:"square", lr:0.03, batch:10, reg:"none", regrate:0,
     hidden:[3], playing:false, showVal:false, discretize:false,
-    mode:"lesson", mission:0, done:[], xp:0,
+    mode:"lesson", set:"basics", mission:0, fdone:[], bdone:[], done:[], xp:0,
     hintOpen:false
   };
   txt = { source:"tempest", tokenizer:"char", model:"markov", order:1, temp:0.9, tview:"tokens", tctab:"corpus", lesson:0, tokens:[], vocab:[], counts:null, totals:null, ctx:null, next:null, ready:false, dirty:false, done:[] };
@@ -603,6 +677,8 @@ class Component extends DCLogic {
   // Loads the editable teaching content from content/*.json (see README.md).
   loadContent(){
     const files = {
+      foundations:"content/foundations.json",
+      basics:"content/basics-missions.json",
       missions:"content/missions.json",
       textLessons:"content/text-lessons.json",
       tour:"content/tour.json",
@@ -634,16 +710,20 @@ class Component extends DCLogic {
     this.root.dataset.reduce = this.reduce ? "1":"0";
     this.selected = null;
     this.lossHistory = [];
-    this.optimizersUsed = new Set([this.state.optimizer]);
+    this.dataSeed = 1337;      // bumped only by Regenerate, so noise/split keep the same base cloud
+    this.resetTracking();
     this.exPerSec = 0; this._exWindow = 0; this._exTime = performance.now();
-    this.applyMission(this.state.mission, true);
+    this.applyMission(this.state.mission);
     this.buildData();
     this.buildModel();
+    this.initInputs();
     this.renderFeatures(); this.renderActs(); this.syncControls();
+    this.applyUIStage(false);
     this.renderNetwork();
     this.sizeCanvases();
     this.drawBoundary(); this.drawLoss(); this.updateMetrics();
     this.updateMissionCard(); this.updateXP(); this.setMode(this.state.mode);
+    if(this.state.lab!=="playground") this.setLab(this.state.lab);
     this.ro = new ResizeObserver(()=>{ this.sizeCanvases(); this.renderNetwork(); this.drawBoundary(); this.drawLoss(); });
     this.ro.observe(this.netRef.current); this.ro.observe(this.rootRef.current);
     this._key = (e)=>this.onKey(e); window.addEventListener("keydown",this._key);
@@ -653,6 +733,7 @@ class Component extends DCLogic {
   }
   componentWillUnmount(){
     cancelAnimationFrame(this._raf);
+    clearTimeout(this._mapT);
     if(this.ro) this.ro.disconnect();
     window.removeEventListener("keydown",this._key);
   }
@@ -663,25 +744,96 @@ class Component extends DCLogic {
 
   // ---------- persistence ----------
   load(){
+    let hadSave=false;
     try{
       const raw = localStorage.getItem("cs3_toolkit_v2");
-      if(raw){ const d=JSON.parse(raw); if(d.theme)this.state.theme=d.theme; if(d.muted!=null)this.state.muted=d.muted;
-        if(Array.isArray(d.done))this.state.done=d.done; if(typeof d.xp==="number")this.state.xp=d.xp; this._tourDone=!!d.tourDone; }
+      if(raw){ const d=JSON.parse(raw); hadSave=true;
+        if(d.theme)this.state.theme=d.theme; if(d.muted!=null)this.state.muted=d.muted;
+        if(Array.isArray(d.done))this.state.done=d.done;
+        if(Array.isArray(d.bdone))this.state.bdone=d.bdone;
+        if(Array.isArray(d.fdone))this.state.fdone=d.fdone;
+        if(Array.isArray(d.tdone))this.txt.done=d.tdone;
+        if(typeof d.xp==="number")this.state.xp=d.xp; this._tourDone=!!d.tourDone;
+        if(d.set==="basics"||d.set==="playground")this.state.set=d.set;
+        else if(Array.isArray(d.done)&&d.done.length)this.state.set="playground"; // save predates level sets
+        if(typeof d.mission==="number")this.state.mission=d.mission;
+        if(typeof d.lesson==="number")this.txt.lesson=d.lesson;
+        if(typeof d.fstep==="number")this._fstepSaved=d.fstep;
+        if(d.lab==="playground"||d.lab==="text"||d.lab==="foundations")this.state.lab=d.lab;
+      }
     }catch(e){}
+    // New students start in Foundations; existing saves keep their last laboratory.
+    if(!hadSave)this.state.lab="foundations";
+    // Clamp saved positions in case the content files shrank since the save.
+    const list=this.currentMissions();
+    if(this.state.mission<0||this.state.mission>=list.length)this.state.mission=0;
+    if(this.txt.lesson<0||this.txt.lesson>=this.textLessons.length)this.txt.lesson=0;
   }
   save(){
-    try{ localStorage.setItem("cs3_toolkit_v2", JSON.stringify({theme:this.state.theme,muted:this.state.muted,done:this.state.done,xp:this.state.xp,tourDone:!!this._tourDone})); }catch(e){}
+    try{ localStorage.setItem("cs3_toolkit_v2", JSON.stringify({
+      theme:this.state.theme,muted:this.state.muted,
+      done:this.state.done,bdone:this.state.bdone,fdone:this.state.fdone,tdone:this.txt.done,
+      xp:this.state.xp,tourDone:!!this._tourDone,
+      set:this.state.set,mission:this.state.mission,lesson:this.txt.lesson,
+      fstep:this.fnd?this.fnd.step:(this._fstepSaved||0),lab:this.state.lab})); }catch(e){}
   }
   applyAccent(name){
     const map={Gold:["#f0b323","#946200","#fff5db"],Magenta:["#ae2573","#8a1d5b","#fbe9f3"],"Burnt Orange":["#b94700","#8f3700","#fdece2"],Olive:["#76881d","#5c6a17","#f2f4e2"]};
     const v=map[name]||map.Gold; const r=this.rootRef.current; if(!r)return;
     r.style.setProperty("--accent",v[0]); r.style.setProperty("--accent-ink",v[1]); r.style.setProperty("--accent-soft",v[2]);
   }
+  // Range and number inputs carry their start value in data-init rather than the HTML `value`
+  // attribute, so the framework does not render them as controlled inputs (which would snap the
+  // thumb back to the default after every drag). We set the DOM value once here after mount.
+  initInputs(){ Array.prototype.forEach.call(this.root.querySelectorAll("[data-init]"),el=>{ el.value=el.getAttribute("data-init"); }); }
   $(sel){ return this.root ? this.root.querySelector('[data-mp="'+sel+'"]') : null; }
   $all(sel){ return this.root ? Array.prototype.slice.call(this.root.querySelectorAll('[data-mp="'+sel+'"]')) : []; }
   setTxt(sel,v){ const el=this.$(sel); if(el)el.textContent=v; }
   // Fills {placeholders} in message templates from content/ui-text.json.
   fmt(template,vars){ return String(template).replace(/\{(\w+)\}/g,(s,k)=>vars[k]!=null?vars[k]:s); }
+
+  // ---------- level sets ----------
+  // Playground missions live in two sets: "basics" (Training Camp, content/basics-missions.json)
+  // and "playground" (content/missions.json). The Text Lab lessons form a third set on the quest map.
+  currentMissions(){ return this.state.set==="basics" ? this.basics : this.missions; }
+  doneArr(set){ return set==="foundations" ? this.state.fdone : set==="basics" ? this.state.bdone : set==="text" ? this.txt.done : this.state.done; }
+  setUnlocked(name){
+    if(name==="foundations") return true;
+    const legacy = this.state.bdone.length>0 || this.state.done.length>0 || this.txt.done.length>0;
+    if(name==="basics") return this.state.fdone.length>=this.foundations.length || legacy;
+    const basicsDone = this.state.bdone.length >= this.basics.length;
+    if(name==="playground") return basicsDone || this.state.done.length>0;
+    return basicsDone || this.state.done.length>0 || this.txt.done.length>0; // text
+  }
+  // ---------- progressive UI disclosure ----------
+  // A basics mission lists its visible UI groups in "show" (see README.md).
+  // Sandbox mode and the playground set show everything (uiShow() returns null).
+  uiShow(){
+    if(this.state.mode==="sandbox") return null;
+    if(this.state.set!=="basics") return null;
+    const m=this.basics[this.state.mission];
+    return (m && m.show) ? m.show : null;
+  }
+  uiVisible(group){ const show=this.uiShow(); return !show || show.indexOf(group)>=0; }
+  applyUIStage(pulse){
+    const els=this.root.querySelectorAll("[data-ui]");
+    Array.prototype.forEach.call(els,el=>{
+      const g=el.getAttribute("data-ui");
+      if(!("uidisp" in el.dataset)) el.dataset.uidisp=el.style.display||"";
+      const vis=this.uiVisible(g);
+      const was=el.style.display!=="none";
+      el.style.display=vis?el.dataset.uidisp:"none";
+      if(pulse && vis && !was && !this.reduce){ el.style.animation="cs3pop .5s both"; setTimeout(()=>{ el.style.animation=""; },600); }
+    });
+    if(!this.uiVisible("tab-model") && this.state.ctab==="model") this.setCtab("data");
+    if(!this.uiVisible("tab-train") && this.state.ctab==="train") this.setCtab("data");
+  }
+  // Per-mission interaction tracking, read by the check rules.
+  resetTracking(){
+    this._regenCount=0; this._inspectedEdge=false; this._discreteToggles=0;
+    this.optimizersUsed=new Set([this.state.optimizer]);
+    this.activationsUsed=new Set([this.state.activation]);
+  }
 
   // ---------- math / rng ----------
   rng(seed){ let s=seed>>>0; return function(){ s+=0x6D2B79F5; let t=s; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
@@ -709,7 +861,11 @@ class Component extends DCLogic {
 
   // ---------- data ----------
   buildData(){
-    const rand=this.rng(1337 + this.state.dataset.length*7 + Math.round(this.state.noise));
+    // Seed depends only on the persistent dataSeed and the chosen dataset, not on noise or
+    // split, so adjusting those sliders keeps the same base points and only Regenerate (which
+    // bumps dataSeed) draws a fresh sample.
+    if(this.dataSeed==null)this.dataSeed=1337;
+    const rand=this.rng((this.dataSeed*131 + this.state.dataset.length*7)>>>0);
     const n=220, pts=[], ds=this.state.dataset, noise=this.state.noise/100;
     const jit=()=>this.gauss(rand)*noise*2.2;
     for(let i=0;i<n;i++){
@@ -891,6 +1047,7 @@ class Component extends DCLogic {
       lb.textContent=l===0?"INPUTS":(l===this.sizes.length-1?"OUTPUT":"HIDDEN "+l); lg.appendChild(lb);
     }
     svg.appendChild(eg); svg.appendChild(ng); svg.appendChild(lg); el.appendChild(svg);
+    if(!this.uiVisible("layercontrols")){ this.updateNetworkVisual(); return; }
     // HTML control pills over hidden layers
     for(let h=0;h<this.state.hidden.length;h++){ const col=lay.cols[h+1];
       const pill=document.createElement("div");
@@ -1000,14 +1157,16 @@ class Component extends DCLogic {
       dataset:()=>this.setDataset(t.getAttribute("data-ds")),
       feature:()=>this.toggleFeature(t.getAttribute("data-feat")),
       act:()=>this.setAct(t.getAttribute("data-act")),
-      regen:()=>{ this.buildData(); this.drawBoundary(); this.sfx("click"); this.status("Regenerated examples."); },
+      regen:()=>{ this._regenCount=(this._regenCount||0)+1; this.dataSeed=(this.dataSeed*1103515245+12345)>>>0; this.buildData(); this.drawBoundary(); this.sfx("click"); this.status("Regenerated examples."); },
       ctab:()=>this.setCtab(t.getAttribute("data-ctab")),
       lab:()=>this.setLab(t.getAttribute("data-lab")),
       theme:()=>this.toggleTheme(), sound:()=>this.toggleSound(),
       help:()=>this.openDialog("help"), compute:()=>this.openDialog("compute"),
+      "reset-progress":()=>this.resetProgress(),
       "dialog-close":()=>{ this.$("dialoglayer").style.display="none"; },
       quest:()=>this.openQuest(), "quest-close":()=>{ this.$("questlayer").style.display="none"; },
-      "quest-go":()=>this.questGo(+t.getAttribute("data-m")),
+      "intro-start":()=>{ this.hideIntro(); this.sfx("click"); },
+      "quest-go":()=>this.questGo(t.getAttribute("data-set"),+t.getAttribute("data-m")),
       hint:()=>this.toggleHint(), check:()=>this.check(),
       "mission-prev":()=>this.gotoMission(this.state.mission-1), "mission-next":()=>this.gotoMission(this.state.mission+1),
       reveal:()=>{ const b=this.$("answerbox"); if(b)b.style.display="block"; },
@@ -1017,6 +1176,7 @@ class Component extends DCLogic {
     };
     if(H[a]){ H[a](); return; }
     this.textClick(a,t);
+    this.fndClick(a,t);
   }
   onInput(e){
     const t=e.target.closest("[data-action]"); if(!t)return; const a=t.getAttribute("data-action");
@@ -1036,16 +1196,17 @@ class Component extends DCLogic {
     else if(a==="batch")this.state.batch=+t.value;
     else if(a==="reg")this.state.reg=t.value;
     else if(a==="showval"){ this.state.showVal=t.checked; this.drawBoundary(); }
-    else if(a==="discretize"){ this.state.discretize=t.checked; this.drawBoundary(); }
+    else if(a==="discretize"){ this.state.discretize=t.checked; this._discreteToggles=(this._discreteToggles||0)+1; this.drawBoundary(); }
   }
   onKey(e){
     if(e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
     if(e.key===" "){ e.preventDefault(); this.togglePlay(); }
     else if(e.key==="s"||e.key==="S")this.step();
     else if(e.key==="r"||e.key==="R")this.reset();
+    else if(e.key==="0")this.setLab("foundations");
     else if(e.key==="1")this.setLab("playground");
     else if(e.key==="2")this.setLab("text");
-    else if(e.key==="Escape"){ this.$("questlayer").style.display="none"; this.$("dialoglayer").style.display="none"; if(this.$("tourlayer").style.display!=="none")this.endTour(); }
+    else if(e.key==="Escape"){ this.$("questlayer").style.display="none"; this.$("dialoglayer").style.display="none"; this.hideIntro(); if(this.$("tourlayer").style.display!=="none")this.endTour(); }
   }
 
   togglePlay(){ this.state.playing=!this.state.playing; this.$("playicon").style.display=this.state.playing?"none":"block"; this.$("pauseicon").style.display=this.state.playing?"block":"none";
@@ -1061,14 +1222,15 @@ class Component extends DCLogic {
   setView(v){ this.state.view=v; ["activations","weights","gradients"].forEach(k=>{ const b=this.$("view-"+k); if(!b)return; const on=k===v; b.style.background=on?this.css("--surface"):"transparent"; b.style.color=on?this.css("--ink"):this.css("--muted"); b.style.boxShadow=on?"var(--shadow-s)":"none"; }); this.updateNetworkVisual(); }
   setDataset(ds){ this.state.dataset=ds; this.$all("").length; Array.prototype.forEach.call(this.root.querySelectorAll('[data-action="dataset"]'),b=>{ const on=b.getAttribute("data-ds")===ds; b.style.borderColor=on?this.css("--blue"):this.css("--line"); b.style.background=on?this.css("--columbia-soft"):this.css("--surface"); b.style.color=on?this.css("--ink"):this.css("--muted"); }); this.buildData(); this.drawBoundary(); this.sfx("click"); }
   toggleFeature(k){ let f=this.state.features.slice(); if(f.indexOf(k)>=0){ if(f.length<=1)return; f=f.filter(x=>x!==k); } else f.push(k); this.state.features=f; this.renderFeatures(); this.rebuild(); this.sfx("tick"); }
-  setAct(a){ this.state.activation=a; this.renderActs(); this.updateMetrics(); this.rebuild(); }
+  setAct(a){ this.state.activation=a; if(this.activationsUsed)this.activationsUsed.add(a); this.renderActs(); this.updateMetrics(); this.rebuild(); }
   setCtab(c){ this.state.ctab=c; ["data","model","train"].forEach(k=>{ const tab=this.$("ctab-"+k),pane=this.$("cpane-"+k); const on=k===c;
     if(tab){ tab.style.background=on?this.css("--surface"):"transparent"; tab.style.color=on?this.css("--ink"):this.css("--muted"); tab.style.boxShadow=on?"var(--shadow-s)":"none"; } if(pane)pane.style.display=on?"block":"none"; }); }
   setLab(l){ this.state.lab=l; Array.prototype.forEach.call(this.root.querySelectorAll("[data-screen]"),s=>{ s.style.display=s.getAttribute("data-screen")===l?"flex":"none"; });
     Array.prototype.forEach.call(this.root.querySelectorAll("[data-labtab]"),b=>{ const on=b.getAttribute("data-labtab")===l; b.style.background=on?this.css("--surface"):"transparent"; b.style.color=on?this.css("--ink"):this.css("--muted"); b.style.boxShadow=on?"var(--shadow-s)":"none"; const num=b.querySelector("span"); if(num){ num.style.background=on?this.css("--navy"):this.css("--surface-strong"); num.style.color=on?"#fff":this.css("--muted"); } });
     if(l==="playground"){ this.sizeCanvases(); this.renderNetwork(); this.drawBoundary(); this.drawLoss(); }
-    if(l==="text"){ if(!this.txt.ready)this.initText(); } this.sfx("click");
-    this.status((l==="text"?"Text Lab":"Model Playground")+" is ready."); }
+    if(l==="text"){ if(!this.txt.ready)this.initText(); }
+    if(l==="foundations"){ this.initFoundationsOnce(); this.fUpdateAll(); } this.sfx("click");
+    this.status((l==="text"?"Text Lab":l==="foundations"?"Foundations":"Model Playground")+" is ready."); }
 
   toggleTheme(){ this.state.theme=this.state.theme==="light"?"dark":"light"; this.root.dataset.theme=this.state.theme; this.save();
     setTimeout(()=>{ this.renderNetwork(); this.drawBoundary(); this.drawLoss(); },30); this.sfx("click"); }
@@ -1076,7 +1238,7 @@ class Component extends DCLogic {
 
   // ---------- inspector ----------
   selectNode(l,u){ this.selected={kind:"node",l,u}; this.updateInspector(); this.highlightSelection(); this.sfx("tick"); }
-  selectEdge(l,i,o){ this.selected={kind:"edge",l,i,o}; this.updateInspector(); this.highlightSelection(); this.sfx("tick"); }
+  selectEdge(l,i,o){ this.selected={kind:"edge",l,i,o}; this._inspectedEdge=true; this.updateInspector(); this.highlightSelection(); this.sfx("tick"); }
   highlightSelection(){ if(!this.nodeEls)return;
     this.nodeEls.forEach(n=>{ n.c.setAttribute("stroke-width",(this.selected&&this.selected.kind==="node"&&this.selected.l===n.l&&this.selected.u===n.u)?"4":"2.5"); });
     this.edgeEls.forEach(e=>{ const on=this.selected&&this.selected.kind==="edge"&&this.selected.l===e.l&&this.selected.i===e.i&&this.selected.o===e.o; e.el.style.filter=on?"drop-shadow(0 0 4px currentColor)":"none"; });
@@ -1099,23 +1261,29 @@ class Component extends DCLogic {
   }
 
   // ---------- missions / gamification ----------
-  applyMission(idx){ const m=this.missions[idx];
+  applyMission(idx){ const m=this.currentMissions()[idx];
     this.state.dataset=m.dataset; this.state.hidden=m.hidden.slice(); this.state.noise=m.noise||0;
   }
-  gotoMission(i){ if(i<0||i>=this.missions.length)return; if(i>0 && this.state.done.indexOf(i-1)<0 && this.state.done.indexOf(i)<0){ this.guide(this.fmt(this.ui.messages.lockedMission,{n:i})); this.sfx("click"); return; }
-    this.stopPulse("mission-next"); this.state.mission=i; this.applyMission(i,false); this.optimizersUsed=new Set([this.state.optimizer]); this.state.playing=false; this.$("playicon").style.display="block"; this.$("pauseicon").style.display="none";
-    this.renderFeatures(); this.buildData(); this.rebuild(); this.syncControls(); this.updateMissionCard(); this.state.hintOpen=false; this.$("hintbox").style.display="none"; this.sfx("click"); }
-  updateMissionCard(){ const m=this.missions[this.state.mission], total=this.missions.length; this.setTxt("mkicker","Mission "+(this.state.mission+1)+" of "+total); this.setTxt("mtitle",m.title); this.setTxt("mgoal",m.goal); this.setTxt("hinttext",m.hint); this.setTxt("m-obj-ds",this.datasetLabel(m.dataset)); this.setTxt("m-obj-target","val loss < "+m.target);
-    this.setTxt("mprogtext",this.state.done.length+"/"+total); this.$("mprog").style.width=(this.state.done.length/total*100)+"%"; this.updateMissionProgress(); }
-  updateMissionProgress(){ const m=this.missions[this.state.mission]; const done=this.state.done.indexOf(this.state.mission)>=0;
+  gotoMission(i){ const list=this.currentMissions(), done=this.doneArr(this.state.set);
+    if(i<0||i>=list.length)return;
+    if(i>0 && done.indexOf(i-1)<0 && done.indexOf(i)<0){ this.guide(this.fmt(this.ui.messages.lockedMission,{n:i})); this.sfx("click"); return; }
+    this.state.mission=i; this.applyMission(i); this.resetTracking(); this.state.playing=false; this.$("playicon").style.display="block"; this.$("pauseicon").style.display="none";
+    this.renderFeatures(); this.buildData(); this.applyUIStage(true); this.rebuild(); this.syncControls(); this.updateMissionCard(); this.state.hintOpen=false; this.$("hintbox").style.display="none"; this.save(); this.sfx("click");
+    this.showIntro(this.state.set,i); }
+  updateMissionCard(){ const list=this.currentMissions(), m=list[this.state.mission], total=list.length, done=this.doneArr(this.state.set);
+    this.setTxt("mkicker",this.ui.sets[this.state.set].title+", mission "+(this.state.mission+1)+" of "+total);
+    this.setTxt("mtitle",m.title); this.setTxt("mgoal",m.goal); this.setTxt("hinttext",m.hint); this.setTxt("m-obj-ds",this.datasetLabel(m.dataset));
+    this.setTxt("m-obj-target", m.target!=null ? "val loss < "+m.target : (m.targetLabel||"explore"));
+    this.setTxt("mprogtext",done.length+"/"+total); this.$("mprog").style.width=(done.length/total*100)+"%"; this.updateMissionProgress(); }
+  updateMissionProgress(){ const done=this.doneArr(this.state.set).indexOf(this.state.mission)>=0;
     const check=this.root.querySelector('[data-action="check"]'); if(check){ if(done){ check.textContent="✓ Completed"; } else check.textContent="Check Solution"; } }
   toggleHint(){ this.state.hintOpen=!this.state.hintOpen; this.$("hintbox").style.display=this.state.hintOpen?"block":"none"; this.sfx("click"); }
   // Mission requirements are data-driven: each mission in content/missions.json has a
   // "rules" array evaluated by ruleOK(). See README.md for the list of rule types.
   missionOK(m){ const need=(msg)=>({ok:false,msg:msg}); const val=this.valLoss, trained=this.epoch>=1&&isFinite(val);
-    if(!trained) return need(this.ui.messages.trainFirst);
+    if(m.target!=null && !trained) return need(this.ui.messages.trainFirst);
     for(const rule of (m.rules||[])){ if(!this.ruleOK(rule)) return need(rule.msg||"Requirement not met."); }
-    if(val>m.target) return need(this.fmt(this.ui.messages.almost,{val:val.toFixed(3),target:m.target.toFixed(2),hint:m.hint}));
+    if(m.target!=null && val>m.target) return need(this.fmt(this.ui.messages.almost,{val:val.toFixed(3),target:m.target.toFixed(2),hint:m.hint}));
     return {ok:true};
   }
   ruleOK(rule){
@@ -1133,13 +1301,23 @@ class Component extends DCLogic {
       case "feature-any": return rule.value.some(k=>F.indexOf(k)>=0);
       case "noise-min": return this.state.noise>=rule.value;
       case "optimizers-min": return (this.optimizersUsed?this.optimizersUsed.size:1)>=rule.value;
+      case "activations-min": return (this.activationsUsed?this.activationsUsed.size:1)>=rule.value;
       case "discrete-off": return !this.state.discretize;
+      case "discrete-toggled": return (this._discreteToggles||0)>=(rule.value||1);
+      case "regen-min": return (this._regenCount||0)>=rule.value;
+      case "inspect-edge": return !!this._inspectedEdge;
+      case "epochs-min": return this.epoch>=rule.value;
       default: console.warn("Unknown mission rule type:",rule.type); return true;
     }
   }
-  check(){ const m=this.missions[this.state.mission]; const r=this.missionOK(m);
-    if(r.ok){ const first=this.state.done.indexOf(this.state.mission)<0; if(first){ this.state.done.push(this.state.mission); this.awardXP(this.cfg.missionXP); this.save(); }
-      this.sfx("success"); this.showToast(this.ui.messages.missionComplete,"+"+(first?this.cfg.missionXP:0)+" XP · "+m.title); this.guide(m.answer); this.burst(); this.updateMissionCard(); this.pulseNext("mission-next"); }
+  check(){ const set=this.state.set, m=this.currentMissions()[this.state.mission]; const r=this.missionOK(m);
+    if(r.ok){ const done=this.doneArr(set); const first=done.indexOf(this.state.mission)<0;
+      const xp=set==="basics"?(this.cfg.basicsXP||60):this.cfg.missionXP;
+      if(first){ done.push(this.state.mission); this.awardXP(xp); this.save(); }
+      this.sfx("success"); this.burst(); this.updateMissionCard();
+      // Duolingo flow: return to the quest map, where the next card unlocks.
+      clearTimeout(this._mapT);
+      this._mapT=setTimeout(()=>this.openQuest({completed:{set:set,index:this.state.mission,xp:first?xp:0}}),1100); }
     else { this.sfx("click"); this.guide(r.msg); this.status(this.ui.messages.notYet); }
   }
   awardXP(n,silent){ const per=this.cfg.xpPerLevel; const before=Math.floor(this.state.xp/per); this.state.xp+=n; const after=Math.floor(this.state.xp/per);
@@ -1151,26 +1329,96 @@ class Component extends DCLogic {
     requestAnimationFrame(()=>{ t.style.opacity="1"; t.style.transform="translateX(-50%) translateY(0)"; }); clearTimeout(this._toast); this._toast=setTimeout(()=>{ t.style.opacity="0"; t.style.transform="translateX(-50%) translateY(-20px)"; setTimeout(()=>t.style.display="none",350); },2800); }
   burst(){ if(this.reduce)return; const el=this.netRef.current; const ring=document.createElement("div"); ring.style.cssText="position:absolute;left:50%;top:50%;width:80px;height:80px;margin:-40px;border:3px solid var(--gold);border-radius:50%;animation:cs3ring .7s ease-out forwards;pointer-events:none;z-index:5"; el.appendChild(ring); setTimeout(()=>ring.remove(),720); }
 
-  openQuest(){ this.renderQuest(); this.$("questlayer").style.display="block"; this.sfx("click"); }
-  questGo(i){ this.$("questlayer").style.display="none"; this.gotoMission(i); }
-  renderQuest(){ const body=this.$("questbody"); const done=this.state.done;
-    let html='<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:14px 16px;border-radius:12px;background:var(--surface-soft);border:1px solid var(--line)">'
+  openQuest(opts){ this.renderQuest(opts||{}); this.$("questlayer").style.display="block"; this.sfx(opts&&opts.completed?"unlock":"click"); }
+  // Large purpose box shown whenever a mission or lesson starts.
+  showIntro(set,i){
+    const items=set==="text"?this.textLessons:set==="foundations"?this.foundations:set==="basics"?this.basics:this.missions;
+    const item=items[i]; if(!item)return;
+    this.setTxt("intro-kicker",this.ui.sets[set].title+", "+(set==="text"?"lesson":"mission")+" "+(i+1)+" of "+items.length);
+    this.setTxt("intro-title",item.title);
+    this.setTxt("intro-goal",item.goal);
+    const st=this.$("intro-story"); if(st){ st.textContent=item.story||""; st.style.display=item.story?"block":"none"; }
+    const chips=this.$("intro-chips");
+    if(chips){ const chip=(k,v)=>'<span style="display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:20px;background:var(--surface-strong);font:700 11.5px/1 var(--sans)"><span style="color:var(--faint);letter-spacing:.06em;text-transform:uppercase;font-size:9px">'+k+'</span><span style="color:var(--ink)">'+v+'</span></span>';
+      let h="";
+      if(item.dataset)h+=chip("Dataset",this.datasetLabel(item.dataset));
+      if(item.target!=null)h+=chip("Goal","val loss < "+item.target); else if(item.targetLabel)h+=chip("Goal",item.targetLabel);
+      if(item.restrict)h+=chip("Focus",item.restrict);
+      chips.innerHTML=h; chips.style.display=h?"flex":"none"; }
+    this.$("introlayer").style.display="block";
+  }
+  hideIntro(){ const l=this.$("introlayer"); if(l)l.style.display="none"; }
+  questGo(set,i){ this.$("questlayer").style.display="none";
+    if(set==="text"){ if(this.state.lab!=="text")this.setLab("text"); this.gotoLesson(i); return; }
+    if(set==="foundations"){ if(this.state.lab!=="foundations")this.setLab("foundations"); this.gotoFStep(i); return; }
+    if(this.state.lab!=="playground")this.setLab("playground");
+    this.state.set=set; this.gotoMission(i); }
+  // The first incomplete, unlocked card across all sets, in path order.
+  // prefSet, when given, is searched first so that a completion continues its own set.
+  nextTarget(prefSet){
+    let order=[["foundations",this.foundations],["basics",this.basics],["playground",this.missions],["text",this.textLessons]];
+    if(prefSet) order=order.filter(o=>o[0]===prefSet).concat(order.filter(o=>o[0]!==prefSet));
+    for(let s=0;s<order.length;s++){ const key=order[s][0], items=order[s][1];
+      if(!this.setUnlocked(key)) continue; const done=this.doneArr(key);
+      for(let i=0;i<items.length;i++){ if(done.indexOf(i)<0){ if(i===0||done.indexOf(i-1)>=0) return {set:key,index:i}; break; } } }
+    return null;
+  }
+  renderQuest(opts){ const body=this.$("questbody"); opts=opts||{};
+    const totalItems=this.foundations.length+this.basics.length+this.missions.length+this.textLessons.length;
+    const totalDone=this.state.fdone.length+this.state.bdone.length+this.state.done.length+this.txt.done.length;
+    let html='<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:14px 16px;border-radius:12px;background:var(--surface-soft);border:1px solid var(--line)">'
       +'<div style="text-align:center"><p style="font:700 26px/1 var(--display);color:var(--navy)">'+(Math.floor(this.state.xp/this.cfg.xpPerLevel)+1)+'</p><p style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Level</p></div>'
       +'<div style="width:1px;height:34px;background:var(--line)"></div>'
       +'<div style="text-align:center"><p style="font:700 26px/1 var(--display);color:var(--gold-ink)">'+this.state.xp+'</p><p style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Total XP</p></div>'
       +'<div style="width:1px;height:34px;background:var(--line)"></div>'
-      +'<div style="text-align:center"><p style="font:700 26px/1 var(--display);color:var(--good)">'+done.length+'/'+this.missions.length+'</p><p style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Missions</p></div></div>';
-    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">';
-    this.missions.forEach((m,i)=>{ const isDone=done.indexOf(i)>=0; const unlocked=i===0||done.indexOf(i-1)>=0||isDone; const current=i===this.state.mission;
-      const bg=isDone?"var(--good-soft)":unlocked?"var(--surface)":"var(--surface-soft)";
-      const bd=current?"var(--navy)":isDone?"color-mix(in oklab,var(--good) 40%,transparent)":"var(--line)";
-      html+='<button '+(unlocked?'data-action="quest-go" data-m="'+i+'"':'disabled')+' style="text-align:left;padding:13px;border-radius:12px;background:'+bg+';border:1.5px solid '+bd+';'+(unlocked?'cursor:pointer':'opacity:.6;cursor:not-allowed')+';transition:transform .14s;position:relative">'
-        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:'+(isDone?"var(--good)":unlocked?"var(--navy)":"var(--line-strong)")+';color:#fff;font:700 13px/1 var(--display)">'+(isDone?"✓":(i+1))+'</span>'
-        +(current?'<span style="font:800 7.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--navy);background:var(--columbia-soft);padding:3px 6px;border-radius:20px">Current</span>':isDone?'<span style="font:800 7.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--good)">Done</span>':unlocked?'':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--faint)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>')+'</div>'
-        +'<p style="font:600 13px/1.15 var(--serif);color:var(--ink);margin-bottom:3px">'+m.title+'</p>'
-        +'<p style="font:500 10px/1.35 var(--sans);color:var(--faint)">'+m.restrict+'</p></button>';
+      +'<div style="text-align:center"><p style="font:700 26px/1 var(--display);color:var(--good)">'+totalDone+'/'+totalItems+'</p><p style="font:700 8px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Complete</p></div></div>';
+    const next=this.nextTarget(opts.completed?opts.completed.set:null);
+    if(opts.completed){ const c=opts.completed; const item=(c.set==="text"?this.textLessons:c.set==="foundations"?this.foundations:(c.set==="basics"?this.basics:this.missions))[c.index];
+      const learn=c.set==="text"?item.notice:item.answer;
+      html+='<div style="margin-bottom:18px;padding:13px 16px;border-radius:12px;background:var(--gold-soft);border:1px solid var(--gold);animation:cs3rise .4s both">'
+        +'<p style="font:800 12px/1.2 var(--sans);color:var(--gold-ink)">✓ '+item.title+' complete'+(c.xp?' (+'+c.xp+' XP)':'')+'</p>'
+        +(learn?'<p style="font:400 12px/1.5 var(--sans);color:var(--ink);margin-top:5px">'+learn+'</p>':'')
+        +'<p style="font:600 11px/1.4 var(--sans);color:var(--muted);margin-top:6px">'+(next?'Click the glowing card to start the next one.':this.ui.messages.allComplete)+'</p>'
+        +'</div>'; }
+    const sections=[
+      {key:"foundations",items:this.foundations},
+      {key:"basics",items:this.basics},
+      {key:"playground",items:this.missions},
+      {key:"text",items:this.textLessons}
+    ];
+    const prereq={basics:this.ui.sets.foundations.title,playground:this.ui.sets.basics.title,text:this.ui.sets.basics.title};
+    sections.forEach(sec=>{
+      const meta=this.ui.sets[sec.key], done=this.doneArr(sec.key), unlockedSet=this.setUnlocked(sec.key);
+      html+='<div style="display:flex;align-items:baseline;justify-content:space-between;margin:14px 0 10px">'
+        +'<div><h3 style="font:500 17px/1.1 var(--serif);color:var(--ink)">'+meta.title+'</h3>'
+        +'<p style="font:400 11px/1.4 var(--sans);color:var(--faint);margin-top:2px">'+(unlockedSet?meta.desc:this.fmt(this.ui.messages.lockedSet,{name:prereq[sec.key]||""}))+'</p></div>'
+        +'<span style="font:700 11px/1 var(--mono);color:'+(done.length>=sec.items.length?'var(--good)':'var(--muted)')+'">'+done.length+'/'+sec.items.length+'</span></div>';
+      html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">';
+      sec.items.forEach((m,i)=>{
+        const isDone=done.indexOf(i)>=0;
+        const unlocked=unlockedSet&&(i===0||done.indexOf(i-1)>=0||isDone);
+        const current=(sec.key==="text")?(this.state.lab==="text"&&this.txt.lesson===i)
+          :(sec.key==="foundations")?(this.state.lab==="foundations"&&!!this.fnd&&this.fnd.step===i)
+          :(this.state.lab==="playground"&&this.state.set===sec.key&&this.state.mission===i);
+        const isNext=!!(next&&next.set===sec.key&&next.index===i);
+        const bg=isDone?"var(--good-soft)":unlocked?"var(--surface)":"var(--surface-soft)";
+        const bd=isNext?"var(--gold)":current?"var(--navy)":isDone?"color-mix(in oklab,var(--good) 40%,transparent)":"var(--line)";
+        const anim=(isNext&&opts.completed&&!this.reduce)?"animation:cs3attn 1.15s ease-in-out infinite;":"";
+        html+='<button '+(unlocked?'data-action="quest-go" data-set="'+sec.key+'" data-m="'+i+'"':'disabled')
+          +' style="text-align:left;padding:13px;border-radius:12px;background:'+bg+';border:1.5px solid '+bd+';'+(unlocked?'cursor:pointer':'opacity:.6;cursor:not-allowed')+';transition:transform .14s;position:relative;'+anim+'">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:'+(isDone?"var(--good)":unlocked?"var(--navy)":"var(--line-strong)")+';color:#fff;font:700 13px/1 var(--display)">'+(isDone?"✓":(i+1))+'</span>'
+          +(isNext?'<span style="font:800 7.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);background:var(--gold-soft);padding:3px 6px;border-radius:20px">'+this.ui.messages.nextBadge+'</span>'
+            :current?'<span style="font:800 7.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--navy);background:var(--columbia-soft);padding:3px 6px;border-radius:20px">Current</span>'
+            :isDone?'<span style="font:800 7.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--good)">Done</span>'
+            :unlocked?'':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--faint)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>')+'</div>'
+          +'<p style="font:600 13px/1.15 var(--serif);color:var(--ink);margin-bottom:3px">'+m.title+'</p>'
+          +'<p style="font:500 10px/1.35 var(--sans);color:var(--faint)">'+(m.restrict||"")+'</p></button>';
+      });
+      html+='</div>';
     });
-    html+='</div>'; body.innerHTML=html;
+    body.innerHTML=html;
+    if(opts.completed&&next){ const nb=body.querySelector('[data-set="'+next.set+'"][data-m="'+next.index+'"]');
+      if(nb) setTimeout(()=>{ try{ nb.scrollIntoView({block:"center",behavior:this.reduce?"auto":"smooth"}); }catch(e){} },80); }
   }
 
   openDialog(kind){ const eb=this.$("dialogeyebrow"),ti=this.$("dialogtitle"),bo=this.$("dialogbody");
@@ -1189,13 +1437,25 @@ class Component extends DCLogic {
     return row("Decision-surface renderer",'<select style="width:100%;padding:8px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"><option>Automatic — WebGPU, WebGL, CPU</option><option>Prefer WebGPU</option><option>Prefer WebGL</option><option>CPU only</option></select>')
       +row("Compute budget",'<select style="width:100%;padding:8px 9px;border-radius:7px;border:1px solid var(--line-strong);background:var(--surface)"><option>Balanced</option><option>Low memory</option><option>Faster updates</option></select>')
       +'<label style="display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:9px;background:var(--surface-soft);border:1px solid var(--line);margin-bottom:10px"><span><span style="display:block;font:700 12px/1 var(--sans);color:var(--ink)">Reduce animation</span><span style="display:block;font:500 10.5px/1.3 var(--sans);color:var(--faint);margin-top:2px">Fewer transitions and no signal flow.</span></span><input data-action="reducemotion" type="checkbox" style="accent-color:var(--blue);width:16px;height:16px"></label>'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:9px;background:var(--good-soft);border:1px solid color-mix(in oklab,var(--good) 22%,transparent)"><span style="font:600 11.5px/1.3 var(--sans);color:var(--good)">All computation is local. No data leaves this device.</span></div>';
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:9px;background:var(--good-soft);border:1px solid color-mix(in oklab,var(--good) 22%,transparent)"><span style="font:600 11.5px/1.3 var(--sans);color:var(--good)">All computation is local. No data leaves this device.</span></div>'
+      +'<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)"><p style="font:700 10px/1 var(--sans);letter-spacing:.02em;color:var(--muted);margin-bottom:6px">Progress</p>'
+      +'<p style="font:500 10.5px/1.4 var(--sans);color:var(--faint);margin-bottom:9px">Erase all saved XP, completed missions, and lesson progress in this browser, and start over from the first mission.</p>'
+      +'<button data-action="reset-progress" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:9px;border:1px solid var(--bad);background:var(--bad-soft);color:var(--bad);font:700 12px/1 var(--sans);transition:all .16s"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M10 11v6M14 11v6"></path></svg>Reset all progress</button></div>';
+  }
+  resetProgress(){
+    const ok = window.confirm("Erase all saved progress?\n\nYour XP, completed missions, and lesson progress in this browser will be removed, and the toolkit will restart from the first mission. This cannot be undone.");
+    if(!ok){ this.sfx("click"); return; }
+    try{ localStorage.removeItem("cs3_toolkit_v2"); }catch(e){}
+    this.sfx("click");
+    // Reload so every screen, counter, and saved position rebuilds from a clean slate.
+    window.location.reload();
   }
 
   // ---------- tour ----------
   startTour(){ this._tourStep=0; this.$("tourlayer").style.display="block"; this.showTourStep(); }
   showTourStep(){ const s=this.tour[this._tourStep]; const target=this.root.querySelector('[data-tour="'+s.sel+'"]'); if(!target){ this.tourNext(1); return; }
     const rb=this.root.getBoundingClientRect(), tb=target.getBoundingClientRect();
+    if(!tb.width && !tb.height){ this.tourNext(1); return; } // target hidden at this UI stage
     const x=tb.left-rb.left-6, y=tb.top-rb.top-6, w=tb.width+12, h=tb.height+12;
     ["tourhole","tourring"].forEach(id=>{ const e=this.$(id); e.setAttribute("x",x); e.setAttribute("y",y); e.setAttribute("width",w); e.setAttribute("height",h); });
     this.setTxt("tournum",this._tourStep+1); this.setTxt("tourstepcount","Step "+(this._tourStep+1)+" of "+this.tour.length);
@@ -1209,7 +1469,7 @@ class Component extends DCLogic {
   endTour(){ this.$("tourlayer").style.display="none"; this._tourDone=true; this.save(); this.guide(this.ui.messages.tourDone); }
 
   // ---------- guidance / mode ----------
-  guide(t){ if(this.state.lab==="text"){ this.setTxt("t-hinttext",t); const b=this.$("t-hintbox"); if(b)b.style.display="block"; } else { this.setTxt("hinttext",t); const b=this.$("hintbox"); if(b){ b.style.display="block"; this.state.hintOpen=true; } } }
+  guide(t){ if(this.state.lab==="foundations"){ this.fGuide(t); } else if(this.state.lab==="text"){ this.setTxt("t-hinttext",t); const b=this.$("t-hintbox"); if(b)b.style.display="block"; } else { this.setTxt("hinttext",t); const b=this.$("hintbox"); if(b){ b.style.display="block"; this.state.hintOpen=true; } } }
   datasetLabel(ds){ return this.ui.datasetLabels[ds]||ds; }
   setMode(m){ this.state.mode=m;
     ["lesson","sandbox"].forEach(k=>{ const b=this.$("mode-"+k); if(!b)return; const on=k===m; b.style.background=on?this.css("--surface"):"transparent"; b.style.color=on?this.css("--ink"):this.css("--muted"); b.style.boxShadow=on?"var(--shadow-s)":"none"; });
@@ -1217,6 +1477,7 @@ class Component extends DCLogic {
     if(m==="sandbox"){ show("m-nav",false); show("m-objective",false); show("m-progress",false); show("m-actions",false); const hb=this.$("hintbox"); if(hb)hb.style.display="none";
       this.setTxt("mkicker",this.ui.sandbox.kicker); this.setTxt("mtitle",this.ui.sandbox.title); this.setTxt("mgoal",this.ui.sandbox.goal); this.status("Sandbox mode — explore freely."); }
     else { show("m-nav",true); show("m-objective",true); show("m-progress",true); show("m-actions",true); this.updateMissionCard(); this.status("Lesson Plan mode."); }
+    this.applyUIStage(false); this.renderNetwork();
     this.sfx("click"); }
 
   // ---------- render helper chips ----------
@@ -1395,8 +1656,11 @@ class Component extends DCLogic {
     else { this.txt.source="tempest"; this.$("t-corpusinput").value=this.corpusText("tempest"); this.syncTextControls(); this.prepareCorpus(true); show(transTab,false); show(embTab,true); show(trainTab,true); { const at=this.$("tview-arch"); if(at)at.style.display="block"; } const tt=this.$("tview-train"); if(tt)tt.textContent=(m==="rnn"?"Train RNN":"Train GPT"); this.setTview("train"); }
     this.sfx("click"); }
   updateTextLesson(){ const L=this.textLessons[this.txt.lesson]; this.setTxt("t-kicker","Lesson "+(this.txt.lesson+1)+" of "+this.textLessons.length); this.setTxt("t-title",L.title); this.setTxt("t-goal",L.goal); this.setTxt("t-hinttext",L.hint); this.setTxt("t-notice",L.notice); }
-  gotoLesson(i){ if(i<0||i>=this.textLessons.length)return; this.stopPulse("t-next"); this.txt.lesson=i; const L=this.textLessons[i]; this.txt.tokenizer=L.tokenizer; this.txt.model=L.model; this.txt.order=L.order; this.txt.source=L.source;
-    this.$("t-corpusinput").value=this.corpusText(L.source); this.txt.sampled=false; this.txt.analogySolved=false; this.syncTextControls(); this.prepareCorpus(true); this.updateTextLesson(); this.$("t-hintbox").style.display="none"; this.sfx("click"); }
+  gotoLesson(i){ if(i<0||i>=this.textLessons.length)return;
+    if(i>0 && this.txt.done.indexOf(i-1)<0 && this.txt.done.indexOf(i)<0){ this.guide(this.fmt(this.ui.messages.lockedLesson,{n:i})); this.sfx("click"); return; }
+    this.stopPulse("t-next"); this.txt.lesson=i; const L=this.textLessons[i]; this.txt.tokenizer=L.tokenizer; this.txt.model=L.model; this.txt.order=L.order; this.txt.source=L.source;
+    this.$("t-corpusinput").value=this.corpusText(L.source); this.txt.sampled=false; this.txt.analogySolved=false; this.syncTextControls(); this.prepareCorpus(true); this.updateTextLesson(); this.$("t-hintbox").style.display="none"; this.save(); this.sfx("click");
+    this.showIntro("text",i); }
   // Lesson requirements are data-driven: each lesson in content/text-lessons.json has a
   // "check" object whose fields (model, order, tokenizer, requireSelection, minSteps,
   // requireSample, requireAnalogy) are evaluated in order here. See README.md.
@@ -1411,7 +1675,10 @@ class Component extends DCLogic {
     return {ok:true};
   }
   textCheck(){ const r=this.lessonOK(); if(!r.ok){ this.sfx("click"); this.guide(r.msg); this.status(this.ui.messages.notYet); return; }
-    const first=this.txt.done.indexOf(this.txt.lesson)<0; if(first){ this.txt.done.push(this.txt.lesson); this.awardXP(this.cfg.lessonXP); this.save(); } this.sfx("success"); this.showToast(this.ui.messages.lessonComplete,"+"+(first?this.cfg.lessonXP:0)+" XP · "+this.textLessons[this.txt.lesson].title); this.guide(this.textLessons[this.txt.lesson].notice); this.pulseNext("t-next"); }
+    const first=this.txt.done.indexOf(this.txt.lesson)<0; if(first){ this.txt.done.push(this.txt.lesson); this.awardXP(this.cfg.lessonXP); this.save(); } this.sfx("success");
+    // Duolingo flow: return to the quest map, where the next card unlocks.
+    clearTimeout(this._mapT);
+    this._mapT=setTimeout(()=>this.openQuest({completed:{set:"text",index:this.txt.lesson,xp:first?this.cfg.lessonXP:0}}),1100); }
   textClick(a,t){
     if(a==="t-prepare")this.prepareCorpus();
     else if(a==="t-source"){ this.txt.source=t.getAttribute("data-src"); this.$("t-corpusinput").value=this.corpusText(this.txt.source); this.syncTextControls(); this.prepareCorpus(); }
@@ -1434,6 +1701,229 @@ class Component extends DCLogic {
     else if(a==="t-size")this.setSize(t.getAttribute("data-size"));
     else if(a==="emb-solve")this.solveAnalogy();
     else if(a==="emb-dim")this.setEmbDim(+t.getAttribute("data-dim"));
+  }
+
+  // ---------- FOUNDATIONS (worked matrix examples, content/foundations.json) ----------
+  initFoundationsOnce(){ if(this._fInit)return; this._fInit=true;
+    const stage=this.$("f-stage");
+    stage.addEventListener("mouseover",(e)=>this.fHover(e,true));
+    stage.addEventListener("mouseout",(e)=>this.fHover(e,false));
+    const start=Math.max(0,Math.min(this._fstepSaved||0,this.foundations.length-1));
+    this.gotoFStep(start,true);
+  }
+  fStep(){ return this.foundations[this.fnd.step]; }
+  gotoFStep(i,init){ if(i<0||i>=this.foundations.length)return;
+    const done=this.state.fdone;
+    if(!init && i>0 && done.indexOf(i-1)<0 && done.indexOf(i)<0){ this.fGuide(this.fmt(this.ui.messages.lockedMission,{n:i})); this.sfx("click"); return; }
+    const def=this.foundations[i];
+    this.fnd={ step:i, explored:new Set(), inputsTried:new Set([0]), exIdx:0, actOn:false, toggled:false,
+      w:(def.start&&def.start.w)?def.start.w.slice():null, b:(def.start&&def.start.b!=null)?def.start.b:0 };
+    this.fUpdateAll(); this.save(); if(!init){ this.sfx("click"); this.showIntro("foundations",i); }
+  }
+  fUpdateAll(){ this.fUpdateCard(); this.fRenderStage(); }
+  fUpdateCard(){ const def=this.fStep();
+    this.setTxt("f-kicker",this.ui.sets.foundations.title+", mission "+(this.fnd.step+1)+" of "+this.foundations.length);
+    this.setTxt("f-title",def.title); this.setTxt("f-goal",def.goal); this.setTxt("f-hinttext",def.hint);
+    this.setTxt("f-story",def.story); this.setTxt("f-note",def.note||"");
+    const titles={linear:"The linear layer",argmax:"Scores and argmax",compose:"Stacked linear layers",fit:"Fitting weights by hand"};
+    this.setTxt("f-stagetitle",titles[def.type]||"Worked example");
+    const box=this.$("f-hintbox"); if(box)box.style.display="none";
+    const btn=this.root.querySelector('[data-action="f-check"]'); if(btn)btn.textContent=this.state.fdone.indexOf(this.fnd.step)>=0?"✓ Completed":"Check Mission";
+  }
+  fGuide(t){ this.setTxt("f-hinttext",t); const b=this.$("f-hintbox"); if(b)b.style.display="block"; }
+  fNum(v){ if(typeof v==="string")return v; const r=Math.round(v*100)/100; return r<0?"−"+Math.abs(r):String(r); }
+  fWrap(v){ return v<0?"("+this.fNum(v)+")":this.fNum(v); }
+  fLinOut(x,W,b){ return b.map((bv,j)=>x.reduce((s,xi,i)=>s+xi*W[i][j],0)+bv); }
+  // ----- html builders -----
+  fCellH(key,kind,act,val,extraAttr){ return '<span class="fcell" data-key="'+key+'"'+(kind?' data-kind="'+kind+'"':'')+(act?' data-act="'+act+'"':'')+(extraAttr||"")+'>'+this.fNum(val)+'</span>'; }
+  fRowH(cells){ return '<span style="display:inline-flex;gap:4px;padding:5px 6px;border-left:2.5px solid var(--line-strong);border-right:2.5px solid var(--line-strong);border-radius:7px">'+cells.join("")+'</span>'; }
+  fGridH(rows){ return '<span style="display:inline-grid;gap:4px;padding:5px 6px;border-left:2.5px solid var(--line-strong);border-right:2.5px solid var(--line-strong);border-radius:7px">'+rows.map(r=>'<span style="display:flex;gap:4px">'+r.join("")+'</span>').join("")+'</span>'; }
+  fTermH(inner,label){ return '<span style="display:inline-flex;flex-direction:column;align-items:center">'+inner+'<span class="fveclbl">'+label+'</span></span>'; }
+  fOp(s){ return '<span class="fop">'+s+'</span>'; }
+  fEqH(terms){ return '<div style="display:flex;align-items:flex-start;justify-content:center;flex-wrap:wrap;gap:2px;margin:10px 0">'+terms.join("")+'</div>'; }
+  fNetH(colsDef,edgesDef,Hd){ const Wd=640; Hd=Hd||230; const pad=95;
+    const nx=(c)=>colsDef.length===1?Wd/2:pad+(Wd-2*pad)*c/(colsDef.length-1);
+    const pos={}; let nodes="";
+    colsDef.forEach((col,c)=>{ const n=col.nodes.length;
+      const gap=n>1?Math.min(84,(Hd-72)/(n-1)):0; const y0=(Hd-24)/2-gap*(n-1)/2+10;
+      col.nodes.forEach((nd,i)=>{ const x=nx(c), y=n===1?(Hd-24)/2+10:y0+gap*i; pos[nd.key]={x:x,y:y};
+        nodes+='<g class="fnode" data-key="'+nd.key+'"'+(nd.act?' data-act="'+nd.act+'"':'')+'>'
+          +'<circle cx="'+x+'" cy="'+y+'" r="21" fill="var(--surface)" stroke="'+col.stroke+'" stroke-width="2.5"></circle>'
+          +'<text x="'+x+'" y="'+(y+4.5)+'" text-anchor="middle" style="font:600 12.5px var(--mono);fill:var(--ink);pointer-events:none">'+this.fNum(nd.val)+'</text>'
+          +'<text x="'+x+'" y="'+(y+37)+'" text-anchor="middle" style="font:600 9.5px var(--sans);fill:var(--faint);pointer-events:none">'+nd.label+'</text></g>'; });
+    });
+    let edges="";
+    edgesDef.forEach((e,k)=>{ const A=pos[e.from],B=pos[e.to];
+      const col=e.val>=0?"var(--blue)":"var(--gold-ink)"; const wpx=(0.9+Math.min(3,Math.abs(e.val)*0.4)).toFixed(1);
+      const t=0.34+(k%2)*0.24; const lx=A.x+(B.x-A.x)*t, ly=A.y+(B.y-A.y)*t-8;
+      edges+='<g data-key="'+e.key+'" data-kind="w" data-act="'+e.act+'" style="cursor:pointer">'
+        +'<line x1="'+(A.x+22)+'" y1="'+A.y+'" x2="'+(B.x-22)+'" y2="'+B.y+'" stroke="transparent" stroke-width="16" stroke-linecap="round"></line>'
+        +'<line class="fedge" x1="'+(A.x+22)+'" y1="'+A.y+'" x2="'+(B.x-22)+'" y2="'+B.y+'" stroke="'+col+'" stroke-width="'+wpx+'" opacity="0.75" stroke-linecap="round" style="pointer-events:none"></line>'
+        +'<rect x="'+(lx-15)+'" y="'+(ly-9)+'" width="30" height="16" rx="4" fill="var(--surface)" opacity="0.92"></rect>'
+        +'<text x="'+lx+'" y="'+(ly+3.5)+'" text-anchor="middle" style="font:700 10.5px var(--mono);fill:'+col+'">'+this.fNum(e.val)+'</text></g>';
+    });
+    return '<svg width="'+Wd+'" height="'+Hd+'" viewBox="0 0 '+Wd+' '+Hd+'" style="display:block;margin:0 auto;max-width:100%">'+edges+nodes+'</svg>';
+  }
+  // ----- stage renderers -----
+  fRenderStage(){ const def=this.fStep(), el=this.$("f-stage"); if(!el)return;
+    let html;
+    if(def.type==="fit")html=this.fHtmlFit(def);
+    else if(def.type==="compose")html=this.fHtmlCompose(def);
+    else html=this.fHtmlLinear(def);
+    el.innerHTML='<div style="max-width:720px;margin:0 auto">'+html+'</div>';
+  }
+  fHtmlLinear(def){
+    const ex=def.examples?def.examples[this.fnd.exIdx]:null;
+    const x=ex?ex.x:def.features.map(f=>f.value);
+    const z=this.fLinOut(x,def.W,def.b);
+    const fl=def.features.map(f=>f.label), ol=def.outputs.map(o=>o.label);
+    const xAct=(i)=>ol.map((_,j)=>"w_"+i+"_"+j).join("|");
+    const wAct=(i,j)=>"x_"+i+"|z_"+j;
+    const zAct=(j)=>fl.map((_,i)=>"w_"+i+"_"+j).join("|")+"|b_"+j;
+    let html="";
+    if(def.examples){ html+='<div style="display:flex;justify-content:center;gap:6px;margin-bottom:6px">'
+      +def.examples.map((e,k)=>'<button data-action="f-example" data-ex="'+k+'" style="padding:7px 13px;border-radius:20px;border:1.5px solid '+(k===this.fnd.exIdx?"var(--blue)":"var(--line)")+';background:'+(k===this.fnd.exIdx?"var(--columbia-soft)":"var(--surface)")+';color:'+(k===this.fnd.exIdx?"var(--navy)":"var(--muted)")+';font:700 11px/1 var(--sans)">'+e.label+'</button>').join("")+'</div>'; }
+    html+=this.fNetH(
+      [{stroke:"var(--blue)",nodes:fl.map((l,i)=>({key:"x_"+i,act:xAct(i),val:x[i],label:l}))},
+       {stroke:"var(--good)",nodes:ol.map((l,j)=>({key:"z_"+j,act:zAct(j),val:z[j],label:l}))}],
+      fl.reduce((arr,_,i)=>{ ol.forEach((__,j)=>arr.push({from:"x_"+i,to:"z_"+j,key:"w_"+i+"_"+j,act:wAct(i,j),val:def.W[i][j]})); return arr; },[]));
+    html+=this.fEqH([
+      this.fTermH(this.fRowH(x.map((v,i)=>this.fCellH("x_"+i,"x",xAct(i),v))),"input x (1×2)"),
+      this.fOp("×"),
+      this.fTermH(this.fGridH(def.W.map((row,i)=>row.map((v,j)=>this.fCellH("w_"+i+"_"+j,"w",wAct(i,j),v,' title="'+fl[i]+' → '+ol[j]+'"')))),"weights W (2×2)"),
+      this.fOp("+"),
+      this.fTermH(this.fRowH(def.b.map((v,j)=>this.fCellH("b_"+j,"b","z_"+j,v))),"bias b (1×2)"),
+      this.fOp("="),
+      this.fTermH(this.fRowH(z.map((v,j)=>this.fCellH("z_"+j,"z",zAct(j),v,' data-action="f-zexp" data-j="'+j+'" style="cursor:pointer"'))),"output z (1×2)")
+    ]);
+    html+='<div data-mp="f-expand" style="min-height:24px;margin-top:8px;text-align:center;font:600 13px/1.6 var(--mono);color:var(--ink)"><span style="font:400 11.5px/1.5 var(--sans);color:var(--faint)">Click an output cell to expand its arithmetic.</span></div>';
+    if(def.type==="argmax"){ const win=z[0]>=z[1]?0:1;
+      html+='<div style="margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--columbia-soft);border:1px solid var(--blue);text-align:center;font:600 12.5px/1.5 var(--sans);color:var(--navy)">Argmax picks the larger score: <strong>'+ol[win]+'</strong> ('+this.fNum(z[win])+' against '+this.fNum(z[1-win])+').</div>'; }
+    return html;
+  }
+  fZExpand(j){ const def=this.fStep(); if(def.type!=="linear"&&def.type!=="argmax")return;
+    const ex=def.examples?def.examples[this.fnd.exIdx]:null;
+    const x=ex?ex.x:def.features.map(f=>f.value);
+    const z=this.fLinOut(x,def.W,def.b);
+    const parts=x.map((xi,i)=>this.fNum(xi)+"×"+this.fWrap(def.W[i][j])).join(" + ");
+    const el=this.$("f-expand"); if(el)el.textContent=def.outputs[j].label+" = "+parts+" + "+this.fWrap(def.b[j])+" = "+this.fNum(z[j]);
+    this.sfx("tick");
+  }
+  fHtmlCompose(def){
+    const x=def.x, hRaw=this.fLinOut(x,def.W1,def.b1);
+    const h=this.fnd.actOn?hRaw.map(v=>Math.max(0,v)):hRaw;
+    const z=this.fLinOut(h,def.W2,def.b2);
+    const Wc=def.W1.map((row,i)=>def.W2[0].map((_,k)=>row.reduce((s,v,j)=>s+v*def.W2[j][k],0)));
+    const bc=def.b2.map((bv,k)=>bv+def.b1.reduce((s,v,j)=>s+v*def.W2[j][k],0));
+    const zc=this.fLinOut(x,Wc,bc);
+    const same=z.every((v,k)=>Math.abs(v-zc[k])<1e-9);
+    const xAct=(i)=>"w_0_"+i+"_0|w_0_"+i+"_1", h1Act=(j)=>"w_0_0_"+j+"|w_0_1_"+j+"|b_0_"+j, h2Act=(j)=>"w_1_"+j+"_0|w_1_"+j+"_1", zAct=(k)=>"w_1_0_"+k+"|w_1_1_"+k+"|b_1_"+k;
+    const cAct=(i,k)=>"w_0_"+i+"_0|w_0_"+i+"_1|w_1_0_"+k+"|w_1_1_"+k;
+    let html=this.fNetH(
+      [{stroke:"var(--blue)",nodes:x.map((v,i)=>({key:"x_"+i,act:xAct(i),val:v,label:"x"+(i+1)}))},
+       {stroke:"var(--navy)",nodes:h.map((v,j)=>({key:"h_"+j,act:h1Act(j)+"|"+h2Act(j),val:v,label:(this.fnd.actOn?"ReLU h":"h")+(j+1)}))},
+       {stroke:"var(--good)",nodes:z.map((v,k)=>({key:"zz_"+k,act:zAct(k),val:v,label:"z"+(k+1)}))}],
+      [].concat(
+        x.reduce((a,_,i)=>{ [0,1].forEach(j=>a.push({from:"x_"+i,to:"h_"+j,key:"w_0_"+i+"_"+j,act:"x_"+i+"|h_"+j,val:def.W1[i][j]})); return a; },[]),
+        [0,1].reduce((a,j)=>{ [0,1].forEach(k=>a.push({from:"h_"+j,to:"zz_"+k,key:"w_1_"+j+"_"+k,act:"h_"+j+"|zz_"+k,val:def.W2[j][k]})); return a; },[])));
+    html+='<div style="display:flex;justify-content:center;margin:2px 0 6px"><button data-action="f-act" style="padding:8px 16px;border-radius:20px;border:1.5px solid '+(this.fnd.actOn?"var(--good)":"var(--line-strong)")+';background:'+(this.fnd.actOn?"var(--good-soft)":"var(--surface)")+';color:'+(this.fnd.actOn?"var(--good)":"var(--muted)")+';font:700 11.5px/1 var(--sans)">ReLU activation: '+(this.fnd.actOn?"on":"off")+'</button></div>';
+    html+=this.fEqH([
+      this.fTermH(this.fRowH(x.map((v,i)=>this.fCellH("x_"+i,"x",xAct(i),v))),"input x"),
+      this.fOp("×"),
+      this.fTermH(this.fGridH(def.W1.map((row,i)=>row.map((v,j)=>this.fCellH("w_0_"+i+"_"+j,"w","x_"+i+"|h_"+j,v)))),"W¹"),
+      this.fOp("+"),
+      this.fTermH(this.fRowH(def.b1.map((v,j)=>this.fCellH("b_0_"+j,"b","h_"+j,v))),"b¹"),
+      this.fOp("="),
+      this.fTermH(this.fRowH(hRaw.map((v,j)=>this.fCellH("hraw_"+j,"","h_"+j,v))),"before activation")
+    ].concat(this.fnd.actOn?[this.fOp("→"),this.fTermH(this.fRowH(h.map((v,j)=>this.fCellH("h_"+j,"",h1Act(j),v))),"h = ReLU(·)")]
+      :[]));
+    html+=this.fEqH([
+      this.fTermH(this.fRowH(h.map((v,j)=>this.fCellH("h_"+j,"",h1Act(j),v))),"h"),
+      this.fOp("×"),
+      this.fTermH(this.fGridH(def.W2.map((row,j)=>row.map((v,k)=>this.fCellH("w_1_"+j+"_"+k,"w","h_"+j+"|zz_"+k,v)))),"W²"),
+      this.fOp("+"),
+      this.fTermH(this.fRowH(def.b2.map((v,k)=>this.fCellH("b_1_"+k,"b","zz_"+k,v))),"b²"),
+      this.fOp("="),
+      this.fTermH(this.fRowH(z.map((v,k)=>this.fCellH("zz_"+k,"z",zAct(k),v))),"stacked output")
+    ]);
+    html+='<p style="text-align:center;font:500 12px/1.5 var(--sans);color:var(--muted);margin:14px 0 2px">One combined layer computes x(W¹W²) + (b¹W² + b²):</p>';
+    html+=this.fEqH([
+      this.fTermH(this.fRowH(x.map((v,i)=>this.fCellH("x_"+i,"x",xAct(i),v))),"input x"),
+      this.fOp("×"),
+      this.fTermH(this.fGridH(Wc.map((row,i)=>row.map((v,k)=>this.fCellH("c_"+i+"_"+k,"w",cAct(i,k),v)))),"W¹W²"),
+      this.fOp("+"),
+      this.fTermH(this.fRowH(bc.map((v,k)=>this.fCellH("cb_"+k,"b","b_0_0|b_0_1|b_1_"+k,v))),"b¹W² + b²"),
+      this.fOp("="),
+      this.fTermH(this.fRowH(zc.map((v,k)=>this.fCellH("cz_"+k,"","c_0_"+k+"|c_1_"+k+"|cb_"+k,v))),"combined output")
+    ]);
+    html+= same
+      ? '<div style="margin-top:8px;padding:10px 14px;border-radius:10px;background:var(--good-soft);border:1px solid var(--good);text-align:center;font:600 12.5px/1.5 var(--sans);color:var(--good)">Both rows match: without an activation, two layers equal one.</div>'
+      : '<div style="margin-top:8px;padding:10px 14px;border-radius:10px;background:var(--bad-soft);border:1px solid var(--bad);text-align:center;font:600 12.5px/1.5 var(--sans);color:var(--bad)">The rows differ: once ReLU clips h'+(1)+' = '+this.fNum(hRaw[0])+' to '+this.fNum(h[0])+', no single linear layer reproduces the stacked output.</div>';
+    return html;
+  }
+  fFitPreds(def){ const w=this.fnd.w,b=this.fnd.b; return def.examples.map(e=>w[0]*e.x[0]+w[1]*e.x[1]+b); }
+  fFitError(def){ const p=this.fFitPreds(def); return def.examples.reduce((s,e,k)=>s+Math.abs(p[k]-e.y),0)/def.examples.length; }
+  fHtmlFit(def){
+    const w=this.fnd.w,b=this.fnd.b,preds=this.fFitPreds(def),mae=this.fFitError(def);
+    const fl=def.features.map(f=>f.label);
+    const step=(a,i,sym)=>'<button data-action="'+a+'"'+(i!=null?' data-i="'+i+'"':'')+' style="width:26px;height:26px;border-radius:50%;background:'+(sym==="+"?"var(--navy)":"var(--surface-strong)")+';color:'+(sym==="+"?"#fff":"var(--ink)")+';font:700 15px/1 var(--sans)">'+sym+'</button>';
+    let html=this.fNetH(
+      [{stroke:"var(--blue)",nodes:fl.map((l,i)=>({key:"x_"+i,act:"w_"+i+"_0",val:"x"+(i+1),label:l}))},
+       {stroke:"var(--good)",nodes:[{key:"z_0",act:"w_0_0|w_1_0|b_0",val:"ŷ",label:def.outputLabel}]}],
+      fl.map((_,i)=>({from:"x_"+i,to:"z_0",key:"w_"+i+"_0",act:"x_"+i+"|z_0",val:w[i]})),190);
+    html+='<div style="display:flex;justify-content:center;align-items:flex-start;gap:26px;margin:4px 0 14px">'
+      +fl.map((l,i)=>'<span style="display:inline-flex;flex-direction:column;align-items:center;gap:5px"><span style="display:inline-flex;align-items:center;gap:6px">'+step("f-wdec",i,"−")+this.fCellH("w_"+i+"_0","w","x_"+i+"|z_0",w[i])+step("f-winc",i,"+")+'</span><span class="fveclbl">w'+(i+1)+' ('+l+')</span></span>').join("")
+      +'<span style="display:inline-flex;flex-direction:column;align-items:center;gap:5px"><span style="display:inline-flex;align-items:center;gap:6px">'+step("f-bdec",null,"−")+this.fCellH("b_0","b","z_0",b)+step("f-binc",null,"+")+'</span><span class="fveclbl">bias</span></span>'
+      +'</div>';
+    html+='<div style="border:1px solid var(--line);border-radius:10px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font:500 12px/1.4 var(--sans)">'
+      +'<tr style="background:var(--surface-soft)">'+["Student","Study","Sleep","Prediction w₁×study + w₂×sleep + bias","Real score","Error"].map(h=>'<th style="padding:8px 10px;text-align:left;font:800 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);border-bottom:1px solid var(--line)">'+h+'</th>').join("")+'</tr>'
+      +def.examples.map((e,k)=>{ const err=Math.abs(preds[k]-e.y);
+        return '<tr>'
+          +'<td style="padding:8px 10px;border-bottom:1px solid var(--line);color:var(--muted)">'+String.fromCharCode(65+k)+'</td>'
+          +'<td style="padding:8px 10px;border-bottom:1px solid var(--line);font-family:var(--mono)">'+e.x[0]+'</td>'
+          +'<td style="padding:8px 10px;border-bottom:1px solid var(--line);font-family:var(--mono)">'+e.x[1]+'</td>'
+          +'<td style="padding:8px 10px;border-bottom:1px solid var(--line);font-family:var(--mono);color:var(--navy)">'+this.fWrap(w[0])+'×'+e.x[0]+' + '+this.fWrap(w[1])+'×'+e.x[1]+' + '+this.fWrap(b)+' = <strong>'+this.fNum(preds[k])+'</strong></td>'
+          +'<td style="padding:8px 10px;border-bottom:1px solid var(--line);font-family:var(--mono)">'+e.y+'</td>'
+          +'<td style="padding:8px 10px;border-bottom:1px solid var(--line);font-family:var(--mono);color:'+(err<=3?"var(--good)":"var(--bad)")+'">'+this.fNum(err)+'</td></tr>'; }).join("")
+      +'</table></div>';
+    html+='<div style="margin-top:10px;padding:10px 14px;border-radius:10px;background:'+(mae<=(def.check&&def.check.maxError!=null?def.check.maxError:3)?"var(--good-soft)":"var(--surface-soft)")+';border:1px solid '+(mae<=(def.check&&def.check.maxError!=null?def.check.maxError:3)?"var(--good)":"var(--line)")+';text-align:center;font:700 13px/1.4 var(--sans);color:'+(mae<=(def.check&&def.check.maxError!=null?def.check.maxError:3)?"var(--good)":"var(--ink)")+'">Mean absolute error: '+this.fNum(mae)+'</div>';
+    return html;
+  }
+  // ----- interaction -----
+  fHover(e,on){ const t=e.target.closest("[data-key]"); if(!t||!this.fnd)return;
+    if(on && t.getAttribute("data-kind")==="w") this.fnd.explored.add(t.getAttribute("data-key"));
+    const own=t.getAttribute("data-key"), act=t.getAttribute("data-act");
+    const keys=(act?act.split("|"):[]).concat([own]);
+    const stage=this.$("f-stage"); if(!stage)return;
+    Array.prototype.forEach.call(stage.querySelectorAll("[data-key]"),el=>{
+      if(keys.indexOf(el.getAttribute("data-key"))>=0) el.classList[on?"add":"remove"]("hl");
+    });
+  }
+  fndClick(a,t){ if(!a||a.slice(0,2)!=="f-"||!this.fnd)return;
+    if(a==="f-prev")this.gotoFStep(this.fnd.step-1);
+    else if(a==="f-next")this.gotoFStep(this.fnd.step+1);
+    else if(a==="f-hint"){ const b=this.$("f-hintbox"); b.style.display=b.style.display==="none"?"block":"none"; this.sfx("click"); }
+    else if(a==="f-check")this.fCheck();
+    else if(a==="f-example"){ const k=+t.getAttribute("data-ex"); this.fnd.exIdx=k; this.fnd.inputsTried.add(k); this.fRenderStage(); this.sfx("tick"); }
+    else if(a==="f-act"){ this.fnd.actOn=!this.fnd.actOn; this.fnd.toggled=true; this.fRenderStage(); this.sfx("tick"); }
+    else if(a==="f-winc"||a==="f-wdec"){ const i=+t.getAttribute("data-i"); this.fnd.w[i]=Math.max(-20,Math.min(20,this.fnd.w[i]+(a==="f-winc"?1:-1))); this.fRenderStage(); this.sfx("tick"); }
+    else if(a==="f-binc"||a==="f-bdec"){ this.fnd.b=Math.max(-30,Math.min(30,this.fnd.b+(a==="f-binc"?1:-1))); this.fRenderStage(); this.sfx("tick"); }
+    else if(a==="f-zexp")this.fZExpand(+t.getAttribute("data-j"));
+  }
+  fCheckOK(def){ const c=def.check||{}, need=(m)=>({ok:false,msg:m});
+    if(c.minCells && this.fnd.explored.size<c.minCells) return need(c.cellsMsg);
+    if(c.minInputs && this.fnd.inputsTried.size<c.minInputs) return need(c.inputsMsg);
+    if(c.requireToggle && !this.fnd.toggled) return need(c.toggleMsg);
+    if(c.maxError!=null){ const e=this.fFitError(def); if(e>c.maxError) return need(this.fmt(c.errorMsg,{err:this.fNum(e)})); }
+    return {ok:true};
+  }
+  fCheck(){ const def=this.fStep(); const r=this.fCheckOK(def);
+    if(!r.ok){ this.sfx("click"); this.fGuide(r.msg); this.status(this.ui.messages.notYet); return; }
+    const done=this.state.fdone, first=done.indexOf(this.fnd.step)<0, xp=this.cfg.foundationsXP||50;
+    if(first){ done.push(this.fnd.step); this.awardXP(xp); this.save(); }
+    this.sfx("success"); this.fUpdateCard();
+    clearTimeout(this._mapT);
+    this._mapT=setTimeout(()=>this.openQuest({completed:{set:"foundations",index:this.fnd.step,xp:first?xp:0}}),1100);
   }
 
   sfx(name){ if(this.state.muted)return; try{ this.ac=this.ac||new (window.AudioContext||window.webkitAudioContext)(); if(this.ac.state==="suspended")this.ac.resume(); }catch(e){ return; }

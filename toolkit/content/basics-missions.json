@@ -1,0 +1,80 @@
+[
+  {
+    "title": "Meet the Data",
+    "dataset": "gaussian",
+    "goal": "Each dot corresponds to one 'example': its position in 2D space corresponds to two numbers, x₁ and x₂ (what we would call x and y in 2D), and its colour gives its class. Press Regenerate examples to draw a fresh sample.",
+    "hint": "The Data tab allows us to choose the dataset, the noise, and the split between training and test examples.",
+    "restrict": "Just the data",
+    "target": null,
+    "targetLabel": "explore the data",
+    "hidden": [],
+    "question": "What does one dot on the panel represent?",
+    "answer": "One dot is one example, a pair of numbers x₁ and x₂ with a class label that the network must learn to predict.",
+    "show": ["boundary"],
+    "rules": [
+      { "type": "regen-min", "value": 1, "msg": "Requirement: press Regenerate examples at least once to draw a fresh sample." }
+    ]
+  },
+  {
+    "title": "Watch the Weights Learn",
+    "dataset": "gaussian",
+    "goal": "Every connection carries a weight, a number that scales its input. Press play, then click a connection to inspect its weight while training moves the boundary.",
+    "hint": "Blue connections push the output up, while amber connections pull it down; thickness shows magnitude.",
+    "restrict": "No hidden layers",
+    "target": 0.12,
+    "hidden": [],
+    "question": "What does training change inside the network?",
+    "answer": "Training changes the weights: after every batch, each weight moves a small step in the direction that reduces the loss.",
+    "show": ["boundary", "transport", "metrics", "inspector"],
+    "rules": [
+      { "type": "inspect-edge", "msg": "Requirement: click a connection in the network to inspect its weight." },
+      { "type": "epochs-min", "value": 1, "msg": "Requirement: press play or step so that the network trains for at least one epoch." }
+    ]
+  },
+  {
+    "title": "Read the Probabilities",
+    "dataset": "gaussian",
+    "goal": "The colour gradient shows the model's confidence for every point on the plane. Toggle Discrete to compare the smooth view with the hard split.",
+    "hint": "Points near the boundary sit in the pale margin, where the model is unsure; deep colour means high confidence.",
+    "restrict": "Confidence view",
+    "target": 0.1,
+    "hidden": [],
+    "question": "What does the pale band around the boundary mean?",
+    "answer": "The pale band is the margin, the region where the model's probability is close to even, so its predictions there are least certain.",
+    "show": ["boundary", "transport", "metrics", "inspector", "boundaryopts"],
+    "rules": [
+      { "type": "discrete-toggled", "msg": "Requirement: toggle the Discrete checkbox to compare the two views." }
+    ]
+  },
+  {
+    "title": "Bend the Line",
+    "dataset": "circle",
+    "goal": "A hidden layer with an activation function lets the network bend its boundary into a curve. Train on the ring, then switch to a second activation function and compare.",
+    "hint": "The activation function sits after each hidden neuron; tanh bends smoothly, while ReLU bends in straight segments.",
+    "restrict": "Try 2 activations",
+    "target": 0.15,
+    "hidden": [4],
+    "question": "Why does the network need an activation function at all?",
+    "answer": "Because stacked linear layers collapse into one linear layer, the activation function supplies the nonlinearity that lets depth create curves.",
+    "show": ["boundary", "transport", "metrics", "inspector", "boundaryopts", "tab-model", "layercontrols"],
+    "rules": [
+      { "type": "layers-min", "value": 1, "msg": "Requirement: keep at least one hidden layer so that the boundary can curve." },
+      { "type": "activations-min", "value": 2, "msg": "Requirement: train with one activation function, then switch to another in the Model tab and compare." }
+    ]
+  },
+  {
+    "title": "The Loss Curve",
+    "dataset": "xor",
+    "goal": "The loss chart plots training loss (blue) and validation loss (amber) as the network learns. Train until both curves flatten below the target.",
+    "hint": "A falling curve means the model is improving; when the validation curve rises while the training curve keeps falling, the model is memorizing the training examples.",
+    "restrict": "Read the chart",
+    "target": 0.15,
+    "hidden": [4],
+    "question": "Why do we track validation loss separately from training loss?",
+    "answer": "Because validation examples were never used for weight updates, their loss measures how well the model generalizes.",
+    "show": ["boundary", "transport", "metrics", "inspector", "boundaryopts", "tab-model", "layercontrols", "loss", "tab-train"],
+    "rules": [
+      { "type": "epochs-min", "value": 3, "msg": "Requirement: train for at least 3 epochs so that the curves have a history to read." }
+    ]
+  }
+]
