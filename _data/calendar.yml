@@ -700,6 +700,9 @@
           - type: "Demo"
             title: "Image-to-3D"
             url: "https://huggingface.co/spaces/tencent/Hunyuan3D-2.1"
+          - type: "Lecture"
+            title: "Intersection Daylighting: NYC Hypotheses"
+            path: "/assets/lectures/ret2026_nyc_daylighting_hypotheses.html"
       - date: "July 22"
         items:
           - type: "Lecture"
