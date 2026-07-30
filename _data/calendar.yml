@@ -771,6 +771,12 @@
             path: "/assets/lectures/REVIEW_AGENTS.md"
       - date: "July 30"
         items:
+          - type: "Lecture"
+            title: "Intro to AI, Part 8 Appendix I: Detection and Segmentation"
+            path: "/assets/lectures/intro_to_ai_part8_appendix_i_detection_and_segmentation.html"
+          - type: "Lecture"
+            title: "Intro to AI, Part 9: Attention"
+            path: "/assets/lectures/intro_to_ai_part9_attention.html"
           - type: "Workshop"
             title: "Work on Lesson Plans"
   - id: "y26w4"
