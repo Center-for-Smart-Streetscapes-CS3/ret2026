@@ -10,3 +10,9 @@ Gemfile.lock
 # Keep the generated design export locally for reference.
 # Exclude it from the Jekyll build and deployment artifact.
 unstructured/
+
+# The offline teaching kit is published as a Hugging Face dataset, not to GitHub.
+huggingface/
+
+# Keep the full-resolution source photos local. The site uses optimized copies.
+cs3-teaching-kit/IMG_*.jpg

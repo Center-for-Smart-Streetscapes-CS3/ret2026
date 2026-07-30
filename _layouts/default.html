@@ -11,7 +11,8 @@
     <meta property="og:title" content="{% if page.title %}{{ page.title | escape }} | {% endif %}{{ site.short_title | escape }}">
     <meta property="og:description" content="{{ page.description | default: site.description | escape }}">
     <meta property="og:url" content="{{ page.url | absolute_url }}">
-    <meta property="og:image" content="{{ '/assets/images/campus-in-the-city.webp' | absolute_url }}">
+    {% assign og_image = page.og_image | default: '/assets/images/campus-in-the-city.webp' %}
+    <meta property="og:image" content="{{ og_image | absolute_url }}">
     <title>{% if page.title %}{{ page.title | escape }} | {% endif %}{{ site.short_title | escape }}</title>
     <link rel="canonical" href="{{ page.url | absolute_url }}">
     <link rel="icon" type="image/png" href="{{ '/assets/images/columbia-crown.png' | relative_url }}">
@@ -52,6 +53,7 @@
           <a href="{{ '/about/' | relative_url }}"{% if page.nav == 'about' %} aria-current="page"{% endif %}>About</a>
           <a href="{{ '/calendar/' | relative_url }}"{% if page.nav == 'calendar' %} aria-current="page"{% endif %}>Calendar</a>
           <a href="{{ '/schedule/' | relative_url }}"{% if page.nav == 'schedule' %} aria-current="page"{% endif %}>Schedule</a>
+          <a href="{{ '/cs3-teaching-kit/' | relative_url }}"{% if page.nav == 'teaching-kit' %} aria-current="page"{% endif %}>Teaching Kit</a>
           <a href="{{ '/staff/' | relative_url }}"{% if page.nav == 'staff' %} aria-current="page"{% endif %}>Staff</a>
         </nav>
 
@@ -80,6 +82,7 @@
               <li><a href="{{ '/about/' | relative_url }}">About</a></li>
               <li><a href="{{ '/calendar/' | relative_url }}">Calendar</a></li>
               <li><a href="{{ '/schedule/' | relative_url }}">Schedule</a></li>
+              <li><a href="{{ '/cs3-teaching-kit/' | relative_url }}">CS3 AI Teaching Kit</a></li>
               <li><a href="{{ '/staff/' | relative_url }}">Staff</a></li>
             </ul>
           </div>
@@ -87,6 +90,8 @@
             <h2>Resources</h2>
             <ul>
               <li><a href="https://cs3-erc.org/">CS3 ERC</a></li>
+              <li><a href="{{ '/toolkit/' | relative_url }}">Online AI Training Toolkit</a></li>
+              <li><a href="https://huggingface.co/datasets/mehmetkeremturkcan/cs3-ai-teaching-kit">Offline Kit on Hugging Face</a></li>
               <li><a href="https://www.engineering.columbia.edu/">Columbia Engineering</a></li>
               <li><a href="https://www.nsf.gov/">National Science Foundation</a></li>
             </ul>

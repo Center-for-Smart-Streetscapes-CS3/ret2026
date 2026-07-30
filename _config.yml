@@ -25,6 +25,7 @@ exclude:
   - LICENSE
   - README.md
   - THIRD_PARTY_NOTICES.md
+  - huggingface
   - unstructured
   - vendor
 
