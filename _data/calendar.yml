@@ -812,6 +812,12 @@
       - date: "August 4"
         items:
           - type: "Lecture"
+            title: "Intro to AI, Part 9 Appendix I: Attention as a Soft Lookup"
+            path: "/assets/lectures/intro_to_ai_part9_appendix_i_attention_as_a_soft_lookup.html"
+          - type: "Lecture"
+            title: "Intro to AI, Part 10: Diffusion"
+            path: "/assets/lectures/intro_to_ai_part10_diffusion.html"
+          - type: "Lecture"
             title: "Bias, Stylization and Diffusion"
           - type: "Demo"
             title: "Artist"
